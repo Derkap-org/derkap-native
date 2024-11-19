@@ -31,7 +31,6 @@ jobs:
     defaults:
       run:
         working-directory: supabase/remotes
-
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
