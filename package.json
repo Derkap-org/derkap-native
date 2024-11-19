@@ -9,7 +9,14 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "db-pull": "supabase db pull && supabase db pull --schema auth,storage",
+    "db-reset": "supabase db reset",
+    "db-diff": "supabase db diff --use-migra -f",  
+    "db-seed":"supabase db dump --data-only -f supabase/seed.sql",
+    "db-push": "supabase db push",                 
+    "db-squash": "supabase migration squash",
+    "gen-db-types": "npx supabase gen types --lang=typescript --project-id localhost --schema public > types/supabase.ts"
   },
   "jest": {
     "preset": "jest-expo"
