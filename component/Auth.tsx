@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Alert, StyleSheet, View, AppState } from 'react-native'
 import { supabase } from '../lib/supabase'
 import { Button, Input } from '@rneui/themed'
+import { Link } from 'expo-router'
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -49,7 +50,8 @@ export default function Auth() {
   }
 
   return (
-    <View className='mt-40'>
+    <View className='px-4 '>
+      <Link href="/" className="text-blue-200 ">Go to Home</Link>
       <View className='mt-20'>
       <Input
           label="Email"
@@ -70,7 +72,7 @@ export default function Auth() {
           autoCapitalize={'none'}
         />
       </View>
-      <View className='py-4'>
+      <View className=''>
         <Input
           label="Password"
           leftIcon={{ type: 'font-awesome', name: 'lock' }}
