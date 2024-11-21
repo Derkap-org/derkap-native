@@ -11,6 +11,7 @@ const Home = () => {
         <Text>Sign in</Text>
       </Pressable>
     </Link>
+      <Link href="/camera" className="text-blue-700">Go to Camera</Link>
     </View>
   )
 }
