@@ -1,13 +1,26 @@
-import { Slot } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
+import React, { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
 
-// Import your global CSS file
 import "../global.css";
 
-export default function Layout() {
-    return (
-      <SafeAreaView className="flex-1">
-        <Slot />
-    </SafeAreaView>
-    );
-  }
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    'Champ': require('./assets/fonts/champs-Black.otf'),
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  return (
+      <Stack screenOptions={{
+        headerShown: false,
+      }} />
+  );
+}
