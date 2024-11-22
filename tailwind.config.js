@@ -44,6 +44,7 @@ module.exports = {
       },
       boxShadow: {
         card: '5px 5px 5px #1B0A32',
+        element: '5px 5px 0px 1px #1B0A32',
       },
       keyframes: {
         'accordion-down': {
@@ -81,8 +82,5 @@ module.exports = {
     },
   },
   presets: [require("nativewind/preset")],
-  theme: {
-    extend: {},
-  },
   plugins: [require('tailwindcss-animate')],
 }
