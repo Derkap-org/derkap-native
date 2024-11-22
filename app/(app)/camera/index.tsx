@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import Camera from '../../components/Camera';
+import Camera from '../../../components/Camera';
 import { Text, View } from 'react-native';
 export default function CameraPage() {
   return (
