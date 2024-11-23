@@ -1,19 +1,19 @@
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, Pressable, ViewProps } from 'react-native'
 import React from 'react'
 import { Link, useRouter } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native';
 import StatusLabel from './StatusLabel'
-interface GroupHeaderProps {
+interface GroupHeaderProps extends ViewProps {
     group_id: string
 }
 
-export default function GroupHeader ({ group_id }: GroupHeaderProps) {
+export default function GroupHeader ({ group_id, ...props }: GroupHeaderProps) {
     const router = useRouter();
 
   return (
-    <View className="flex-row justify-between items-center p-4 bg-[#f1d7f3] ">
-        <Pressable className='' onPress={() => router.back()}>
-            <ChevronLeft  />
+    <View {...props} className="flex-row justify-between items-center p-4 bg-[#f1d7f3] ">
+        <Pressable onPress={() => router.back()}>
+            <ChevronLeft size={40} color={'black'}  />
         </Pressable>
         {
           //todo: center the text

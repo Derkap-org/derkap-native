@@ -38,3 +38,8 @@ export type TPostDB = Database['public']['Tables']['post']['Row'] & {
 
 // VOTES
 export type TVoteDB = Database['public']['Tables']['vote']['Row'];
+
+export type UserVote =  {
+  voted: boolean;
+  postId?: number;
+} | null;
