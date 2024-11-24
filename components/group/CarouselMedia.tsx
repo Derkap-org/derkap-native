@@ -1,7 +1,7 @@
 import { Dimensions, Image, Text, View, ViewProps } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
-import { TPostDB, UserVote, TVoteDB } from '../../types/types';
-import { cn } from '../../lib/utils'
+import { TPostDB, UserVote, TVoteDB } from '@/types/types';
+import { cn } from '@/lib/utils'
 interface CarouselMediaProps extends ViewProps {
     posts:TPostDB[];
     finalizationData? : {  

@@ -1,6 +1,6 @@
-import { TChallengeDB } from '../types/types';
+import { TChallengeDB } from '@/types/types';
 import { View, Text } from 'react-native';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 
 interface ChallengeBoxProps {
     challenge?: TChallengeDB;

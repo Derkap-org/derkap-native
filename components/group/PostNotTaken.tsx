@@ -1,11 +1,11 @@
-import { cn } from '../../lib/utils'
+import { cn } from '@/lib/utils'
 import { useState } from 'react';
-import Capture from '../Capture';
-import Button from '../Button';
-import { TChallengeDB, TGroupDB, TPostDB } from '../../types/types'
+import Capture from '@/components/Capture';
+import Button from '@/components/Button';
+import { TChallengeDB, TGroupDB, TPostDB } from '@/types/types'
 
 import { View, Text, Image, ViewProps } from 'react-native';
-import CarouselMedia from './CarouselMedia';
+import CarouselMedia from '@/components/group/CarouselMedia';
 
 interface PostNotTakenProps extends ViewProps {
   posts: TPostDB[] | undefined;

@@ -1,5 +1,5 @@
-import { cn } from '../../lib/utils'
-import { TPostDB, TGroupDB, TChallengeDB } from '../../types/types';
+import { cn } from '@/lib/utils'
+import { TPostDB, TGroupDB, TChallengeDB } from '@/types/types';
 // import { useUser } from '@/contexts/user-context';
 // import Button from '../Button';
 // import DrawerComponent from '@/components/DrawerComponent';
@@ -11,7 +11,7 @@ import { useState } from 'react';
 import Image,  { View, Text, StyleSheet } from 'react-native';
 import Button from '../Button';
 // import { Separator } from '@radix-ui/react-separator';
-import CarouselMedia from './CarouselMedia'
+import CarouselMedia from '@/components/group/CarouselMedia'
 import { BlurView } from 'expo-blur';
 
 interface PostTakenProps {

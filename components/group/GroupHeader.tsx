@@ -1,8 +1,8 @@
 import { View, Text, Pressable, ViewProps } from 'react-native'
 import React from 'react'
-import { Link, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { ChevronLeft } from 'lucide-react-native';
-import StatusLabel from './StatusLabel'
+import StatusLabel from '@/components/group/StatusLabel'
 interface GroupHeaderProps extends ViewProps {
     group_id: string
 }

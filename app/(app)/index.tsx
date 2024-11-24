@@ -2,7 +2,7 @@ import { View, Text, Pressable, Image } from "react-native"
 import React from "react"
 import { Link } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useSupabase } from "../../context/auth-context"
+import { useSupabase } from "@/context/auth-context"
 const Home = () => {
 	const { user, signOut, profile } = useSupabase()
 
@@ -15,9 +15,6 @@ const Home = () => {
 
 			<Link href="/sign-in" className="text-blue-700">
 				Go to Login (should not be possible if already logged in)
-			</Link>
-			<Link href="/camera" className="text-blue-700">
-				Go to Camera
 			</Link>
 			<Link
 				href={{

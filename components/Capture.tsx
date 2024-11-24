@@ -4,8 +4,8 @@ import { Text, Pressable, View, ViewProps, Dimensions } from 'react-native';
 import { XIcon, RefreshCcw, Timer, ChevronLeft } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
 import { Image } from 'react-native';
-import Button from './Button';
-import Title from './Title';
+import Button from '@/components/Button';
+import Title from '@/components/Title';
 
 interface CameraProps extends ViewProps {
   setIsCapturing: (isCapturing: boolean) => void;

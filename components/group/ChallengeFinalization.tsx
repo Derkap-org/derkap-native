@@ -1,9 +1,9 @@
-import { cn } from '../../lib/utils';
-import Button from '../Button';
+import { cn } from '@/lib/utils';
+import Button from '@/components/Button';
 // import CarouselComponent from '@/components/CarousselComponent';
 // import { CarouselApi, CarouselItem } from '@/components/ui/carousel';
-import CarouselMedia from './CarouselMedia'
-import { TPostDB, TVoteDB, TChallengeDB, UserVote } from '../../types/types';
+import CarouselMedia from '@/components/group/CarouselMedia'
+import { TPostDB, TVoteDB, TChallengeDB, UserVote } from '@/types/types';
 import { useState, useEffect } from 'react';
 import {Image, View, Text, ViewProps, Pressable} from 'react-native';
 // import { addVote, getVotes } from '@/functions/vote-action';

@@ -2,11 +2,11 @@ import { Text, Pressable, View } from 'react-native'
 import React, {useState} from 'react'
 import { Link, useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeAreaView } from "react-native-safe-area-context";
-import GroupHeader from '../../components/group/GroupHeader';
-import ChallengeBox from '../../components/ChallengeBox';
-import { TChallengeDB, TGroupDB, TPostDB } from '../../types/types';
-import ChallengeInProgress from  '../../components/group/ChallengeInProgress';
-import ChallengeFinalization from '../../components/group/ChallengeFinalization';
+import GroupHeader from '@/components/group/GroupHeader';
+import ChallengeBox from '@/components/ChallengeBox';
+import { TChallengeDB, TGroupDB, TPostDB } from '@/types/types';
+import ChallengeInProgress from  '@/components/group/ChallengeInProgress';
+import ChallengeFinalization from '@/components/group/ChallengeFinalization';
 export default function Group() {
   const mockedChallenge: TChallengeDB = {
     created_at:'',

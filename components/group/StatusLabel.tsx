@@ -1,6 +1,6 @@
 import { View, Text, ViewProps } from 'react-native'
-import { Database } from '../../types/supabase'
-import { getStatusLabel, cn } from '../../lib/utils'
+import { Database } from '@/types/supabase'
+import { getStatusLabel, cn } from '@/lib/utils'
 interface StatusLabelProps extends ViewProps {
     challengeStatus?: Database['public']['Tables']['challenge']['Row']['status'];
 }

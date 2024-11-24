@@ -1,6 +1,6 @@
 // import { Link } from 'expo-router'
 import { Pressable, PressableProps, Text } from 'react-native';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 
 
 interface ButtonProps extends PressableProps {

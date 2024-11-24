@@ -5,7 +5,7 @@ import { Text } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
 import "../../global.css";
-import { useSupabase } from '../../context/auth-context';
+import { useSupabase } from '@/context/auth-context';
 
 SplashScreen.preventAutoHideAsync();
 

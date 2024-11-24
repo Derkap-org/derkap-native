@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-import { Database } from '../types/supabase';
+import { Database } from '@/types/supabase';
 
 export const getStatusLabel = ({
   status,
