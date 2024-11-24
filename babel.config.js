@@ -7,10 +7,11 @@ module.exports = function (api) {
     ],
     plugins: [
       [
-        'module-resolver',
+        "module-resolver",
         {
-          alias: { // link to root
-            '@': './',
+          alias: {
+            // link to root
+            "@": "./",
           },
         },
       ],

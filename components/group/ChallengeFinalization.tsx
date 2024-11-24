@@ -1,17 +1,17 @@
-import { cn } from '@/lib/utils';
-import Button from '@/components/Button';
+import { cn } from "@/lib/utils";
+import Button from "@/components/Button";
 // import CarouselComponent from '@/components/CarousselComponent';
 // import { CarouselApi, CarouselItem } from '@/components/ui/carousel';
-import CarouselMedia from '@/components/group/CarouselMedia'
-import { TPostDB, TVoteDB, TChallengeDB, UserVote } from '@/types/types';
-import { useState, useEffect } from 'react';
-import {Image, View, Text, ViewProps, Pressable} from 'react-native';
+import CarouselMedia from "@/components/group/CarouselMedia";
+import { TPostDB, TVoteDB, TChallengeDB, UserVote } from "@/types/types";
+import { useState, useEffect } from "react";
+import { Image, View, Text, ViewProps, Pressable } from "react-native";
 // import { addVote, getVotes } from '@/functions/vote-action';
 // import { useUser } from '@/contexts/user-context';
 // import DrawerComponent from '@/components/DrawerComponent';
 // import { setChallengeToEnd } from '@/functions/challenge-action';
 
-interface ChallengeFinalizationProps extends ViewProps{
+interface ChallengeFinalizationProps extends ViewProps {
   posts: TPostDB[];
   // fetchAllGroupData: () => Promise<void>;
   challenge: TChallengeDB;
@@ -26,11 +26,10 @@ const ChallengeFinalization = ({
   className,
   ...props
 }: ChallengeFinalizationProps) => {
-
-  const userVotedMocked : UserVote = {
+  const userVotedMocked: UserVote = {
     voted: true,
-    postId: 1
-  }
+    postId: 1,
+  };
 
   // const { userData } = useUser();
   const [selectedPost, setSelectedPost] = useState<TPostDB | null>(null);
@@ -58,7 +57,6 @@ const ChallengeFinalization = ({
     //   await fetchAllGroupData();
     // }
   };
-
 
   const handleEndVote = async () => {
     // try {
@@ -132,7 +130,7 @@ const ChallengeFinalization = ({
   return (
     <View
       {...props}
-      className={cn('w-full flex flex-col items-center gap-2 mb-28', className)}
+      className={cn("w-full flex flex-col items-center gap-2 mb-28", className)}
     >
       {/* <DrawerComponent
         trigger={null}
@@ -154,7 +152,7 @@ const ChallengeFinalization = ({
         </View>
       </DrawerComponent> */}
 
-      {challenge?.status === 'ended' && (
+      {challenge?.status === "ended" && (
         <Text className="font-champ text-xl">
           Défi terminé ! Check les résultats:
         </Text>
@@ -186,27 +184,25 @@ const ChallengeFinalization = ({
         ))}
       </CarouselComponent> */}
 
-      <CarouselMedia posts={posts} finalizationData={
-       { setCurrentPostIndex : setCurrentPost,
-        challengeStatus: challenge.status,
-        userVote: userVote,
-        votes: votes,
-        }
-
-      } />
-
-      
-
+      <CarouselMedia
+        posts={posts}
+        finalizationData={{
+          setCurrentPostIndex: setCurrentPost,
+          challengeStatus: challenge.status,
+          userVote: userVote,
+          votes: votes,
+        }}
+      />
 
       <View className="flex flex-row items-center gap-1">
         {posts.map((post, index) => (
           <View
             key={index}
             className={cn(
-              'rounded-full cursor-pointer transition-all duration-300',
+              "rounded-full cursor-pointer transition-all duration-300",
               post.id === selectedPost?.id
-                ? 'bg-gray-800 w-2 h-2'
-                : 'bg-gray-400 w-1 h-1',
+                ? "bg-gray-800 w-2 h-2"
+                : "bg-gray-400 w-1 h-1",
             )}
             // onPress={() => {
             //   setCurrentPost(index + 1);
@@ -216,8 +212,7 @@ const ChallengeFinalization = ({
         ))}
       </View>
 
-
-       {/* {challenge?.creator_id === userData.id && (
+      {/* {challenge?.creator_id === userData.id && (
               <Button
                 className="bg-purple-300 w-full font-champ"
                 text="Fermer les votes"
@@ -227,28 +222,29 @@ const ChallengeFinalization = ({
               />
             )} 
              todo : in challenge?.status === 'voting' 
-             */} 
+             */}
 
-      {challenge?.status === 'voting' && (
-
-            <Button
-              className="w-full font-champ"
-              text={userVote?.voted ? `Changer mon vote pour @${selectedPost?.creator?.username}` : `Voter pour @${selectedPost?.creator?.username}`}
-              isCancel={!selectedPost}
-              onPress={() => {
-                handleVote();
-              }}
-            />
-
-
+      {challenge?.status === "voting" && (
+        <Button
+          className="w-full font-champ"
+          text={
+            userVote?.voted
+              ? `Changer mon vote pour @${selectedPost?.creator?.username}`
+              : `Voter pour @${selectedPost?.creator?.username}`
+          }
+          isCancel={!selectedPost}
+          onPress={() => {
+            handleVote();
+          }}
+        />
       )}
-      {challenge?.status === 'ended' && (
+      {challenge?.status === "ended" && (
         <View className="fixed w-full bg-[#f8e9db] bottom-0 right-0">
-            <Button
-              className="w-full font-champ"
-              text="Relancer dès mainteant un défi !"
-              onPress={() => setIsCreateChallengeOpen(true)}
-            />
+          <Button
+            className="w-full font-champ"
+            text="Relancer dès mainteant un défi !"
+            onPress={() => setIsCreateChallengeOpen(true)}
+          />
         </View>
       )}
     </View>

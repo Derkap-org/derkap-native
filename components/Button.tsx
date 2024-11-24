@@ -1,7 +1,6 @@
 // import { Link } from 'expo-router'
-import { Pressable, PressableProps, Text } from 'react-native';
-import { cn } from '@/lib/utils';
-
+import { Pressable, PressableProps, Text } from "react-native";
+import { cn } from "@/lib/utils";
 
 interface ButtonProps extends PressableProps {
   text: string;
@@ -38,14 +37,12 @@ export default function Button({
       {...props}
       disabled={isCancel}
       className={cn(
-        ' bg-custom-primary text-white py-2 px-4 rounded text-sm',
+        " bg-custom-primary text-white py-2 px-4 rounded text-sm",
         className,
-        { 'bg-gray-300 text-gray-400': isCancel },
+        { "bg-gray-300 text-gray-400": isCancel },
       )}
     >
-      <Text className='text-center'>
-      {text}
-      </Text>
+      <Text className="text-center">{text}</Text>
     </Pressable>
   );
 }

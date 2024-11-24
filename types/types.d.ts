@@ -1,7 +1,7 @@
-import { Database } from './supabase';
+import { Database } from "./supabase";
 
 // USERS
-export type TProfileDB = Database['public']['Tables']['profile']['Row'];
+export type TProfileDB = Database["public"]["Tables"]["profile"]["Row"];
 
 // NOTIFICATIONS
 export interface TVapidDetails {
@@ -12,35 +12,34 @@ export interface TVapidDetails {
 
 // CHALLENGES
 export type TChallengeDB =
-  | (Database['public']['Tables']['challenge']['Row'] & {
+  | (Database["public"]["Tables"]["challenge"]["Row"] & {
       creator: TProfileDB | null;
     })
   | null;
 
 // GROUPS
-export type TGroupDB = Database['public']['Tables']['group']['Row'] & {
+export type TGroupDB = Database["public"]["Tables"]["group"]["Row"] & {
   members: {
     profile: TProfileDB | null;
   }[];
-  challengeStatus?: 'posting' | 'voting' | 'ended';
+  challengeStatus?: "posting" | "voting" | "ended";
   hasNewStatus?: boolean;
 };
 
 export type TGroupsStatus = {
   group_id: number;
-  status: 'posting' | 'voting' | 'ended';
+  status: "posting" | "voting" | "ended";
 };
 
 // POSTS
-export type TPostDB = Database['public']['Tables']['post']['Row'] & {
+export type TPostDB = Database["public"]["Tables"]["post"]["Row"] & {
   creator: TProfileDB | null;
 };
 
 // VOTES
-export type TVoteDB = Database['public']['Tables']['vote']['Row'];
+export type TVoteDB = Database["public"]["Tables"]["vote"]["Row"];
 
-export type UserVote =  {
+export type UserVote = {
   voted: boolean;
   postId?: number;
 } | null;
-

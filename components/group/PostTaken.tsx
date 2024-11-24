@@ -1,25 +1,25 @@
-import { cn } from '@/lib/utils'
-import { TPostDB, TGroupDB, TChallengeDB } from '@/types/types';
+import { cn } from "@/lib/utils";
+import { TPostDB, TGroupDB, TChallengeDB } from "@/types/types";
 // import { useUser } from '@/contexts/user-context';
 // import Button from '../Button';
 // import DrawerComponent from '@/components/DrawerComponent';
-import { useState } from 'react';
+import { useState } from "react";
 // import { setChallengeToVoting } from '@/functions/challenge-action';
 // import { toast } from 'sonner';
 // import CarouselComponent from '../CarousselComponent';
 // import { CarouselItem } from '../ui/carousel';
-import Image,  { View, Text, StyleSheet } from 'react-native';
-import Button from '../Button';
+import Image, { View, Text, StyleSheet } from "react-native";
+import Button from "../Button";
 // import { Separator } from '@radix-ui/react-separator';
-import CarouselMedia from '@/components/group/CarouselMedia'
-import { BlurView } from 'expo-blur';
+import CarouselMedia from "@/components/group/CarouselMedia";
+import { BlurView } from "expo-blur";
 
 interface PostTakenProps {
   posts: TPostDB[] | undefined;
   group: TGroupDB | undefined;
   challenge: TChallengeDB;
   // fetchAllGroupData: () => Promise<void>;
-  className?:string
+  className?: string;
 }
 
 const PostTaken = ({
@@ -47,9 +47,9 @@ const PostTaken = ({
   const getWhoNotPost = () => {
     if (!group || !posts) return [];
     const groupMembers = group.members;
-    const postsProfiles = posts.map(post => post.profile_id);
+    const postsProfiles = posts.map((post) => post.profile_id);
     return groupMembers.filter(
-      member => !postsProfiles.includes(member.profile?.id ?? ''),
+      (member) => !postsProfiles.includes(member.profile?.id ?? ""),
     );
   };
 
@@ -58,7 +58,7 @@ const PostTaken = ({
       <View
         {...props}
         className={cn(
-          ' w-full rounded-2xl flex items-center justify-center flex-col text-white gap-y-4',
+          " w-full rounded-2xl flex items-center justify-center flex-col text-white gap-y-4",
           className,
         )}
       >
@@ -100,14 +100,18 @@ const PostTaken = ({
           </CarouselComponent> */}
           <CarouselMedia posts={posts} />
           <View className="absolute flex flex-col w-full h-full gap-4 font-champ rounded-2xl overflow-hidden">
-          <BlurView intensity={80} tint="light" className='flex flex-col w-full h-full items-center justify-center text-center' >
-            <Text className="text-xl w-fit">
-              En attente de tous les participants !
-            </Text>
-            <Text className="text-4xl w-fit">
-              {posts?.length} / {group?.members?.length}
-            </Text>
-          </BlurView>
+            <BlurView
+              intensity={80}
+              tint="light"
+              className="flex flex-col w-full h-full items-center justify-center text-center"
+            >
+              <Text className="text-xl w-fit">
+                En attente de tous les participants !
+              </Text>
+              <Text className="text-4xl w-fit">
+                {posts?.length} / {group?.members?.length}
+              </Text>
+            </BlurView>
           </View>
         </View>
       </View>
@@ -137,13 +141,11 @@ const PostTaken = ({
               
             />
        )} */}
-
     </View>
   );
 };
 
 export default PostTaken;
-
 
 // const styles = StyleSheet.create({
 //   blurView: {
