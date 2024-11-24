@@ -43,3 +43,4 @@ export type UserVote =  {
   voted: boolean;
   postId?: number;
 } | null;
+
