@@ -1,82 +1,105 @@
 import { Text, Pressable, View } from "react-native";
-import React, { useState } from "react";
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
+import { Link, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GroupHeader from "@/components/group/GroupHeader";
 import ChallengeBox from "@/components/ChallengeBox";
 import { TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
 import ChallengeInProgress from "@/components/group/ChallengeInProgress";
 import ChallengeFinalization from "@/components/group/ChallengeFinalization";
+import { getGroup } from "@/functions/group-action";
+import {
+  getCurrentChallenge,
+  createChallenge,
+} from "@/functions/challenge-action";
+import { getPosts } from "@/functions/post-action";
+import Button from "@/components/Button";
 export default function Group() {
-  const mockedChallenge: TChallengeDB = {
-    created_at: "",
-    id: 1,
-    creator: {
-      avatar_url: "",
-      created_at: "",
-      email: "",
-      id: "1",
-      username: "Nicoalz",
-    },
-    creator_id: "1",
-    description: "Description du défi",
-    group_id: 1,
-    status: "ended",
+  const [currentGroup, setCurrentGroup] = useState<TGroupDB>();
+  const [currentChallenge, setCurrentChallenge] = useState<TChallengeDB>();
+  const [currentPosts, setCurrentPosts] = useState<TPostDB[]>();
+  const { id } = useLocalSearchParams() as { id: string };
+
+  const fetchCurrentGroup = async () => {
+    const { data: group, error } = await getGroup({ group_id: id });
+    if (error) return console.error(error);
+    if (group) setCurrentGroup(group);
   };
 
-  const mockedPosts: TPostDB[] = [
-    {
-      challenge_id: 1,
-      created_at: "",
-      creator: {
-        avatar_url: "",
-        created_at: "",
-        email: "",
-        id: "1",
-        username: "Nicoalz",
-      },
-      id: 1,
-      img_url: "https://picsum.photos/id/237/200/300",
-      file_name: "mocked",
-      profile_id: "1",
-    },
-    {
-      challenge_id: 1,
-      created_at: "",
-      creator: {
-        avatar_url: "",
-        created_at: "",
-        email: "",
-        id: "1",
-        username: "Nicoalz",
-      },
-      id: 2,
-      img_url: "https://picsum.photos/id/237/200/300",
-      file_name: "mocked",
-      profile_id: "1",
-    },
-  ];
+  const fetchCurrentChallenge = async () => {
+    const { data: challenges, error } = await getCurrentChallenge({
+      group_id: id,
+    });
+    if (error) console.error("Erreur dans la récupéaration du défi");
+    if (challenges) {
+      console.log(challenges);
+      setCurrentChallenge(challenges[0]);
+      return challenges[0];
+    }
+  };
 
-  const [currentGroup, setCurrentGroup] = useState<TGroupDB>();
-  const [currentChallenge, setCurrentChallenge] =
-    useState<TChallengeDB>(mockedChallenge);
-  const [currentPosts, setCurrentPosts] = useState<TPostDB[]>(mockedPosts);
-  const [isCreateChallengeOpen, setIsCreateChallengeOpen] =
-    useState<boolean>(false); // todo: add new challenge
-  const { id } = useLocalSearchParams() as { id: string };
-  const router = useRouter();
+  const fetchCurrentPosts = async ({
+    challengeId,
+  }: {
+    challengeId: number;
+  }) => {
+    const { data: posts, error } = await getPosts({
+      challenge_id: challengeId,
+    });
+    if (error) return console.error("Erreur dans la récupéaration des posts");
+    if (posts) {
+      console.log(posts);
+      setCurrentPosts(posts);
+    }
+  };
+
+  const fetchAllGroupData = async () => {
+    try {
+      await fetchCurrentGroup();
+      const challenge = await fetchCurrentChallenge();
+      if (!challenge) return;
+      await fetchCurrentPosts({ challengeId: challenge.id });
+    } catch (error) {
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchAllGroupData();
+  }, [id]);
+
+  const handleCreateChallenge = async () => {
+    try {
+      if (!currentGroup?.id) return;
+
+      const { error } = await createChallenge({
+        challenge: {
+          description: "Description du défi",
+          group_id: currentGroup.id,
+        },
+      });
+
+      if (error) {
+        throw new Error("");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la création du défi");
+    } finally {
+      fetchAllGroupData();
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1">
-      <GroupHeader group_id={id} />
-      <View className="flex-1 p-4 gap-y-4 ">
+      <GroupHeader group={currentGroup} challenge={currentChallenge} />
+      <View className="flex-1 p-4 gap-y-4">
         <ChallengeBox challenge={currentChallenge} />
         {currentChallenge?.status === "posting" && (
           <ChallengeInProgress
             challenge={currentChallenge}
             group={currentGroup}
             posts={currentPosts}
-            // fetchAllGroupData={fetchAllGroupData}
+            fetchAllGroupData={fetchAllGroupData}
           />
         )}
         {(currentChallenge?.status === "voting" ||
@@ -84,11 +107,18 @@ export default function Group() {
           <ChallengeFinalization
             posts={currentPosts}
             challenge={currentChallenge}
-            // fetchAllGroupData={fetchAllGroupData}
-            setIsCreateChallengeOpen={setIsCreateChallengeOpen}
+            fetchAllGroupData={fetchAllGroupData}
+            // setIsCreateChallengeOpen={setIsCreateChallengeOpen}
           />
         )}
       </View>
+      {(!currentChallenge || currentChallenge?.status === "ended") && (
+        <Button
+          className="mx-4"
+          onPress={() => handleCreateChallenge()}
+          text="Créer un défi"
+        />
+      )}
     </SafeAreaView>
   );
 }

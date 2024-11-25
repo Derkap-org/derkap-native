@@ -1,5 +1,5 @@
-import { useSupabase } from "../context/auth-context";
-import { supabase } from "../lib/supabase";
+import { useSupabase } from "@/context/auth-context";
+import { supabase } from "@/lib/supabase";
 
 export const getProfile = async () => {
   const { user } = (await supabase.auth.getUser()).data;

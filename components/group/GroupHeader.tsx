@@ -3,11 +3,17 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import StatusLabel from "@/components/group/StatusLabel";
+import { TGroupDB, TChallengeDB } from "@/types/types";
 interface GroupHeaderProps extends ViewProps {
-  group_id: string;
+  group?: TGroupDB;
+  challenge: TChallengeDB;
 }
 
-export default function GroupHeader({ group_id, ...props }: GroupHeaderProps) {
+export default function GroupHeader({
+  group,
+  challenge,
+  ...props
+}: GroupHeaderProps) {
   const router = useRouter();
 
   return (
@@ -22,10 +28,10 @@ export default function GroupHeader({ group_id, ...props }: GroupHeaderProps) {
         //todo: center the text
       }
       <Text className="text-2xl font-champ absolute left-1/2 transform -translate-x-1/2 ">
-        Group {group_id}
+        {group?.name}
       </Text>
 
-      <StatusLabel challengeStatus="posting" />
+      <StatusLabel challengeStatus={challenge?.status} />
     </View>
   );
 }

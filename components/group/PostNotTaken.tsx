@@ -11,12 +11,14 @@ interface PostNotTakenProps extends ViewProps {
   posts: TPostDB[] | undefined;
   // fetchAllGroupData: () => Promise<void>;
   challenge: TChallengeDB;
+  group: TGroupDB;
 }
 
 const PostNotTaken = ({
   className,
   posts,
   challenge,
+  group,
   // fetchAllGroupData,
   ...props
 }: PostNotTakenProps) => {
@@ -33,7 +35,11 @@ const PostNotTaken = ({
       ) : (
         <View className="w-full flex flex-col items-center gap-2 relative rounded-xl">
           {posts && posts.length > 0 ? (
-            <CarouselMedia posts={posts} />
+            <CarouselMedia
+              posts={posts}
+              challengeStatus={challenge.status}
+              groupLength={group.members.length}
+            />
           ) : (
             <View className="aspect-image w-full h-[510px] rounded-xl bg-gray-400"></View>
           )}

@@ -1,10 +1,44 @@
 import { View, Text, Pressable, Image } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabase } from "@/context/auth-context";
+import { getGroups, createGroup } from "@/functions/group-action";
+import { TGroupDB } from "@/types/types";
+import Button from "@/components/Button";
+
 const Home = () => {
+  const [groups, setGroups] = useState<TGroupDB[]>([]);
   const { user, signOut, profile } = useSupabase();
+
+  const handleGetGroups = async () => {
+    try {
+      const { data, error } = await getGroups({});
+
+      if (error) {
+        console.error(error);
+      }
+      if (data) {
+        setGroups(data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    handleGetGroups();
+  }, []);
+
+  const handleCreateGroup = async () => {
+    console.log("create group");
+    const groupeName = "Groupe test";
+    const { data, error } = await createGroup({ name: groupeName });
+    if (error) return console.error(error);
+    if (data) {
+      setGroups([...groups, data]);
+    }
+  };
 
   return (
     <SafeAreaView className="relative items-center justify-center flex-1">
@@ -15,12 +49,20 @@ const Home = () => {
           style={{ width: 200, height: 200 }}
         />
       )}
+      <Button onPress={handleCreateGroup} text="Créer un groupe" />
 
-      <Text className="text-3xl text-red-700">Home</Text>
-
-      <Link href="/sign-in" className="text-blue-700">
-        Go to Login (should not be possible if already logged in)
-      </Link>
+      {groups.map((group) => (
+        <Link
+          key={group.id}
+          href={{
+            pathname: "/group/[id]",
+            params: { id: group.id },
+          }}
+          className="text-blue-700"
+        >
+          {group.name}
+        </Link>
+      ))}
       <Link
         href={{
           pathname: "/group/[id]",
@@ -29,15 +71,6 @@ const Home = () => {
         className="text-blue-700"
       >
         Go to Group 1
-      </Link>
-      <Link
-        href={{
-          pathname: "/group/[id]",
-          params: { id: "2" },
-        }}
-        className="text-blue-700"
-      >
-        Go to Group 2
       </Link>
 
       <Text onPress={signOut} className="absolute text-sm bottom-20 ">

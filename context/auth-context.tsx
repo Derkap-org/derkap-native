@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { TProfileDB } from "../types/types";
-import { getProfile } from "../function/profile-action";
+import { getProfile } from "../functions/profile-action";
 import { Alert } from "react-native";
 
 type SupabaseContextType = {

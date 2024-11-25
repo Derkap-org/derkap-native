@@ -13,12 +13,14 @@ import Button from "../Button";
 // import { Separator } from '@radix-ui/react-separator';
 import CarouselMedia from "@/components/group/CarouselMedia";
 import { BlurView } from "expo-blur";
+import { useSupabase } from "@/context/auth-context";
+import { setChallengeToVoting } from "@/functions/challenge-action";
 
 interface PostTakenProps {
   posts: TPostDB[] | undefined;
   group: TGroupDB | undefined;
   challenge: TChallengeDB;
-  // fetchAllGroupData: () => Promise<void>;
+  fetchAllGroupData: () => Promise<void>;
   className?: string;
 }
 
@@ -27,21 +29,21 @@ const PostTaken = ({
   posts,
   challenge,
   group,
-  // fetchAllGroupData,
+  fetchAllGroupData,
   ...props
 }: PostTakenProps) => {
-  // const { userData: currentUserData } = useUser();
+  const { profile } = useSupabase();
   const [isGoVoteOpen, setIsGoVoteOpen] = useState<boolean>(false);
 
   const handleGoVote = async () => {
-    // try {
-    //   if (!challenge) return toast.error('Challenge inconnu');
-    //   await setChallengeToVoting({ challenge_id: challenge.id });
-    // } catch (error) {
-    //   toast.error('Erreur lors du passage aux votes');
-    // } finally {
-    //   await fetchAllGroupData();
-    // }
+    try {
+      if (!challenge) return console.error("Challenge inconnu");
+      await setChallengeToVoting({ challenge_id: challenge.id });
+    } catch (error) {
+      console.error("Erreur lors du passage aux votes");
+    } finally {
+      await fetchAllGroupData();
+    }
   };
 
   const getWhoNotPost = () => {
@@ -98,7 +100,11 @@ const PostTaken = ({
               </CarouselItem>
             ))}
           </CarouselComponent> */}
-          <CarouselMedia posts={posts} />
+          <CarouselMedia
+            posts={posts}
+            groupLength={group.members.length}
+            challengeStatus="posting"
+          />
           <View className="absolute flex flex-col w-full h-full gap-4 font-champ rounded-2xl overflow-hidden">
             <BlurView
               intensity={80}
@@ -131,16 +137,16 @@ const PostTaken = ({
         </View>
       </View>
 
-      {/* {challenge?.creator_id === currentUserData.id && ( 
-      <Button
-              text="Passer aux votes"
-              className="w-full font-champ"
-              onPress={() => {
-                setIsGoVoteOpen(true);
-              }}
-              
-            />
-       )} */}
+      {challenge?.creator_id === profile.id && (
+        <Button
+          text="Passer aux votes"
+          className="w-full font-champ"
+          //todo: add confirmation before go
+          onPress={() => {
+            handleGoVote();
+          }}
+        />
+      )}
     </View>
   );
 };
