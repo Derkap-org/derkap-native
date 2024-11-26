@@ -30,7 +30,7 @@ const ChallengeInProgress = ({
       const myPost = posts.find((post) => post.profile_id === profile.id);
       if (myPost) setIsMyPostTaken(true);
     }
-  }, [posts, profile]);
+  }, [posts, profile, challenge]);
 
   return (
     <View {...props} className={cn("w-full", className)}>
@@ -46,7 +46,7 @@ const ChallengeInProgress = ({
           group={group}
           posts={posts}
           challenge={challenge}
-          // fetchAllGroupData={fetchAllGroupData}
+          fetchAllGroupData={fetchAllGroupData}
         />
       )}
     </View>

@@ -86,6 +86,7 @@ export default function Group() {
       console.error("Erreur lors de la création du défi");
     } finally {
       fetchAllGroupData();
+      // should also refect is my derkap taken
     }
   };
 

@@ -4,12 +4,12 @@ import Capture from "@/components/Capture";
 import Button from "@/components/Button";
 import { TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
 
-import { View, Text, Image, ViewProps } from "react-native";
+import { View, Text, ViewProps } from "react-native";
 import CarouselMedia from "@/components/group/CarouselMedia";
 
 interface PostNotTakenProps extends ViewProps {
   posts: TPostDB[] | undefined;
-  // fetchAllGroupData: () => Promise<void>;
+  fetchAllGroupData: () => Promise<void>;
   challenge: TChallengeDB;
   group: TGroupDB;
 }
@@ -19,7 +19,7 @@ const PostNotTaken = ({
   posts,
   challenge,
   group,
-  // fetchAllGroupData,
+  fetchAllGroupData,
   ...props
 }: PostNotTakenProps) => {
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
@@ -29,8 +29,8 @@ const PostNotTaken = ({
       {isCapturing ? (
         <Capture
           setIsCapturing={setIsCapturing}
-          // fetchAllGroupData={fetchAllGroupData}
-          // challenge={challenge}
+          fetchAllGroupData={fetchAllGroupData}
+          challenge={challenge}
         />
       ) : (
         <View className="w-full flex flex-col items-center gap-2 relative rounded-xl">

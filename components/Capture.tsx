@@ -6,14 +6,20 @@ import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
 import Title from "@/components/Title";
-
+import { addPostToDb } from "@/functions/post-action";
+import { TChallengeDB } from "@/types/types";
 interface CameraProps extends ViewProps {
+  challenge: TChallengeDB;
   setIsCapturing: (isCapturing: boolean) => void;
-  // fetchAllGroupData: () => Promise<void>;
-  // challenge: TChallengeDB;
+  fetchAllGroupData: () => Promise<void>;
 }
 
-export default function Capture({ setIsCapturing, ...props }: CameraProps) {
+export default function Capture({
+  setIsCapturing,
+  challenge,
+  fetchAllGroupData,
+  ...props
+}: CameraProps) {
   const [facing, setFacing] = useState<CameraType>("front");
   const [permission, requestPermission] = useCameraPermissions();
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
@@ -37,16 +43,41 @@ export default function Capture({ setIsCapturing, ...props }: CameraProps) {
         <Text className="text-center pb-2">
           Il nous faut ta permission pour utiliser la caméra !
         </Text>
-        <Button onPress={requestPermission} text="Grant Permission" />
+        <Button onPress={requestPermission} text="Autoriser" />
       </View>
     );
   }
 
   const validatePhoto = async () => {
-    setIsValidatingFile(true);
-    // upload the photo to supabase function
-    // fetch group data
-    setIsCapturing(false);
+    try {
+      setIsValidatingFile(true);
+      if (!capturedPhoto) return;
+
+      if (!challenge) {
+        throw new Error("Challenge not found");
+      }
+      console.log("capturedPhoto", capturedPhoto);
+      // const post = {
+      //   file_url: capturedPhoto,
+      //   challenge_id: challenge?.id,
+      // };
+
+      const { error } = await addPostToDb({
+        file_url: capturedPhoto,
+        challenge_id: challenge?.id,
+      });
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      setIsCapturing(false);
+    } catch (error) {
+      console.error("Une erreur est survenue: " + error);
+    } finally {
+      setIsValidatingFile(false);
+      fetchAllGroupData();
+    }
   };
 
   function toggleCameraFacing() {
