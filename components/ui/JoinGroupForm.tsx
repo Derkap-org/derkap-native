@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ScrollView,
+} from "react-native";
 
 const JoinGroupForm = ({ onSubmit, onCancel }) => {
-  const [groupId, setGroupId] = useState('');
+  const [groupId, setGroupId] = useState("");
   const [missingId, setMissingId] = useState(false);
 
   const handleJoin = () => {
@@ -12,15 +20,25 @@ const JoinGroupForm = ({ onSubmit, onCancel }) => {
     }
 
     onSubmit(groupId.trim()); // Soumettre l'ID du groupe
-    setGroupId('');
+    setGroupId("");
   };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 16 }} keyboardShouldPersistTaps="handled" className="w-full">
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          padding: 16,
+        }}
+        keyboardShouldPersistTaps="handled"
+        className="w-full"
+      >
         <View className="flex flex-col items-center justify-center gap-4">
           {/* Titre */}
-          <Text className="text-3xl font-bold text-gray-800 mb-6">Rejoindre un groupe</Text>
+          <Text className="text-3xl font-bold text-gray-800 mb-6">
+            Rejoindre un groupe
+          </Text>
 
           {/* Champ de saisie pour l'ID du groupe */}
           <View className="w-full max-w-sm flex flex-col gap-1.5">
@@ -34,7 +52,9 @@ const JoinGroupForm = ({ onSubmit, onCancel }) => {
               returnKeyType="done"
             />
             {missingId && (
-              <Text className="text-red-500 text-xs">Vous devez remplir ce champ</Text>
+              <Text className="text-red-500 text-xs">
+                Vous devez remplir ce champ
+              </Text>
             )}
           </View>
 
@@ -44,14 +64,18 @@ const JoinGroupForm = ({ onSubmit, onCancel }) => {
               className="bg-red-600 py-3 px-6 rounded-lg flex-1 shadow-lg"
               onPress={onCancel}
             >
-              <Text className="text-white text-base font-medium text-center">Annuler</Text>
+              <Text className="text-white text-base font-medium text-center">
+                Annuler
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               className="bg-green-600 py-3 px-6 rounded-lg flex-1 shadow-lg"
               onPress={handleJoin}
             >
-              <Text className="text-white text-base font-medium text-center">Rejoindre</Text>
+              <Text className="text-white text-base font-medium text-center">
+                Rejoindre
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
