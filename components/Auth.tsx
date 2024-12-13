@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Alert, StyleSheet, View, AppState } from "react-native";
+import { Alert, Text, View, AppState, SafeAreaView } from "react-native";
 import { supabase } from "@/lib/supabase";
-import { Button, Input } from "@rneui/themed";
 import { Link, router } from "expo-router";
-import { Pressable } from "react-native";
+import { TextInput } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
+import Button from "./Button";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -19,6 +19,7 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function Auth() {
+  const [isSignIn, setIsSignIn] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -56,52 +57,76 @@ export default function Auth() {
   }
 
   return (
-    <View className="px-4 ">
-      <View className="mt-20">
-        <Input
-          label="Email"
-          leftIcon={{ type: "font-awesome", name: "envelope" }}
+    <View className="relative items-center justify-center flex-1 flex-col w-full gap-y-20">
+      <Text className="text-5xl font-grotesque text-center">
+        Bienvenue sur {"\n"} Derkap ! 👋
+      </Text>
+
+      <View className="w-96 flex flex-col gap-y-4">
+        <TextInput
+          // label="Email"
+          // leftIcon={{ type: "font-awesome", name: "envelope" }}
           onChangeText={(text) => setEmail(text)}
           value={email}
-          placeholder="email@address.com"
+          placeholder="Email"
           autoCapitalize={"none"}
+          className="w-full p-2 border border-gray-300 rounded-xl bg-white h-16 placeholder:text-gray-500"
         />
-      </View>
-      <View className="py-4">
-        <Input
-          label="Username"
-          leftIcon={{ type: "font-awesome", name: "user" }}
-          onChangeText={(text) => setUsername(text)}
-          value={username}
-          placeholder="Username"
-          autoCapitalize={"none"}
-        />
-      </View>
-      <View className="">
-        <Input
-          label="Password"
-          leftIcon={{ type: "font-awesome", name: "lock" }}
+        {!isSignIn && (
+          <TextInput
+            // label="Username"
+            // leftIcon={{ type: "font-awesome", name: "user" }}
+            onChangeText={(text) => setUsername(text)}
+            value={username}
+            placeholder="Pseudo"
+            autoCapitalize={"none"}
+            className="w-full p-2 border border-gray-300 rounded-xl bg-white h-16 placeholder:text-gray-500"
+          />
+        )}
+
+        <TextInput
+          // label="Password"
+          // leftIcon={{ type: "font-awesome", name: "lock" }}
           onChangeText={(text) => setPassword(text)}
           value={password}
           secureTextEntry={true}
-          placeholder="Password"
+          placeholder="Mot de passe"
           autoCapitalize={"none"}
+          className="w-full p-2 border border-gray-300 rounded-xl bg-white h-16 placeholder:text-gray-500"
         />
-      </View>
 
-      <View className="py-4 mt-20">
-        <Button
-          title="Sign in"
-          disabled={loading}
-          onPress={() => signInWithEmail()}
-        />
-      </View>
-      <View className="py-4">
-        <Button
-          title="Sign up"
-          disabled={loading}
-          onPress={() => signUpWithEmail()}
-        />
+        <View className="">
+          {isSignIn ? (
+            <Button
+              text="Connexion"
+              disabled={loading}
+              onPress={() => signInWithEmail()}
+            />
+          ) : (
+            <Button
+              text="Inscription"
+              disabled={loading}
+              onPress={() => signUpWithEmail()}
+            />
+          )}
+        </View>
+        <View className="flex flex-row justify-center ">
+          {isSignIn ? (
+            <Button
+              text="S'inscire"
+              disabled={loading}
+              onPress={() => setIsSignIn(false)}
+              className="bg-gray-500 w-fit"
+            />
+          ) : (
+            <Button
+              text="Se connecter"
+              disabled={loading}
+              onPress={() => setIsSignIn(true)}
+              className="bg-gray-500 w-fit"
+            />
+          )}
+        </View>
       </View>
     </View>
   );

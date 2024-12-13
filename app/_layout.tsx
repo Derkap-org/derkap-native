@@ -1,11 +1,10 @@
-import { Slot, Stack } from "expo-router";
+import { Slot } from "expo-router";
 import { useFonts } from "expo-font";
 import React, { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import "../global.css";
 import { SupabaseProvider } from "@/context/auth-context";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { Alert, Text, View, AppState, SafeAreaView } from "react-native";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -22,7 +21,9 @@ export default function RootLayout() {
 
   return (
     <SupabaseProvider>
-      <Slot />
+      <SafeAreaView className="flex-1 bg-[#f1d7f3]">
+        <Slot />
+      </SafeAreaView>
     </SupabaseProvider>
   );
 }

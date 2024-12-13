@@ -9,7 +9,6 @@ import {
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "expo-router";
 import { User } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabase } from "@/context/auth-context";
 import Button from "@/components/Button";
 import StatusLabel from "@/components/group/StatusLabel";
@@ -65,18 +64,18 @@ const Home = () => {
 
   return (
     <>
-      <SafeAreaView className="relative flex flex-col items-center justify-start flex-1 gap-4 p-4">
+      <View className="relative flex flex-col items-center justify-start flex-1 gap-4 p-4">
+        <View className="flex-row justify-end w-full px-4">
+          <Link
+            href={{
+              pathname: "/profile/[id]",
+              params: { id: user.id },
+            }}
+          >
+            <User size={30} color="black" />
+          </Link>
+        </View>
         <ScrollView>
-          <View className="flex-row justify-end w-full px-4">
-            <Link
-              href={{
-                pathname: "/profile/[id]",
-                params: { id: user.id },
-              }}
-            >
-              <User size={30} color="black" />
-            </Link>
-          </View>
           <View className="flex-row items-center justify-between w-full py-4">
             <Button onPress={showModalCreateGroup} text="Créer un groupe" />
             <Button onPress={showModalJoinGroup} text="Rejoindre un groupe" />
@@ -142,7 +141,7 @@ const Home = () => {
             </Link>
           ))}
         </ScrollView>
-      </SafeAreaView>
+      </View>
 
       <SwipeModal
         ref={modalJoinGroupRef}
@@ -155,7 +154,7 @@ const Home = () => {
         <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
           <Text className="text-2xl font-bold">Rejoindre un groupe</Text>
           <TextInput
-            className="w-full p-2 border border-gray-300 rounded-lg"
+            className="w-full p-2 border border-gray-300 rounded-xl"
             onChangeText={setInviteCode}
             value={inviteCode}
             placeholder="Entrez votre code d'invitation ici"
@@ -180,7 +179,7 @@ const Home = () => {
         <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
           <Text className="text-2xl font-bold">Créer un groupe</Text>
           <TextInput
-            className="w-full p-2 border border-gray-300 rounded-lg"
+            className="w-full p-2 border border-gray-300 rounded-xl"
             onChangeText={setGroupName}
             value={groupName}
             placeholder="Entrez votre nom de groupe ici"

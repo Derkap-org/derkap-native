@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface ButtonProps extends PressableProps {
   text: string;
   isCancel?: boolean;
+  textClassName?: string;
   // asLink?: boolean;
   // url?: string;
 }
@@ -14,6 +15,7 @@ export default function Button({
   isCancel,
   // asLink,
   className,
+  textClassName,
   ...props
 }: ButtonProps) {
   //todo: implement link but care Link/router.back etc
@@ -42,7 +44,14 @@ export default function Button({
         { "bg-gray-300 text-gray-400": isCancel },
       )}
     >
-      <Text className="p-2 text-xl text-center text-white ">{text}</Text>
+      <Text
+        className={cn(
+          textClassName,
+          "p-2 text-xl text-center text-white font-grotesque",
+        )}
+      >
+        {text}
+      </Text>
     </Pressable>
   );
 }

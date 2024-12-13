@@ -26,7 +26,12 @@ const useGroupStore = create<GroupState>((set, get) => ({
       return;
     }
     if (data) {
-      set({ groups: data });
+      const groups: TGroupDB[] = data;
+      const groupsOrdered = groups.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+      set({ groups: groupsOrdered });
       return;
     }
   },
@@ -56,7 +61,7 @@ const useGroupStore = create<GroupState>((set, get) => ({
     }
     if (data) {
       const groups = get().groups;
-      set({ groups: [...groups, data], isCreating: false });
+      set({ groups: [data, ...groups], isCreating: false });
       return { succes: true };
     }
     set({ isCreating: false });

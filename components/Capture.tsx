@@ -39,7 +39,7 @@ export default function Capture({
   if (!permission.granted) {
     // Camera permissions are not granted yet.
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex flex-col h-full w-full gap-y-4">
         <Text className="text-center pb-2">
           Il nous faut ta permission pour utiliser la caméra !
         </Text>

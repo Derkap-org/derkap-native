@@ -89,11 +89,11 @@ export default function CarouselMedia({
               />
 
               {finalizationData && (
-                <View className="flex flex-row w-full justify-between absolute bottom-1 px-4">
-                  <Text className="font-grotesque">
+                <View className="flex flex-row w-full justify-between absolute bottom-0 rounded-b-2xl py-1 px-4 bg-black/30">
+                  <Text className="font-grotesque text-white">
                     @{post.creator?.username}
                   </Text>
-                  <Text className="font-grotesque">
+                  <Text className="font-grotesque text-white">
                     {getVoteCount({ postId: post.id })} vote(s)
                   </Text>
                 </View>

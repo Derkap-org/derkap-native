@@ -8,11 +8,7 @@ export default function SignIn() {
   const { session } = useSupabase();
 
   if (!session) {
-    return (
-      <SafeAreaView className="flex-1">
-        <Auth />
-      </SafeAreaView>
-    );
+    return <Auth />;
   }
 
   return <Redirect href="/" />;

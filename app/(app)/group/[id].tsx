@@ -104,7 +104,7 @@ export default function Group() {
 
   return (
     <>
-      <SafeAreaView className="flex-1">
+      <View className="flex-1">
         <GroupHeader group={currentGroup} challenge={currentChallenge} />
         <View className="flex-1 p-4 gap-y-4">
           <ChallengeBox challenge={currentChallenge} />
@@ -131,7 +131,7 @@ export default function Group() {
             <Button className="mx-4" onPress={showModal} text="Créer un défi" />
           </>
         )}
-      </SafeAreaView>
+      </View>
       <SwipeModal
         ref={modalRef}
         showBar
@@ -143,7 +143,7 @@ export default function Group() {
         <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
           <Text className="text-2xl font-bold">Créer un défi</Text>
           <TextInput
-            className="w-full p-2 border border-gray-300 rounded-lg"
+            className="w-full p-2 border border-gray-300 rounded-xl"
             onChangeText={setInputText}
             value={inputText}
             placeholder="Entrez votre défi ici"

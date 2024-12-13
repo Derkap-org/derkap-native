@@ -7,7 +7,7 @@ export default function Group() {
   const { user, signOut, profile } = useSupabase();
 
   return (
-    <SafeAreaView className="flex-1">
+    <View className="flex-1">
       <ProfileHeader profile={profile} />
       <View className="w-full flex flex-col items-center gap-4">
         <View className="flex flex-col items-center justify-center gap-2">
@@ -40,6 +40,6 @@ export default function Group() {
       <Text onPress={signOut} className="text-sm">
         Déconnexion
       </Text>
-    </SafeAreaView>
+    </View>
   );
 }

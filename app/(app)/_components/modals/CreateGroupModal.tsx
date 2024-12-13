@@ -25,7 +25,7 @@ export default function CreateGroupModal({
       <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
         <Text className="text-2xl font-bold">Créer un groupe</Text>
         <TextInput
-          className="w-full p-2 border border-gray-300 rounded-lg"
+          className="w-full p-2 border border-gray-300 rounded-xl"
           onChangeText={setGroupName}
           value={groupName}
           placeholder="Entrez votre défi ici"
