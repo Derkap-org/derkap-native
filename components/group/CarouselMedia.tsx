@@ -90,8 +90,10 @@ export default function CarouselMedia({
 
               {finalizationData && (
                 <View className="flex flex-row w-full justify-between absolute bottom-1 px-4">
-                  <Text className="font-champ">@{post.creator?.username}</Text>
-                  <Text className="font-champ">
+                  <Text className="font-grotesque">
+                    @{post.creator?.username}
+                  </Text>
+                  <Text className="font-grotesque">
                     {getVoteCount({ postId: post.id })} vote(s)
                   </Text>
                 </View>
@@ -101,7 +103,7 @@ export default function CarouselMedia({
         />
       </View>
       {challengeStatus === "posting" && (
-        <View className="absolute flex flex-col w-full h-full gap-4 font-champ rounded-2xl overflow-hidden">
+        <View className="absolute flex flex-col w-full h-full gap-4 font-grotesque rounded-2xl overflow-hidden">
           <BlurView
             intensity={80}
             tint="light"

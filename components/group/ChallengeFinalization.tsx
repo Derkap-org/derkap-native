@@ -148,7 +148,7 @@ const ChallengeFinalization = ({
         </View>
       </DrawerComponent> */}
       {challenge?.status === "ended" && (
-        <Text className="font-champ text-xl">
+        <Text className="font-grotesque text-xl">
           Défi terminé ! Check les résultats:
         </Text>
       )}
@@ -171,8 +171,8 @@ const ChallengeFinalization = ({
               height={300}
             />
             <View className="flex w-full justify-between">
-              <Text className="font-champ">@{post.creator?.username}</Text>
-              <Text className="font-champ">{getVoteCount(post.id)} vote(s)</Text>
+              <Text className="font-grotesque">@{post.creator?.username}</Text>
+              <Text className="font-grotesque">{getVoteCount(post.id)} vote(s)</Text>
             </View>
           </CarouselItem>
         ))}
@@ -204,7 +204,7 @@ const ChallengeFinalization = ({
       {challenge?.status === "voting" && (
         <View className="flex flex-col w-full gap-y-2">
           <Button
-            className="w-full font-champ"
+            className="w-full font-grotesque"
             text={
               userVote?.voted
                 ? `Changer mon vote pour @${selectedPost?.creator?.username}`
@@ -217,7 +217,7 @@ const ChallengeFinalization = ({
           />
           {challenge?.creator_id === profile.id && (
             <Button
-              className="bg-purple-500 w-full font-champ"
+              className="bg-purple-500 w-full font-grotesque"
               text="Fermer les votes"
               //todo: add validation msg and confirm
               onPress={() => {
