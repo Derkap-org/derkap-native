@@ -22,4 +22,3 @@ jobs:
 
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push
-
