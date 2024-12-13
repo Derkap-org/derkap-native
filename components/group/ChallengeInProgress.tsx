@@ -28,7 +28,11 @@ const ChallengeInProgress = ({
   useEffect(() => {
     if (posts) {
       const myPost = posts.find((post) => post.profile_id === profile.id);
-      if (myPost) setIsMyPostTaken(true);
+      if (myPost) {
+        setIsMyPostTaken(true);
+      } else {
+        setIsMyPostTaken(false);
+      }
     }
   }, [posts, profile, challenge]);
 

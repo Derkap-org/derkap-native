@@ -75,72 +75,83 @@ const Home = () => {
             <User size={30} color="black" />
           </Link>
         </View>
-        <ScrollView>
-          <View className="flex-row items-center justify-between w-full py-4">
-            <Button onPress={showModalCreateGroup} text="Créer un groupe" />
-            <Button onPress={showModalJoinGroup} text="Rejoindre un groupe" />
+        <View className="flex-row items-center justify-between w-full py-4">
+          <Button onPress={showModalCreateGroup} text="Créer un groupe" />
+          <Button onPress={showModalJoinGroup} text="Rejoindre un groupe" />
+        </View>
+        {groups.length === 0 ? (
+          <View className="flex-1 flex flex-col items-center justify-center">
+            <View className="flex flex-col gap-2 items-center justify-center">
+              <Text className="text-xs">Pas de groupe pour le moment...</Text>
+              <Text className="font-grotesque text-4xl text-center">
+                Créez en un dès maintenant !
+              </Text>
+            </View>
           </View>
-          {groups.map((group) => (
-            <Link
-              key={group.id}
-              href={{
-                pathname: "/group/[id]",
-                params: { id: group.id },
-              }}
-              className="flex items-center w-full gap-4 p-4 px-4 py-2 mb-4 bg-white border shadow-element border-custom-black min-h-16 max-h-fit rounded-xl bg-custom-white text-custom-black"
-            >
-              <View className="flex-row items-center justify-between">
-                <View className="w-full">
-                  <Text className="text-lg font-semibold">{group.name}</Text>
+        ) : (
+          <ScrollView className="w-full">
+            {groups.map((group) => (
+              <Link
+                key={group.id}
+                href={{
+                  pathname: "/group/[id]",
+                  params: { id: group.id },
+                }}
+                className="flex items-center w-full gap-4 p-4 px-4 py-2 mb-4 bg-white border shadow-element border-custom-black rounded-xl text-custom-black"
+              >
+                <View className="flex-row items-center justify-between">
+                  <View className="w-full">
+                    <Text className="text-lg font-semibold">{group.name}</Text>
 
-                  {/* Statut du groupe */}
-                  <View className="w-24 text-white">
-                    <StatusLabel challengeStatus={"posting"} />
-                  </View>
+                    {/* Statut du groupe */}
+                    <View className="w-24 text-white">
+                      <StatusLabel challengeStatus={group.challengeStatus} />
+                    </View>
 
-                  {/* Barre de statut */}
-                  <View className="mt-2 mb-2">
-                    <View className="h-[2px] bg-gray-300 w-full" />
-                  </View>
+                    {/* Barre de statut */}
+                    <View className="mt-2 mb-2">
+                      <View className="h-[2px] bg-gray-300 w-full" />
+                    </View>
 
-                  {/* Photos des membres */}
-                  <View className="flex-row">
-                    {group.members?.slice(0, 5).map((member, index) => (
-                      <View
-                        key={member.profile.id}
-                        className={`border-2 border-white rounded-full overflow-hidden ${
-                          index !== 0 ? "-ml-3" : ""
-                        }`}
-                      >
-                        {member.profile.avatar_url ? (
-                          <Image
-                            source={{ uri: member.profile.avatar_url }}
-                            className="w-10 h-10 rounded-full"
-                          />
-                        ) : (
-                          <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-                            <Text className="text-sm text-white">
-                              {member.profile.username?.charAt(0) || "?"}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                    ))}
+                    {/* Photos des membres */}
+                    <View className="flex-row">
+                      {group.members?.slice(0, 5).map((member, index) => (
+                        <View
+                          key={member.profile.id}
+                          className={`border-2 border-white rounded-full overflow-hidden ${
+                            index !== 0 ? "-ml-3" : ""
+                          }`}
+                        >
+                          {member.profile.avatar_url ? (
+                            <Image
+                              source={{ uri: member.profile.avatar_url }}
+                              className="w-10 h-10 rounded-full"
+                            />
+                          ) : (
+                            <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
+                              <Text className="text-sm text-white">
+                                {member.profile.username?.charAt(0) || "?"}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      ))}
 
-                    {/* Nombre de membres supplémentaires */}
-                    {(group.members?.length || 0) > 5 && (
-                      <View className="items-center justify-center w-10 h-10 -ml-3 bg-gray-300 border-2 border-white rounded-full">
-                        <Text className="text-sm text-white">
-                          +{(group.members?.length || 0) - 5}
-                        </Text>
-                      </View>
-                    )}
+                      {/* Nombre de membres supplémentaires */}
+                      {(group.members?.length || 0) > 5 && (
+                        <View className="items-center justify-center w-10 h-10 -ml-3 bg-gray-300 border-2 border-white rounded-full">
+                          <Text className="text-sm text-white">
+                            +{(group.members?.length || 0) - 5}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
                 </View>
-              </View>
-            </Link>
-          ))}
-        </ScrollView>
+              </Link>
+            ))}
+          </ScrollView>
+        )}
       </View>
 
       <SwipeModal
@@ -188,7 +199,7 @@ const Home = () => {
           <Button
             disabled={!groupName.length}
             onPress={handleCreateGroup}
-            text="Créer un groupe"
+            text="Créer"
             className="w-fit"
           />
         </View>

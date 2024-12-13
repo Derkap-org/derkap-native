@@ -34,7 +34,7 @@ export default function JoinGroupModal({
         <Button
           disabled={!inviteCode.length}
           onPress={() => joinGroup(inviteCode)}
-          text="Créer un défi"
+          text="Rejoindre"
           className="w-fit"
         />
       </View>

@@ -1,4 +1,5 @@
 import { createGroup, getGroups, joinGroup } from "@/functions/group-action";
+import { getCurrentChallengesStatus } from "@/functions/challenge-action";
 import { TGroupDB } from "@/types/types";
 import { create } from "zustand";
 
@@ -25,15 +26,38 @@ const useGroupStore = create<GroupState>((set, get) => ({
       set({ groups: [] });
       return;
     }
-    if (data) {
-      const groups: TGroupDB[] = data;
-      const groupsOrdered = groups.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
-      set({ groups: groupsOrdered });
+
+    if (!data) {
+      set({ groups: [] });
       return;
     }
+
+    const groups: TGroupDB[] = data;
+    const groupsOrdered = groups.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+    set({ groups: groupsOrdered });
+
+    const { data: challengesStatus } = await getCurrentChallengesStatus({
+      group_ids: groupsOrdered.map((group) => group.id),
+    });
+
+    if (!challengesStatus) return;
+
+    const groupsWithChallenges = groupsOrdered.map((group) => {
+      const challengeStatus = challengesStatus.find(
+        (challenge) => challenge.group_id === group.id,
+      );
+      return {
+        ...group,
+        challengeStatus: challengeStatus?.status || "ended",
+      };
+    });
+
+    set({ groups: groupsWithChallenges });
+
+    return;
   },
   joinGroup: async (invite_code) => {
     set({ isJoining: true });

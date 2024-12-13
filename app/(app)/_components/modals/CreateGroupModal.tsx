@@ -28,13 +28,13 @@ export default function CreateGroupModal({
           className="w-full p-2 border border-gray-300 rounded-xl"
           onChangeText={setGroupName}
           value={groupName}
-          placeholder="Entrez votre défi ici"
+          placeholder="Nom du groupe"
           placeholderTextColor="#888"
         />
         <Button
           disabled={!groupName.length}
           onPress={() => createGroup(groupName)}
-          text="Créer un défi"
+          text="Créer un groupe"
           className="w-fit"
         />
       </View>

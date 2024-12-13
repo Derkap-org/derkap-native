@@ -4,10 +4,13 @@ import { useRouter } from "expo-router";
 import { Ellipsis, ChevronLeft } from "lucide-react-native";
 
 interface ProfileHeaderProps extends ViewProps {
-  profile: any;
+  showModal: () => void;
 }
 
-export default function ProfileHeader({ ...props }: ProfileHeaderProps) {
+export default function ProfileHeader({
+  showModal,
+  ...props
+}: ProfileHeaderProps) {
   const router = useRouter();
 
   return (
@@ -17,7 +20,7 @@ export default function ProfileHeader({ ...props }: ProfileHeaderProps) {
       </Pressable>
       <Pressable
         onPress={() => {
-          console.log("Edit profile");
+          showModal();
         }}
       >
         <Ellipsis size={30} color={"black"} />

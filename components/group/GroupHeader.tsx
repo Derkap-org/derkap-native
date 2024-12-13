@@ -7,9 +7,11 @@ import { TGroupDB, TChallengeDB } from "@/types/types";
 interface GroupHeaderProps extends ViewProps {
   group?: TGroupDB;
   challenge: TChallengeDB;
+  showModal: () => void;
 }
 
 export default function GroupHeader({
+  showModal,
   group,
   challenge,
   ...props
@@ -27,7 +29,10 @@ export default function GroupHeader({
       {
         //todo: center the text
       }
-      <Text className="text-2xl font-grotesque absolute left-1/2 transform -translate-x-1/2 ">
+      <Text
+        onPress={showModal}
+        className="text-2xl font-grotesque absolute left-1/2 transform -translate-x-1/2 "
+      >
         {group?.name}
       </Text>
 
