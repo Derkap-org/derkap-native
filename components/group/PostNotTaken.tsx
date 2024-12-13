@@ -44,12 +44,12 @@ const PostNotTaken = ({
             <View className="aspect-image w-full h-[510px] rounded-xl bg-gray-400"></View>
           )}
           <View className="flex flex-col gap-4">
-            <Text className="text-xl font-champ text-center">
+            <Text className="text-xl font-grotesque text-center">
               À toi de jouer !
             </Text>
             <Button
               text="Capturer mon Derkap"
-              className="font-champ"
+              className="font-grotesque"
               onPress={() => setIsCapturing(true)}
             />
           </View>

@@ -3,24 +3,24 @@ import { useFonts } from "expo-font";
 import React, { useEffect } from "react";
 import { Text } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
-
+import { User } from "lucide-react-native";
 import "../../global.css";
 import { useSupabase } from "@/context/auth-context";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    Champ: require("../../assets/fonts/champs/champs-Black.otf"),
-  });
+  // const [loaded, error] = useFonts({
+  //   Champ: require("../../assets/fonts/champs/champs-Black.otf"),
+  // });
 
   const { session, isLoading } = useSupabase();
 
-  useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, error]);
+  // useEffect(() => {
+  //   if (loaded || error) {
+  //     SplashScreen.hideAsync();
+  //   }
+  // }, [loaded, error]);
 
   if (isLoading) {
     return <Text>Loading...</Text>;

@@ -10,7 +10,7 @@ export default function Title({ text, className, ...props }: titleProps) {
     <Text
       {...props}
       className={cn(
-        "font-champ text-[32px] text-center text-custom-black",
+        "font-grotesque text-[32px] text-center text-custom-black",
         className,
       )}
     >

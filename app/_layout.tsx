@@ -10,7 +10,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    Champ: require("../assets/fonts/champs/champs-Black.ttf"),
+    // Champ: require("../assets/fonts/champs/champs-Black.ttf"),
+    Grotesque: require("../assets/fonts/grotesque/grotesque.ttf"),
   });
 
   useEffect(() => {

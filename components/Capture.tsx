@@ -229,7 +229,7 @@ export default function Capture({
               disabled={isValidatingFile}
               onPress={() => validatePhoto()}
               text="Poster mon derkap de fou"
-              className="mt-4 mb-32 mx-auto w-full font-champ text-xl"
+              className="mt-4 mb-32 mx-auto w-full font-grotesque text-xl"
             />
           )}
         </View>
