@@ -74,7 +74,7 @@ export default function Group() {
 
       const { error } = await createChallenge({
         challenge: {
-          description: "Description du défi",
+          description: "Prends une photo avec un chauve",
           group_id: currentGroup.id,
         },
       });

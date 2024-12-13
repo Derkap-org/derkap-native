@@ -31,8 +31,7 @@ const Home = () => {
   }, []);
 
   const handleCreateGroup = async () => {
-    console.log("create group");
-    const groupeName = "Groupe test";
+    const groupeName = "Groupe Test";
     const { data, error } = await createGroup({ name: groupeName });
     if (error) return console.error(error);
     if (data) {
@@ -63,15 +62,6 @@ const Home = () => {
           {group.name}
         </Link>
       ))}
-      <Link
-        href={{
-          pathname: "/group/[id]",
-          params: { id: "1" },
-        }}
-        className="text-blue-700"
-      >
-        Go to Group 1
-      </Link>
 
       <Text onPress={signOut} className="absolute text-sm bottom-20 ">
         Déconnexion
