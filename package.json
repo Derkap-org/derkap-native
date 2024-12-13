@@ -58,7 +58,9 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^3.4.14",
     "tailwindcss-animate": "^1.0.7",
-    "cookie": ">=0.7.0"
+    "cookie": ">=0.7.0",
+    "expo-notifications": "~0.29.11",
+    "expo-device": "~7.0.1"
   },
   "devDependencies": {
     "cookie": ">=0.7.0",
