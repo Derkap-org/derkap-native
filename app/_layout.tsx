@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import "../global.css";
 import { SupabaseProvider } from "@/context/auth-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync();
 

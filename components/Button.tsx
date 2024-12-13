@@ -35,14 +35,14 @@ export default function Button({
   return (
     <Pressable
       {...props}
-      disabled={isCancel}
+      disabled={isCancel || props.disabled}
       className={cn(
-        " bg-custom-primary text-white py-2 px-4 rounded text-sm",
+        " bg-custom-primary text-white py-2 px-4 rounded-xl text-sm disabled:opacity-50",
         className,
         { "bg-gray-300 text-gray-400": isCancel },
       )}
     >
-      <Text className="text-center">{text}</Text>
+      <Text className="p-2 text-xl text-center text-white ">{text}</Text>
     </Pressable>
   );
 }

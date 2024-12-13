@@ -1,134 +1,200 @@
-import { View, Text, Pressable, Image, ScrollView } from "react-native";
-import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  Image,
+  ScrollView,
+  TextInput,
+} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "expo-router";
 import { User } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabase } from "@/context/auth-context";
-import { getGroups, createGroup } from "@/functions/group-action";
-import { TGroupDB } from "@/types/types";
 import Button from "@/components/Button";
 import StatusLabel from "@/components/group/StatusLabel";
+import SwipeModal, {
+  SwipeModalPublicMethods,
+} from "@birdwingo/react-native-swipe-modal";
+import JoinGroupModal from "./_components/modals/JoinGroupModal";
+import CreateGroupModal from "./_components/modals/CreateGroupModal";
+import useGroupStore from "@/store/useGroupStore";
 
 const Home = () => {
-  const [groups, setGroups] = useState<TGroupDB[]>([]);
+  const [inviteCode, setInviteCode] = useState("");
+  const [groupName, setGroupName] = useState("");
+
   const { user, profile } = useSupabase();
 
-  const handleGetGroups = async () => {
-    try {
-      const { data, error } = await getGroups({});
-
-      if (error) {
-        console.error(error);
-      }
-      if (data) {
-        setGroups(data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const {
+    groups,
+    fetchGroups,
+    setGroups,
+    joinGroup,
+    createGroup,
+    isJoining,
+    isCreating,
+  } = useGroupStore();
 
   useEffect(() => {
-    handleGetGroups();
+    fetchGroups();
   }, []);
 
-  const handleCreateGroup = async () => {
-    const groupeName = "Groupe Test";
-    const { data, error } = await createGroup({ name: groupeName });
-    if (error) return console.error(error);
-    if (data) {
-      setGroups([...groups, data]);
+  const modalCreateGroupRef = useRef<SwipeModalPublicMethods>(null);
+
+  const modalJoinGroupRef = useRef<SwipeModalPublicMethods>(null);
+
+  const showModalCreateGroup = () => modalCreateGroupRef.current?.show();
+  const showModalJoinGroup = () => modalJoinGroupRef.current?.show();
+
+  const handleJoinGroup = async () => {
+    const { succes } = await joinGroup(inviteCode);
+    if (succes) {
+      modalJoinGroupRef.current?.hide();
+      setInviteCode("");
     }
   };
 
-  const handleJoinGroup = async () => {
-    // const inviteCode = "INVITE_CODE";
-    // const { data, error } = await joinGroup({ invite_code: inviteCode });
-    // if (error) return console.error(error);
-    // if (data) {
-    //   setGroups([...groups, data]);
-    // }
+  const handleCreateGroup = async () => {
+    const { succes } = await createGroup(groupName);
+    if (succes) {
+      modalCreateGroupRef.current?.hide();
+      setGroupName("");
+    }
   };
 
   return (
-    <SafeAreaView className="relative items-center justify-start flex-1 p-4 flex flex-col gap-4">
-      <ScrollView>
-        <View className="w-full flex-row justify-end px-4">
-          <Link
-            href={{
-              pathname: "/profile/[id]",
-              params: { id: user.id },
-            }}
-          >
-            <User size={30} color="black" />
-          </Link>
-        </View>
-        <View className="w-full flex-row justify-between items-center py-4">
-          <Button onPress={handleCreateGroup} text="Créer un groupe" />
-          <Button onPress={handleJoinGroup} text="Rejoindre un groupe" />
-        </View>
-        {groups.map((group) => (
-          <Link
-            key={group.id}
-            href={{
-              pathname: "/group/[id]",
-              params: { id: group.id },
-            }}
-            className="p-4 shadow-element bg-white mb-4  border border-custom-black min-h-16 max-h-fit flex w-full px-4 rounded-xl bg-custom-white rounded-xl py-2 text-custom-black shadow-element gap-4 items-center"
-          >
-            <View className="flex-row justify-between items-center">
-              <View className="w-full">
-                <Text className="text-lg font-semibold">{group.name}</Text>
+    <>
+      <SafeAreaView className="relative flex flex-col items-center justify-start flex-1 gap-4 p-4">
+        <ScrollView>
+          <View className="flex-row justify-end w-full px-4">
+            <Link
+              href={{
+                pathname: "/profile/[id]",
+                params: { id: user.id },
+              }}
+            >
+              <User size={30} color="black" />
+            </Link>
+          </View>
+          <View className="flex-row items-center justify-between w-full py-4">
+            <Button onPress={showModalCreateGroup} text="Créer un groupe" />
+            <Button onPress={showModalJoinGroup} text="Rejoindre un groupe" />
+          </View>
+          {groups.map((group) => (
+            <Link
+              key={group.id}
+              href={{
+                pathname: "/group/[id]",
+                params: { id: group.id },
+              }}
+              className="flex items-center w-full gap-4 p-4 px-4 py-2 mb-4 bg-white border shadow-element border-custom-black min-h-16 max-h-fit rounded-xl bg-custom-white text-custom-black"
+            >
+              <View className="flex-row items-center justify-between">
+                <View className="w-full">
+                  <Text className="text-lg font-semibold">{group.name}</Text>
 
-                {/* Statut du groupe */}
-                <View className="w-24 text-white">
-                  <StatusLabel challengeStatus={"posting"} />
-                </View>
+                  {/* Statut du groupe */}
+                  <View className="w-24 text-white">
+                    <StatusLabel challengeStatus={"posting"} />
+                  </View>
 
-                {/* Barre de statut */}
-                <View className="mt-2 mb-2">
-                  <View className="h-[2px] bg-gray-300 w-full" />
-                </View>
+                  {/* Barre de statut */}
+                  <View className="mt-2 mb-2">
+                    <View className="h-[2px] bg-gray-300 w-full" />
+                  </View>
 
-                {/* Photos des membres */}
-                <View className="flex-row">
-                  {group.members?.slice(0, 5).map((member, index) => (
-                    <View
-                      key={member.profile.id}
-                      className={`border-2 border-white rounded-full overflow-hidden ${
-                        index !== 0 ? "-ml-3" : ""
-                      }`}
-                    >
-                      {member.profile.avatar_url ? (
-                        <Image
-                          source={{ uri: member.profile.avatar_url }}
-                          className="w-10 h-10 rounded-full"
-                        />
-                      ) : (
-                        <View className="w-10 h-10 bg-gray-300 justify-center items-center rounded-full">
-                          <Text className="text-sm text-white">
-                            {member.profile.username?.charAt(0) || "?"}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  ))}
+                  {/* Photos des membres */}
+                  <View className="flex-row">
+                    {group.members?.slice(0, 5).map((member, index) => (
+                      <View
+                        key={member.profile.id}
+                        className={`border-2 border-white rounded-full overflow-hidden ${
+                          index !== 0 ? "-ml-3" : ""
+                        }`}
+                      >
+                        {member.profile.avatar_url ? (
+                          <Image
+                            source={{ uri: member.profile.avatar_url }}
+                            className="w-10 h-10 rounded-full"
+                          />
+                        ) : (
+                          <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
+                            <Text className="text-sm text-white">
+                              {member.profile.username?.charAt(0) || "?"}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    ))}
 
-                  {/* Nombre de membres supplémentaires */}
-                  {(group.members?.length || 0) > 5 && (
-                    <View className="-ml-3 w-10 h-10 bg-gray-300 justify-center items-center rounded-full border-2 border-white">
-                      <Text className="text-sm text-white">
-                        +{(group.members?.length || 0) - 5}
-                      </Text>
-                    </View>
-                  )}
+                    {/* Nombre de membres supplémentaires */}
+                    {(group.members?.length || 0) > 5 && (
+                      <View className="items-center justify-center w-10 h-10 -ml-3 bg-gray-300 border-2 border-white rounded-full">
+                        <Text className="text-sm text-white">
+                          +{(group.members?.length || 0) - 5}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
-            </View>
-          </Link>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+            </Link>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+
+      <SwipeModal
+        ref={modalJoinGroupRef}
+        showBar
+        maxHeight={400}
+        bg="white"
+        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+        wrapInGestureHandlerRootView
+      >
+        <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
+          <Text className="text-2xl font-bold">Rejoindre un groupe</Text>
+          <TextInput
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            onChangeText={setInviteCode}
+            value={inviteCode}
+            placeholder="Entrez votre code d'invitation ici"
+            placeholderTextColor="#888"
+          />
+          <Button
+            disabled={!inviteCode.length}
+            onPress={handleJoinGroup}
+            text="Rejoindre un groupe"
+            className="w-fit"
+          />
+        </View>
+      </SwipeModal>
+      <SwipeModal
+        ref={modalCreateGroupRef}
+        showBar
+        maxHeight={400}
+        bg="white"
+        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+        wrapInGestureHandlerRootView
+      >
+        <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
+          <Text className="text-2xl font-bold">Créer un groupe</Text>
+          <TextInput
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            onChangeText={setGroupName}
+            value={groupName}
+            placeholder="Entrez votre nom de groupe ici"
+            placeholderTextColor="#888"
+          />
+          <Button
+            disabled={!groupName.length}
+            onPress={handleCreateGroup}
+            text="Créer un groupe"
+            className="w-fit"
+          />
+        </View>
+      </SwipeModal>
+    </>
   );
 };
 
