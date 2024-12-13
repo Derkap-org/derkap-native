@@ -29,7 +29,10 @@ export default function Group() {
               </Text>
             </View>
           )}
-          <Text className="font-champ text-xl tracking-wider capitalize max-w-52 text-wrap overflow-hidden text-ellipsis text-center">
+          <Text
+            // style={{ fontFamily: "Grotesque" }}
+            className="font-grotesque text-xl tracking-wider capitalize max-w-52 text-wrap overflow-hidden text-ellipsis text-center"
+          >
             {profile.username}
           </Text>
         </View>

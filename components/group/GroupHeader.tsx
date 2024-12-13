@@ -27,7 +27,7 @@ export default function GroupHeader({
       {
         //todo: center the text
       }
-      <Text className="text-2xl font-champ absolute left-1/2 transform -translate-x-1/2 ">
+      <Text className="text-2xl font-grotesque absolute left-1/2 transform -translate-x-1/2 ">
         {group?.name}
       </Text>
 

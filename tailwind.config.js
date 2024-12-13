@@ -28,6 +28,7 @@ module.exports = {
       fontFamily: {
         champ: ["Champ"],
         sans: ["var(--font-dm-sans)"],
+        grotesque: ["Grotesque"],
       },
       fontSize: {
         title: "32px",
