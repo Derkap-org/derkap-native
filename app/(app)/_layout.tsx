@@ -3,7 +3,7 @@ import { useFonts } from "expo-font";
 import React, { useEffect } from "react";
 import { Text } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
-
+import { User } from "lucide-react-native";
 import "../../global.css";
 import { useSupabase } from "@/context/auth-context";
 

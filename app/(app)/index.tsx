@@ -1,6 +1,7 @@
 import { View, Text, Pressable, Image } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Link } from "expo-router";
+import { User } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabase } from "@/context/auth-context";
 import { getGroups, createGroup } from "@/functions/group-action";
@@ -9,7 +10,7 @@ import Button from "@/components/Button";
 
 const Home = () => {
   const [groups, setGroups] = useState<TGroupDB[]>([]);
-  const { user, signOut, profile } = useSupabase();
+  const { user, profile } = useSupabase();
 
   const handleGetGroups = async () => {
     try {
@@ -40,8 +41,17 @@ const Home = () => {
   };
 
   return (
-    <SafeAreaView className="relative items-center justify-center flex-1">
-      <Text className="absolute text-sm top-20 ">Bonjour {user.email} </Text>
+    <SafeAreaView className="relative items-center justify-start flex-1">
+      <View className="w-full flex-row justify-end px-4">
+        <Link
+          href={{
+            pathname: "/profile/[id]",
+            params: { id: user.id },
+          }}
+        >
+          <User size={30} color="black" />
+        </Link>
+      </View>
       {profile?.avatar_url && (
         <Image
           source={{ uri: profile.avatar_url }}
@@ -62,10 +72,6 @@ const Home = () => {
           {group.name}
         </Link>
       ))}
-
-      <Text onPress={signOut} className="absolute text-sm bottom-20 ">
-        Déconnexion
-      </Text>
     </SafeAreaView>
   );
 };
