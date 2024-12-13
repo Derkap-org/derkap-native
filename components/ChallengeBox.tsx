@@ -19,7 +19,7 @@ export default function ChallengeBox({
           {challenge ? "😹" : "🥱"}
         </Text>
         <View className="flex-1 flex flex-col items-center justify-center gap-y-1 ">
-          <Text className="text-sm font-champ text-custom-black line-clamp-2">
+          <Text className="text-sm font-grotesque text-custom-black line-clamp-2">
             {challenge ? challenge.description : "Pas de défi..."}
           </Text>
           <View className="flex items-center gap-1">

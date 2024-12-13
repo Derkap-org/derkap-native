@@ -105,7 +105,7 @@ const PostTaken = ({
             groupLength={group.members.length}
             challengeStatus="posting"
           />
-          <View className="absolute flex flex-col w-full h-full gap-4 font-champ rounded-2xl overflow-hidden">
+          <View className="absolute flex flex-col w-full h-full gap-4 font-grotesque rounded-2xl overflow-hidden">
             <BlurView
               intensity={80}
               tint="light"
@@ -123,7 +123,7 @@ const PostTaken = ({
       </View>
 
       <View className="w-full flex flex-col gap-4">
-        <Text className="text-xl font-champ">Toujours en retard...</Text>
+        <Text className="text-xl font-grotesque">Toujours en retard...</Text>
         <View className="w-full flex flex-col gap-2">
           {getWhoNotPost().map((member, index) => (
             <Text
@@ -140,7 +140,7 @@ const PostTaken = ({
       {challenge?.creator_id === profile.id && (
         <Button
           text="Passer aux votes"
-          className="w-full font-champ"
+          className="w-full font-grotesque"
           //todo: add confirmation before go
           onPress={() => {
             handleGoVote();
