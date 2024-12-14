@@ -32,8 +32,9 @@ export default function JoinGroupModal({
           placeholderTextColor="#888"
         />
         <Button
-          disabled={!inviteCode.length}
-          onPress={() => joinGroup(inviteCode)}
+          withLoader={true}
+          isCancel={!inviteCode.length}
+          onClick={() => joinGroup(inviteCode)}
           text="Rejoindre"
           className="w-fit"
         />

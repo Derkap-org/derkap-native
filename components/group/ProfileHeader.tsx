@@ -16,14 +16,14 @@ export default function ProfileHeader({
   return (
     <View {...props} className="flex-row justify-between items-center p-4">
       <Pressable onPress={() => router.back()}>
-        <ChevronLeft size={30} color={"black"} />
+        <ChevronLeft size={32} color={"black"} />
       </Pressable>
       <Pressable
         onPress={() => {
           showModal();
         }}
       >
-        <Ellipsis size={30} color={"black"} />
+        <Ellipsis size={32} color={"black"} />
       </Pressable>
     </View>
   );

@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  Pressable,
-  Image,
-  ScrollView,
-  TextInput,
-} from "react-native";
+import { View, Text, Image, ScrollView, TextInput } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "expo-router";
 import { User } from "lucide-react-native";
@@ -15,8 +8,6 @@ import StatusLabel from "@/components/group/StatusLabel";
 import SwipeModal, {
   SwipeModalPublicMethods,
 } from "@birdwingo/react-native-swipe-modal";
-import JoinGroupModal from "./_components/modals/JoinGroupModal";
-import CreateGroupModal from "./_components/modals/CreateGroupModal";
 import useGroupStore from "@/store/useGroupStore";
 
 const Home = () => {
@@ -76,8 +67,8 @@ const Home = () => {
           </Link>
         </View>
         <View className="flex-row items-center justify-between w-full py-4">
-          <Button onPress={showModalCreateGroup} text="Créer un groupe" />
-          <Button onPress={showModalJoinGroup} text="Rejoindre un groupe" />
+          <Button onClick={showModalCreateGroup} text="Créer un groupe" />
+          <Button onClick={showModalJoinGroup} text="Rejoindre un groupe" />
         </View>
         {groups.length === 0 ? (
           <View className="flex-1 flex flex-col items-center justify-center">
@@ -172,8 +163,9 @@ const Home = () => {
             placeholderTextColor="#888"
           />
           <Button
-            disabled={!inviteCode.length}
-            onPress={handleJoinGroup}
+            withLoader={true}
+            isCancel={!inviteCode.length}
+            onClick={handleJoinGroup}
             text="Rejoindre un groupe"
             className="w-fit"
           />
@@ -197,8 +189,9 @@ const Home = () => {
             placeholderTextColor="#888"
           />
           <Button
-            disabled={!groupName.length}
-            onPress={handleCreateGroup}
+            withLoader={true}
+            isCancel={!groupName.length}
+            onClick={handleCreateGroup}
             text="Créer"
             className="w-fit"
           />

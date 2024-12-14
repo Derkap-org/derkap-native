@@ -46,6 +46,7 @@ module.exports = {
       boxShadow: {
         card: "5px 5px 5px #1B0A32",
         element: "5px 5px 0px 1px #1B0A32",
+        bottom: "0px 5px 5px #1B0A32",
       },
       keyframes: {
         "accordion-down": {

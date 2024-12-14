@@ -50,7 +50,7 @@ const PostNotTaken = ({
             <Button
               text="Capturer mon Derkap"
               className="font-grotesque"
-              onPress={() => setIsCapturing(true)}
+              onClick={() => setIsCapturing(true)}
             />
           </View>
         </View>

@@ -32,8 +32,9 @@ export default function CreateGroupModal({
           placeholderTextColor="#888"
         />
         <Button
-          disabled={!groupName.length}
-          onPress={() => createGroup(groupName)}
+          withLoader={true}
+          isCancel={!groupName.length}
+          onClick={() => createGroup(groupName)}
           text="Créer un groupe"
           className="w-fit"
         />

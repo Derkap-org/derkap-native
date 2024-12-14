@@ -182,7 +182,7 @@ export default function Group() {
           <>
             <Button
               className="mx-4"
-              onPress={showCreateChallengeModal}
+              onClick={showCreateChallengeModal}
               text="Créer un défi"
             />
           </>
@@ -206,8 +206,9 @@ export default function Group() {
             placeholderTextColor="#888"
           />
           <Button
-            disabled={!newChallengeDescription.length}
-            onPress={handleCreateChallenge}
+            withLoader={true}
+            isCancel={!newChallengeDescription.length}
+            onClick={handleCreateChallenge}
             text="Créer un défi"
             className="w-fit"
           />
@@ -236,11 +237,12 @@ export default function Group() {
               placeholderTextColor="#888"
             />
             <Button
+              withLoader={true}
               className="w-full flex items-center justify-center gap-2"
-              onPress={() => {
+              onClick={() => {
                 handleUpdateGroupName();
               }}
-              disabled={
+              isCancel={
                 !newGroupName.length || newGroupName === currentGroup?.name
               }
               text={"Modifier le nom du groupe"}
@@ -256,7 +258,7 @@ export default function Group() {
             </Text>
             <Button
               className="w-full flex items-center justify-center gap-2"
-              onPress={() => {
+              onClick={() => {
                 copyInviteCode();
               }}
               text={"Copier le code"}
@@ -268,8 +270,9 @@ export default function Group() {
               {currentGroup?.members?.length}/10 membres
             </Text>
             <Button
+              withLoader={true}
               className="w-full bg-red-500"
-              onPress={() => {
+              onClick={() => {
                 handleLeaveGroup();
               }}
               text={"Quitter le groupe"}

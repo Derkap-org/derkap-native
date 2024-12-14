@@ -57,8 +57,9 @@ export default function Group() {
       >
         <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
           <Button
+            withLoader={true}
             className="w-full bg-red-500 flex items-center justify-center gap-2"
-            onPress={signOut}
+            onClick={signOut}
             text={"Se déconnecter"}
           />
         </View>

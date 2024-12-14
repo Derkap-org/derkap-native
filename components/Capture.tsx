@@ -1,6 +1,13 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { useState, useRef } from "react";
-import { Text, Pressable, View, ViewProps, Dimensions } from "react-native";
+import {
+  Text,
+  Pressable,
+  View,
+  ViewProps,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 import { XIcon, RefreshCcw, Timer, ChevronLeft } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import { Image } from "react-native";
@@ -43,7 +50,7 @@ export default function Capture({
         <Text className="text-center pb-2">
           Il nous faut ta permission pour utiliser la caméra !
         </Text>
-        <Button onPress={requestPermission} text="Autoriser" />
+        <Button onClick={requestPermission} text="Autoriser" />
       </View>
     );
   }
@@ -222,16 +229,13 @@ export default function Capture({
       </View>
       {capturedPhoto && (
         <View className="flex flex-col items-center justify-center w-full mt-2">
-          {isValidatingFile ? (
-            <Text>Chargement...</Text>
-          ) : (
-            <Button
-              disabled={isValidatingFile}
-              onPress={() => validatePhoto()}
-              text="Poster mon derkap de fou"
-              className="mt-4 mb-32 mx-auto w-full font-grotesque text-xl"
-            />
-          )}
+          <Button
+            isCancel={isValidatingFile}
+            withLoader={true}
+            onClick={() => validatePhoto()}
+            text="Poster mon derkap de fou"
+            className="mt-4 mb-32 mx-auto w-full font-grotesque text-xl"
+          />
         </View>
       )}
     </View>

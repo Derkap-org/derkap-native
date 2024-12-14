@@ -98,15 +98,17 @@ export default function Auth() {
         <View className="">
           {isSignIn ? (
             <Button
+              withLoader={true}
               text="Connexion"
-              disabled={loading}
-              onPress={() => signInWithEmail()}
+              isCancel={loading}
+              onClick={() => signInWithEmail()}
             />
           ) : (
             <Button
               text="Inscription"
-              disabled={loading}
-              onPress={() => signUpWithEmail()}
+              isCancel={loading}
+              withLoader={true}
+              onClick={() => signUpWithEmail()}
             />
           )}
         </View>
@@ -114,15 +116,15 @@ export default function Auth() {
           {isSignIn ? (
             <Button
               text="S'inscire"
-              disabled={loading}
-              onPress={() => setIsSignIn(false)}
+              isCancel={loading}
+              onClick={() => setIsSignIn(false)}
               className="bg-gray-500 w-fit"
             />
           ) : (
             <Button
               text="Se connecter"
-              disabled={loading}
-              onPress={() => setIsSignIn(true)}
+              isCancel={loading}
+              onClick={() => setIsSignIn(true)}
               className="bg-gray-500 w-fit"
             />
           )}
