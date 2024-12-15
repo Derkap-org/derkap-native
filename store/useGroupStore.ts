@@ -2,6 +2,7 @@ import { createGroup, getGroups, joinGroup } from "@/functions/group-action";
 import { getCurrentChallengesStatus } from "@/functions/challenge-action";
 import { TGroupDB } from "@/types/types";
 import { create } from "zustand";
+import { addLastStatusSeenToGroups } from "@/lib/lastStatusSeen";
 
 interface GroupState {
   groups: TGroupDB[];
@@ -45,7 +46,7 @@ const useGroupStore = create<GroupState>((set, get) => ({
 
     if (!challengesStatus) return;
 
-    const groupsWithChallenges = groupsOrdered.map((group) => {
+    const groupsWithChallengesStatus = groupsOrdered.map((group) => {
       const challengeStatus = challengesStatus.find(
         (challenge) => challenge.group_id === group.id,
       );
@@ -55,7 +56,19 @@ const useGroupStore = create<GroupState>((set, get) => ({
       };
     });
 
-    set({ groups: groupsWithChallenges });
+    set({ groups: groupsWithChallengesStatus });
+
+    const groupsWLastSeenStatus = await addLastStatusSeenToGroups({
+      groups: groupsWithChallengesStatus,
+    });
+
+    const orderedByNewStatus = groupsWLastSeenStatus.sort((a, b) => {
+      if (a.hasNewStatus && !b.hasNewStatus) return -1;
+      if (!a.hasNewStatus && b.hasNewStatus) return 1;
+      return 0;
+    }); // new status first
+
+    set({ groups: orderedByNewStatus });
 
     return;
   },

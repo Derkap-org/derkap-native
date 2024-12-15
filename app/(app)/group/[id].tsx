@@ -23,6 +23,7 @@ import { getPosts } from "@/functions/post-action";
 import Button from "@/components/Button";
 import * as Clipboard from "expo-clipboard";
 import useGroupStore from "@/store/useGroupStore";
+import { updateLastStatusSeen } from "@/lib/lastStatusSeen";
 
 export default function Group() {
   const [currentGroup, setCurrentGroup] = useState<TGroupDB>();
@@ -112,6 +113,15 @@ export default function Group() {
   useEffect(() => {
     fetchAllGroupData();
   }, [id]);
+
+  useEffect(() => {
+    if (currentGroup?.id && currentChallenge?.status) {
+      updateLastStatusSeen({
+        groupId: currentGroup.id,
+        newStatus: currentChallenge.status,
+      });
+    }
+  }, [currentGroup, currentChallenge]);
 
   const handleCreateChallenge = async () => {
     try {

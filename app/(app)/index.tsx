@@ -92,16 +92,30 @@ const Home = () => {
               >
                 <View className="flex-row items-center justify-between">
                   <View className="w-full">
-                    <Text className="text-lg font-semibold">{group.name}</Text>
+                    <View className="w-full flex-row items-center justify-between">
+                      <View className="">
+                        <Text className="text-lg font-semibold">
+                          {group.name}
+                        </Text>
 
-                    {/* Statut du groupe */}
-                    <View className="w-24 text-white">
-                      <StatusLabel challengeStatus={group.challengeStatus} />
+                        {/* Statut du groupe */}
+                        <View className="w-24 text-white">
+                          <StatusLabel
+                            challengeStatus={group.challengeStatus}
+                          />
+                        </View>
+                      </View>
+
+                      {group.hasNewStatus === true && (
+                        <Text className="flex flex-col text-center pt-[1px] items-center justify-center text-white rounded-full aspect-square h-5 w-5 bg-red-500 text-xs">
+                          1
+                        </Text>
+                      )}
                     </View>
 
                     {/* Barre de statut */}
-                    <View className="mt-2 mb-2">
-                      <View className="h-[2px] bg-gray-300 w-full" />
+                    <View className="my-2">
+                      <View className="h-[2px] bg-gray-300 w-full rounded-full" />
                     </View>
 
                     {/* Photos des membres */}
