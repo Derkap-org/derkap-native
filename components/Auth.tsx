@@ -51,8 +51,6 @@ export default function Auth() {
     });
 
     if (error) Alert.alert(error.message);
-    if (!session)
-      Alert.alert("Please check your inbox for email verification!");
     setLoading(false);
   }
 
@@ -111,6 +109,12 @@ export default function Auth() {
               onClick={() => signUpWithEmail()}
             />
           )}
+        </View>
+        <View className="flex flex-row justify-end ">
+          {
+            //todo: add password reset
+            isSignIn && <Text>Mot de passe oublié ?</Text>
+          }
         </View>
         <View className="flex flex-row justify-center ">
           {isSignIn ? (

@@ -9,6 +9,7 @@ type SupabaseContextType = {
   user: User | null;
   profile: TProfileDB | null;
   isLoading: boolean;
+  updateProfileImg: (newImgUrl: string) => void;
 };
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(
@@ -53,9 +54,19 @@ export const SupabaseProvider = ({
     }
   }, [session]);
 
+  const updateProfileImg = (newImgUrl: string) => {
+    if (!profile || !newImgUrl) return;
+    setProfile((prevData) => ({
+      ...prevData,
+      avatar_url: newImgUrl,
+      avatarTimestamp: Date.now(),
+    }));
+  };
+
   return (
     <SupabaseContext.Provider
       value={{
+        updateProfileImg,
         session,
         profile,
         user: session?.user || null,

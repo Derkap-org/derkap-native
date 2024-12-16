@@ -30,6 +30,8 @@ export default function Button({
     try {
       if (withLoader) setShowLoader(true);
       await props.onClick();
+    } catch (e) {
+      console.error("Error in Button component:", e);
     } finally {
       if (withLoader) setShowLoader(false);
     }
