@@ -12,5 +12,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always" // Run ESLint fixes on save
   },
-  "prettier.configPath": ".prettierrc" // Use Prettier rules from your project
+  "prettier.configPath": ".prettierrc", // Use Prettier rules from your project
+  "deno.enablePaths": ["supabase/functions"],
+  "deno.lint": true
 }

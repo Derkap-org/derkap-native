@@ -32,8 +32,23 @@ export type TGroupsStatus = {
 };
 
 // POSTS
-export type TPostDB = Database["public"]["Tables"]["post"]["Row"] & {
-  creator: TProfileDB | null;
+// export type TPostDB = Database["public"]["Tables"]["post"]["Row"] & {
+//   creator: TProfileDB | null;
+// };
+
+export type TPostDB = {
+  id: number;
+  created_at: string;
+  challenge_id: number;
+  profile_id: string;
+  creator: {
+    id: string;
+    email: string;
+    username: string;
+    avatar_url: string;
+    created_at: string;
+  };
+  base64img: string;
 };
 
 // VOTES
