@@ -1,20 +1,14 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { useState, useRef } from "react";
-import {
-  Text,
-  Pressable,
-  View,
-  ViewProps,
-  Dimensions,
-  ActivityIndicator,
-} from "react-native";
+import { Text, Pressable, View, ViewProps, Dimensions } from "react-native";
 import { XIcon, RefreshCcw, Timer, ChevronLeft } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
 import Title from "@/components/Title";
-import { addPostToDb } from "@/functions/post-action";
+import { uploadPostToDB } from "@/functions/post-action";
 import { TChallengeDB } from "@/types/types";
+import * as FileSystem from "expo-file-system";
 interface CameraProps extends ViewProps {
   challenge: TChallengeDB;
   setIsCapturing: (isCapturing: boolean) => void;
@@ -64,19 +58,22 @@ export default function Capture({
         throw new Error("Challenge not found");
       }
       console.log("capturedPhoto", capturedPhoto);
-      // const post = {
-      //   file_url: capturedPhoto,
-      //   challenge_id: challenge?.id,
-      // };
 
-      const { error } = await addPostToDb({
-        file_url: capturedPhoto,
+      const base64Img = await fetch(capturedPhoto).then((res) => res.blob());
+      const formData = new FormData();
+      formData.append("file", base64Img);
+      console.log("formData", formData);
+
+      const base64 = await FileSystem.readAsStringAsync(capturedPhoto, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const { error } = await uploadPostToDB({
+        base64file: base64,
         challenge_id: challenge?.id,
       });
 
-      if (error) {
-        throw new Error(error);
-      }
+      console.log("error", error);
 
       setIsCapturing(false);
     } catch (error) {
@@ -134,7 +131,6 @@ export default function Capture({
       });
 
       setCapturedPhoto(photo.uri); // Save the photo URI
-      console.log("Photo captured:", photo);
     } catch (error) {
       console.error("Failed to take picture:", error);
     }

@@ -76,7 +76,7 @@ export default function CarouselMedia({
           renderItem={({ item: post, index }) => (
             <View className="flex-1 rounded-2xl gap-y-2 relative">
               <Image
-                src={post.img_url}
+                src={post.base64img}
                 className={cn(
                   "flex-1 rounded-2xl",
                   challengeStatus === "voting" &&

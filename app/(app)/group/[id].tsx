@@ -19,7 +19,7 @@ import {
   getCurrentChallenge,
   createChallenge,
 } from "@/functions/challenge-action";
-import { getPosts } from "@/functions/post-action";
+import { getEncryptedPosts } from "@/functions/post-action";
 import Button from "@/components/Button";
 import * as Clipboard from "expo-clipboard";
 import useGroupStore from "@/store/useGroupStore";
@@ -72,12 +72,12 @@ export default function Group() {
   }: {
     challengeId: number;
   }) => {
-    const { data: posts, error } = await getPosts({
+    const { data: posts, error } = await getEncryptedPosts({
       challenge_id: challengeId,
     });
     if (error) return console.error("Erreur dans la récupéaration des posts");
     if (posts) {
-      console.log(posts);
+      console.log("posts:", posts.length);
       setCurrentPosts(posts);
     }
   };
@@ -106,7 +106,7 @@ export default function Group() {
       if (!challenge) return;
       await fetchCurrentPosts({ challengeId: challenge.id });
     } catch (error) {
-      console.error("Erreur dans la récupération des données du groupe");
+      console.error("Erreur dans la récupération des données du groupe", error);
     }
   };
 

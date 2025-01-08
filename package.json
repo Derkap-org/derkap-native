@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "prepare": "npx husky",
-    "start": "npx expo start --tunnel",
-    "start-local": "npx expo start",
+    "start:tunnel": "npx expo start --tunnel",
+    "start": "npx expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
