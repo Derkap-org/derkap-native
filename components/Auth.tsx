@@ -55,12 +55,12 @@ export default function Auth() {
   }
 
   return (
-    <View className="relative items-center justify-center flex-1 flex-col w-full gap-y-20">
-      <Text className="text-5xl font-grotesque text-center">
+    <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-20">
+      <Text className="text-5xl text-center font-grotesque">
         Bienvenue sur {"\n"} Derkap ! 👋
       </Text>
 
-      <View className="w-96 flex flex-col gap-y-4">
+      <View className="flex flex-col w-96 gap-y-4">
         <TextInput
           // label="Email"
           // leftIcon={{ type: "font-awesome", name: "envelope" }}
@@ -68,7 +68,7 @@ export default function Auth() {
           value={email}
           placeholder="Email"
           autoCapitalize={"none"}
-          className="w-full p-2 border border-gray-300 rounded-xl bg-white h-16 placeholder:text-gray-500"
+          className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
         />
         {!isSignIn && (
           <TextInput
@@ -78,7 +78,7 @@ export default function Auth() {
             value={username}
             placeholder="Pseudo"
             autoCapitalize={"none"}
-            className="w-full p-2 border border-gray-300 rounded-xl bg-white h-16 placeholder:text-gray-500"
+            className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
           />
         )}
 
@@ -90,7 +90,7 @@ export default function Auth() {
           secureTextEntry={true}
           placeholder="Mot de passe"
           autoCapitalize={"none"}
-          className="w-full p-2 border border-gray-300 rounded-xl bg-white h-16 placeholder:text-gray-500"
+          className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
         />
 
         <View className="">
@@ -111,10 +111,15 @@ export default function Auth() {
           )}
         </View>
         <View className="flex flex-row justify-end ">
-          {
-            //todo: add password reset
-            isSignIn && <Text>Mot de passe oublié ?</Text>
-          }
+          {isSignIn && (
+            <Link
+              href={{
+                pathname: "/password-forgotten",
+              }}
+            >
+              Mot de passe oublié ?
+            </Link>
+          )}
         </View>
         <View className="flex flex-row justify-center ">
           {isSignIn ? (
