@@ -66,7 +66,7 @@ const PostTaken = ({
 
   return (
     <>
-      <View className="w-full flex flex-col gap-4 rounded-2xl">
+      <View className="flex flex-col w-full gap-4 rounded-2xl">
         <View
           {...props}
           className={cn(
@@ -74,7 +74,7 @@ const PostTaken = ({
             className,
           )}
         >
-          <View className="w-full relative rounded-2xl">
+          <View className="relative w-full rounded-2xl">
             {/* <CarouselComponent>
       {posts?.map((post, index) => (
         <CarouselItem key={index}>
@@ -83,7 +83,7 @@ const PostTaken = ({
             alt="post"
             width={300}
             height={300}
-            className="blur-2xl w-full object-cover aspect-image rounded-xl"
+            className="object-cover w-full blur-2xl aspect-image rounded-xl"
           />
         </CarouselItem>
       ))}
@@ -93,11 +93,11 @@ const PostTaken = ({
               groupLength={group.members.length}
               challengeStatus="posting"
             />
-            <View className="absolute flex flex-col w-full h-full gap-4 font-grotesque rounded-2xl overflow-hidden">
+            <View className="absolute flex flex-col w-full h-full gap-4 overflow-hidden font-grotesque rounded-2xl">
               <BlurView
                 intensity={80}
                 tint="light"
-                className="flex flex-col w-full h-full items-center justify-center text-center"
+                className="flex flex-col items-center justify-center w-full h-full text-center"
               >
                 <Text className="text-xl w-fit">
                   En attente de tous les participants !
@@ -110,9 +110,9 @@ const PostTaken = ({
           </View>
         </View>
 
-        <View className="w-full flex flex-col gap-4">
+        <View className="flex flex-col w-full gap-4">
           <Text className="text-xl font-grotesque">Toujours en retard...</Text>
-          <View className="w-full flex flex-col gap-2">
+          <View className="flex flex-col w-full gap-2">
             {getWhoNotPost().map((member, index) => (
               <Text key={index} className="">
                 @{member.profile?.username}
@@ -125,7 +125,6 @@ const PostTaken = ({
           <Button
             text="Passer aux votes"
             className="w-full font-grotesque"
-            //todo: add confirmation before go
             onClick={() => {
               showModalGoVote();
             }}
@@ -143,7 +142,7 @@ const PostTaken = ({
         }}
         wrapInGestureHandlerRootView
       >
-        <View className="flex flex-col px-10 justify-between items-center bg-white gap-y-4">
+        <View className="flex flex-col items-center justify-between px-10 bg-white gap-y-4">
           <Text className="text-2xl font-bold">Passer aux votes</Text>
           <Text className="text-xs">
             En tant que créateur du défi, tu peux décider de passer aux votes,
@@ -155,9 +154,8 @@ const PostTaken = ({
             </Text>
           </Text>
           <Button
-            className="bg-purple-500 w-full font-grotesque"
+            className="w-full bg-purple-500 font-grotesque"
             text="Confirmer"
-            //todo: add validation msg and confirm
             onClick={() => {
               handleGoVote();
             }}

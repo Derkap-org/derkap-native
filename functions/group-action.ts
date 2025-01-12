@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { Alert } from "react-native";
 
 export const getGroups = async ({ user_id }: { user_id?: string }) => {
   const { user } = (await supabase.auth.getUser()).data;

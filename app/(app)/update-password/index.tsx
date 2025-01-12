@@ -17,14 +17,14 @@ export default function UpdatePassword() {
     });
 
     setLoading(false);
-    if (error) Alert.alert(error.message);
+    if (error) console.error(error);
     else {
-      Alert.alert("Un email de réinitialisation a été envoyé.");
+      Alert.alert("Votre mot de passe a été mis à jour.");
       router.push("/");
     }
   }
 
-  if (!session) {
+  if (session) {
     return (
       <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
         <Text className="px-16 text-4xl text-center font-grotesque">
@@ -40,6 +40,7 @@ export default function UpdatePassword() {
             onChangeText={(text) => setPassword(text)}
             value={password}
             placeholder="Mot de passe"
+            secureTextEntry={true}
             autoCapitalize={"none"}
             className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
           />
@@ -65,6 +66,4 @@ export default function UpdatePassword() {
       </View>
     );
   }
-
-  return <Redirect href="/" />;
 }

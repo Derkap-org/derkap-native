@@ -17,12 +17,14 @@ export default function PasswordForgotten() {
   async function resetPassword() {
     setLoading(true);
 
+    const redirectUrl = Linking.createURL("update-password");
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "exp://ra3xln8-n0rooo-8081.exp.direct:80/--/update-password",
+      redirectTo: redirectUrl,
     });
 
     setLoading(false);
-    if (error) Alert.alert(error.message);
+    if (error) console.error(error);
     else {
       Alert.alert("Un email de réinitialisation a été envoyé.");
       router.push("/");
@@ -32,7 +34,7 @@ export default function PasswordForgotten() {
   if (!session) {
     return (
       <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
-        <Text className="px-16 text-4xl text-center font-grotesque">
+        <Text className="px-16 text-3xl text-center font-grotesque">
           Mot de passe oublié ? 🤔
         </Text>
 

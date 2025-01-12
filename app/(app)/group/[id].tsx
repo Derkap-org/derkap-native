@@ -77,7 +77,6 @@ export default function Group() {
     });
     if (error) {
       console.error("Erreur dans la récupération des posts");
-      Alert.alert(error);
     }
     if (posts) {
       console.log("posts:", posts.length);
@@ -138,7 +137,7 @@ export default function Group() {
       });
 
       if (error) {
-        Alert.alert(error);
+        console.error("Erreur lors de la création du défi", error);
         throw new Error("");
       }
       fetchAllGroupData();

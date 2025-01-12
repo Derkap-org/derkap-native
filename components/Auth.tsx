@@ -33,7 +33,7 @@ export default function Auth() {
     });
 
     setLoading(false);
-    if (error) Alert.alert(error.message);
+    if (error) console.error(error);
     else {
       router.push("/");
     }
@@ -50,7 +50,7 @@ export default function Auth() {
       options: { data: { username: username } },
     });
 
-    if (error) Alert.alert(error.message);
+    if (error) console.error(error);
     setLoading(false);
   }
 
