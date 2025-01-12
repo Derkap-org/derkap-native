@@ -19,7 +19,12 @@ export default function StatusLabel({
   };
 
   //todo: add skeleton
-  if (!challengeStatus) return <View className="w-20 h-5 bg-gray-600" />;
+  if (!challengeStatus)
+    return (
+      <View className="rounded px-2.5 py-0.5 text-xs font-semibold bg-custom-primary text-white w-fit">
+        <Text className="text-center">Nouveau</Text>
+      </View>
+    );
 
   return (
     <View
