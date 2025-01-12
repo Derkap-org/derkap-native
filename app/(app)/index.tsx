@@ -71,10 +71,10 @@ const Home = () => {
           <Button onClick={showModalJoinGroup} text="Rejoindre un groupe" />
         </View>
         {groups.length === 0 ? (
-          <View className="flex-1 flex flex-col items-center justify-center">
-            <View className="flex flex-col gap-2 items-center justify-center">
+          <View className="flex flex-col items-center justify-center flex-1">
+            <View className="flex flex-col items-center justify-center gap-2">
               <Text className="text-xs">Pas de groupe pour le moment...</Text>
-              <Text className="font-grotesque text-4xl text-center">
+              <Text className="text-4xl text-center font-grotesque">
                 Créez en un dès maintenant !
               </Text>
             </View>
@@ -92,7 +92,7 @@ const Home = () => {
               >
                 <View className="flex-row items-center justify-between">
                   <View className="w-full">
-                    <View className="w-full flex-row items-center justify-between">
+                    <View className="flex-row items-center justify-between w-full">
                       <View className="">
                         <Text className="text-lg font-semibold">
                           {group.name}

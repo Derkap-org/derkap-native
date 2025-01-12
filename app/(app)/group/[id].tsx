@@ -1,4 +1,4 @@
-import { Text, View, TextInput } from "react-native";
+import { Text, View, TextInput, Alert } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
@@ -59,7 +59,7 @@ export default function Group() {
     const { data: challenges, error } = await getCurrentChallenge({
       group_id: id,
     });
-    if (error) console.error("Erreur dans la récupéaration du défi");
+    if (error) console.error("Erreur dans la récupération du défi");
     if (challenges) {
       console.log(challenges);
       setCurrentChallenge(challenges[0]);
@@ -75,7 +75,9 @@ export default function Group() {
     const { data: posts, error } = await getEncryptedPosts({
       challenge_id: challengeId,
     });
-    if (error) return console.error("Erreur dans la récupéaration des posts");
+    if (error) {
+      console.error("Erreur dans la récupération des posts");
+    }
     if (posts) {
       console.log("posts:", posts.length);
       setCurrentPosts(posts);
@@ -135,6 +137,7 @@ export default function Group() {
       });
 
       if (error) {
+        console.error("Erreur lors de la création du défi", error);
         throw new Error("");
       }
       fetchAllGroupData();
@@ -232,12 +235,12 @@ export default function Group() {
         style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
         wrapInGestureHandlerRootView
       >
-        <View className="flex-1 flex-col items-center justify-between px-10 py-5 gap-y-4">
+        <View className="flex-col items-center justify-between flex-1 px-10 py-5 gap-y-4">
           <Text className="text-2xl font-bold font-grotesque">
             Gérer le groupe
           </Text>
 
-          <View className="flex flex-col items-center justify-center gap-2 w-full">
+          <View className="flex flex-col items-center justify-center w-full gap-2">
             <Text className="text-xl ">Nom du groupe</Text>
             <TextInput
               className="w-full p-2 border border-gray-300 rounded-xl"
@@ -248,7 +251,7 @@ export default function Group() {
             />
             <Button
               withLoader={true}
-              className="w-full flex items-center justify-center gap-2"
+              className="flex items-center justify-center w-full gap-2"
               onClick={() => {
                 handleUpdateGroupName();
               }}
@@ -267,7 +270,7 @@ export default function Group() {
               {currentGroup?.invite_code}
             </Text>
             <Button
-              className="w-full flex items-center justify-center gap-2"
+              className="flex items-center justify-center w-full gap-2"
               onClick={() => {
                 copyInviteCode();
               }}
@@ -275,8 +278,8 @@ export default function Group() {
             />
           </View>
 
-          <View className="flex flex-col items-center justify-center gap-2 w-full">
-            <Text className=" font-bold">
+          <View className="flex flex-col items-center justify-center w-full gap-2">
+            <Text className="font-bold ">
               {currentGroup?.members?.length}/10 membres
             </Text>
             <Button

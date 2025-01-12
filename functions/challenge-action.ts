@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { Alert } from "react-native";
 
 export const getCurrentChallenge = async ({
   group_id,
@@ -94,6 +95,7 @@ export const setChallengeToVoting = async ({
     .eq("id", challenge_id);
 
   if (error) {
+    console.error("Error setting challenge to voting", error);
     return {
       error: error.message,
     };
