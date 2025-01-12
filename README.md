@@ -20,6 +20,10 @@
 - Fill in the `.env` file with the necessary information from the `.env.example` file. Based on what the `supabase status` command outputs + the API
 - `npm run start`
 
+### Encryption key:
+- The encryption key is stored in the `.env` file. It is used to encrypt and decrypt the private data (posts photos) stored in the database.
+In development, if you change the encryption key, the photos posted with the previous key will not be decrypted correctly.
+
 ### Notes:
 
 If you want to run the app on a physical device, you can use the Expo Go app.
