@@ -1,5 +1,5 @@
 import { View, Text, Image, ScrollView, TextInput } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "expo-router";
 import { User } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
@@ -9,6 +9,7 @@ import SwipeModal, {
   SwipeModalPublicMethods,
 } from "@birdwingo/react-native-swipe-modal";
 import useGroupStore from "@/store/useGroupStore";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Home = () => {
   const [inviteCode, setInviteCode] = useState("");
@@ -26,9 +27,11 @@ const Home = () => {
     isCreating,
   } = useGroupStore();
 
-  useEffect(() => {
-    fetchGroups();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchGroups();
+    }, []),
+  );
 
   const modalCreateGroupRef = useRef<SwipeModalPublicMethods>(null);
 

@@ -103,14 +103,10 @@ export default function Group() {
 
   const fetchAllGroupData = async () => {
     try {
-      console.log("0");
       await fetchCurrentGroup();
-      console.log("1");
       const challenge = await fetchCurrentChallenge();
-      console.log("2");
       if (!challenge) return;
       await fetchCurrentPosts({ challengeId: challenge.id });
-      console.log("3");
     } catch (error) {
       console.error("Erreur dans la récupération des données du groupe", error);
     }
