@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import StatusLabel from "@/components/group/StatusLabel";
 import { TGroupDB, TChallengeDB } from "@/types/types";
+import useGroupStore from "@/store/useGroupStore";
 interface GroupHeaderProps extends ViewProps {
   group?: TGroupDB;
   challenge: TChallengeDB;
@@ -17,13 +18,19 @@ export default function GroupHeader({
   ...props
 }: GroupHeaderProps) {
   const router = useRouter();
+  const { fetchGroups } = useGroupStore();
+
+  const handleBack = () => {
+    fetchGroups();
+    router.back();
+  };
 
   return (
     <View
       {...props}
       className="flex-row justify-between items-center p-4 bg-[#f1d7f3] border-b border-[#d4c1d6] rounded-b-xl"
     >
-      <Pressable onPress={() => router.back()}>
+      <Pressable onPress={() => handleBack()}>
         <ChevronLeft size={32} color={"black"} />
       </Pressable>
       {

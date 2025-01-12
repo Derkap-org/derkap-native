@@ -69,20 +69,20 @@ export default function Group() {
               >
                 <Pencil size={20} color={"white"} />
               </Pressable>
-              {profile.avatar_url || profileImage ? (
+              {profile?.avatar_url || profileImage ? (
                 <Image
                   src={
                     profileImage ||
-                    `${profile.avatar_url}?t=${user.user_metadata.avatarTimestamp}`
+                    `${profile?.avatar_url}?t=${user.user_metadata.avatarTimestamp}`
                   }
-                  alt={profile.username ?? ""}
+                  alt={profile?.username ?? ""}
                   width={70}
                   height={70}
                   className="rounded-full w-24 h-24 object-cover border-2 border-custom-primary bg-custom-white"
                 />
               ) : (
                 <Text className="uppercase">
-                  {profile.username
+                  {profile?.username
                     .split(" ")
                     .map((word) => word.charAt(0))
                     .join("")}
@@ -94,7 +94,7 @@ export default function Group() {
               // style={{ fontFamily: "Grotesque" }}
               className="font-grotesque text-xl tracking-wider capitalize max-w-52 text-wrap overflow-hidden text-ellipsis text-center"
             >
-              {profile.username}
+              {profile?.username}
             </Text>
           </View>
         </View>

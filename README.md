@@ -1,15 +1,31 @@
-# Welcome to your Expo app 👋
+# Derkap
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Dev:
 
-## Develop
+### Start local Supabase:
+- `cd application`
+- `pnpm install`
+- `supabase start`
+- Verify it's running with `supabase status`
 
-```bash
-npm install
-```
+### API:
+- `cd api`
+- `pnpm install`
+- Fill in the `.env` file with the necessary information from the `.env.example` file. Based on what the `supabase status` command outputs
+- `npm run dev`
 
-```bash
-npx expo
-```
+### Launch Expo app:
+- `cd application`
+- `pnpm install` (Should already be done)
+- Fill in the `.env` file with the necessary information from the `.env.example` file. Based on what the `supabase status` command outputs + the API
+- `npm run start`
 
-Then follow the instructions in the terminal.
+### Notes:
+
+If you want to run the app on a physical device, you can use the Expo Go app.
+
+Just scan the QR code that appears in the terminal after running `npm run start`.
+
+You may need to configure ngrok to expose the API & Supabase to the internet. You can do this by running `ngrok http 3000` (for API) and `ngrok http 54321` (for Supabase) respectively. And run the app with `npm run start:tunnel`.
+
+If you have a free ngrok account, you may need to configure your ngrok yaml and run `ngrok start --all` to expose both the API and Supabase to the internet.
