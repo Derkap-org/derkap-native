@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server'
 import { uploadPost } from '@/services/post.service'
+import { verifyToken } from '@/services/auth.service'
 export async function POST(req: Request) {
   try {
+
+    const authResult = await verifyToken(req)
+    if (!authResult.success) {
+      return NextResponse.json({ success: false, message: authResult.error }, { status: 401 })
+    }
+    
+    if (!authResult.token) {
+      return NextResponse.json({ success: false, message: 'No token found' }, { status: 400 })
+    }
+
+        
     const body = await req.json()
     const { base64_img, challenge_id, profile_id } = body
 
@@ -30,6 +42,7 @@ export async function POST(req: Request) {
       base64img: base64_img,
       challengeId: challenge_id,
       profileID: profile_id,
+      token: authResult.token,
     })
     return NextResponse.json(
       { success: true, message: 'Post uploaded' },
