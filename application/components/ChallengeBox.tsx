@@ -26,7 +26,7 @@ export default function ChallengeBox({
             <Text className="text-xs line-clamp-1">
               {challenge
                 ? "Par " + challenge.creator?.username
-                : "Créez en un dès maintenant !"}
+                : "Crée en un dès maintenant !"}
             </Text>
           </View>
         </View>

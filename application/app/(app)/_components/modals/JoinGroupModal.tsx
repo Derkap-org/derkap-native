@@ -28,7 +28,7 @@ export default function JoinGroupModal({
           className="w-full p-2 border border-gray-300 rounded-xl"
           onChangeText={setInviteCode}
           value={inviteCode}
-          placeholder="Entrez votre défi ici"
+          placeholder="Entre ton défi ici"
           placeholderTextColor="#888"
         />
         <Button

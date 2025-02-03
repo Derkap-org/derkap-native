@@ -28,13 +28,11 @@ export default function UpdatePassword() {
     return (
       <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
         <Text className="px-16 text-4xl text-center font-grotesque">
-          Mettre à jour votre mot de passe 🤔
+          Mettre à jour ton mot de passe 🤔
         </Text>
 
         <View className="flex flex-col w-96 gap-y-4">
-          <Text className="text-center">
-            Entrez votre nouveau mot de passe.
-          </Text>
+          <Text className="text-center">Entre ton nouveau mot de passe.</Text>
 
           <TextInput
             onChangeText={(text) => setPassword(text)}
@@ -60,7 +58,7 @@ export default function UpdatePassword() {
             }}
             className="text-[#9747ff]"
           >
-            Connectez-vous.
+            Connecte-toi !
           </Link>
         </Text>
       </View>

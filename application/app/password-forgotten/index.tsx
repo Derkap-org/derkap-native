@@ -34,13 +34,13 @@ export default function PasswordForgotten() {
   if (!session) {
     return (
       <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
-        <Text className="px-16 text-3xl text-center font-grotesque">
+        <Text className="px-16 text-2xl text-center font-grotesque">
           Mot de passe oublié ? 🤔
         </Text>
 
         <View className="flex flex-col w-96 gap-y-4">
           <Text className="text-center">
-            Entrez votre adresse email pour réinitialiser votre mot de passe.
+            Entre ton adresse email pour réinitialiser ton mot de passe.
           </Text>
 
           <TextInput
@@ -66,7 +66,7 @@ export default function PasswordForgotten() {
             }}
             className="text-[#9747ff]"
           >
-            Connectez-vous.
+            Connecte-toi !
           </Link>
         </Text>
       </View>

@@ -215,7 +215,7 @@ export default function Group() {
             className="w-full p-2 border border-gray-300 rounded-xl"
             onChangeText={setNewChallengeDescription}
             value={newChallengeDescription}
-            placeholder="Entrez votre défi ici"
+            placeholder="Entre ton défi ici"
             placeholderTextColor="#888"
           />
           <Button
