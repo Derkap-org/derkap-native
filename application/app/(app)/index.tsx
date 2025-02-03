@@ -59,7 +59,8 @@ const Home = () => {
   return (
     <>
       <View className="relative flex flex-col items-center justify-start flex-1 gap-4 p-4">
-        <View className="flex-row justify-end w-full px-4">
+        <View className="flex-row justify-between w-full px-4">
+          <Text className="text-2xl font-bold">Mes groupes</Text>
           <Link
             href={{
               pathname: "/profile/[id]",
@@ -78,7 +79,7 @@ const Home = () => {
             <View className="flex flex-col items-center justify-center gap-2">
               <Text className="text-xs">Pas de groupe pour le moment...</Text>
               <Text className="text-4xl text-center font-grotesque">
-                Créez en un dès maintenant !
+                Crée en un dès maintenant !
               </Text>
             </View>
           </View>
@@ -176,7 +177,7 @@ const Home = () => {
             className="w-full p-2 border border-gray-300 rounded-xl"
             onChangeText={setInviteCode}
             value={inviteCode}
-            placeholder="Entrez votre code d'invitation ici"
+            placeholder="Entre le code d'invitation ici"
             placeholderTextColor="#888"
           />
           <Button
@@ -202,7 +203,7 @@ const Home = () => {
             className="w-full p-2 border border-gray-300 rounded-xl"
             onChangeText={setGroupName}
             value={groupName}
-            placeholder="Entrez votre nom de groupe ici"
+            placeholder="Entre le nom de groupe ici"
             placeholderTextColor="#888"
           />
           <Button
