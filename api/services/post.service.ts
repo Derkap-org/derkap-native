@@ -1,19 +1,24 @@
 import { encrypt, decrypt } from '@/services/encryption.service'
 import { UUID } from 'crypto'
-import { supabase } from '@/services/supabase.service'
+import { getSupabaseClient } from '@/services/supabase.service'
 
 export const uploadPost = async ({
   base64img,
   challengeId,
   profileID,
+  token,
 }: {
   base64img: string
   challengeId: number
   profileID: UUID
+  token: string
 }) => {
   console.log(
     `Uploading post for profile ${profileID} and challenge ${challengeId}: ${base64img.substring(0, 5)}...`
   )
+
+  const supabase = await getSupabaseClient({ token })
+
   const buffer = Buffer.from(base64img, 'base64')
   const { encryptedData, iv } = encrypt({ buffer })
 
@@ -37,7 +42,9 @@ export const uploadPost = async ({
   }
 }
 
-export const getPosts = async ({ challengeId }: { challengeId: number }) => {
+export const getPosts = async ({ challengeId, token }: { challengeId: number, token:string }) => {
+  const supabase = await getSupabaseClient({token})
+  console.log(`Fetching posts for challenge ${challengeId}`)
   const { data, error } = await supabase
     .from('encrypted_post')
     .select(`*, creator:profile(*)`)
@@ -49,6 +56,7 @@ export const getPosts = async ({ challengeId }: { challengeId: number }) => {
   }
 
   if (!data) {
+    console.error('No data found')
     return []
   }
 

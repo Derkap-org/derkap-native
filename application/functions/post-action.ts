@@ -9,20 +9,26 @@ export const uploadPostToDB = async ({
 }) => {
   try {
     console.log("uploadPostToDB", challenge_id);
-    const user = supabase.auth.getUser();
-    console.log("user", user);
-    const user_id = (await user).data.user?.id;
-    console.log("user_id", user_id);
+    const user = await supabase.auth.getUser();
+    const user_id = user.data.user?.id;
     if (!user || !user_id) {
       throw new Error("Not authorized");
     }
 
+    const session = await supabase.auth.getSession();
+    const token = session?.data?.session?.access_token;
+
+    if (!token) {
+      throw new Error("Not authorized");
+    }
+    console.log("token", token);
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_API_URL}/api/post/upload`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           base64_img: base64file,
@@ -60,12 +66,22 @@ export const getEncryptedPosts = async ({
       error: "User not found",
     };
   }
+  const session = await supabase.auth.getSession();
+  const token = session?.data?.session?.access_token;
+  if (!token) {
+    return {
+      data: null,
+      error: "Token not found",
+    };
+  }
+
   const response = await fetch(
     `${process.env.EXPO_PUBLIC_API_URL}/api/post/get`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         challenge_id,
