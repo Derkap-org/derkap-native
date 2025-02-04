@@ -5,7 +5,6 @@ import { TProfileDB } from "../types/types";
 import { getProfile } from "../functions/profile-action";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import { Alert } from "react-native";
 
 type SupabaseContextType = {
   session: Session | null;

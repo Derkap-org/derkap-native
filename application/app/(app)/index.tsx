@@ -135,7 +135,9 @@ const Home = () => {
                           >
                             {member.profile?.avatar_url ? (
                               <Image
-                                source={{ uri: member.profile?.avatar_url }}
+                                source={{
+                                  uri: `${member.profile?.avatar_url}?t=${user.user_metadata.avatarTimestamp}`,
+                                }}
                                 className="w-10 h-10 rounded-full"
                               />
                             ) : (

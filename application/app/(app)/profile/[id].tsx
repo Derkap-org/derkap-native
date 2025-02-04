@@ -41,13 +41,13 @@ export default function Group() {
     <>
       <View className="flex-1">
         <ProfileHeader showModal={showModal} />
-        <View className="w-full flex flex-col items-center gap-4">
+        <View className="flex flex-col items-center w-full gap-4">
           <View className="flex flex-col items-center justify-center gap-2">
             {/* {profile.avatar_url || profileImage ? (
               <View className="relative bg-red-400">
                 <Button
                   onClick={pickImage}
-                  className="absolute right-0 bottom-0"
+                  className="absolute bottom-0 right-0"
                   text={<Pencil size={32} />}
                 ></Button>
                 <Image
@@ -58,14 +58,14 @@ export default function Group() {
                   alt={profile.username ?? ""}
                   width={70}
                   height={70}
-                  className="rounded-full w-24 h-24 object-cover border-2 border-custom-primary bg-custom-white"
+                  className="object-cover w-24 h-24 border-2 rounded-full border-custom-primary bg-custom-white"
                 />
               </View>
             ) : ( */}
-            <View className="relative flex items-center justify-center bg-custom-white rounded-full border-2 border-custom-primary w-24 h-24">
+            <View className="relative flex items-center justify-center w-24 h-24 border-2 rounded-full bg-custom-white border-custom-primary">
               <Pressable
                 onPress={pickImage}
-                className="absolute -right-2 -top-2 bg-custom-primary rounded-full p-2 z-10"
+                className="absolute z-10 p-2 rounded-full -right-2 -top-2 bg-custom-primary"
               >
                 <Pencil size={20} color={"white"} />
               </Pressable>
@@ -78,7 +78,7 @@ export default function Group() {
                   alt={profile?.username ?? ""}
                   width={70}
                   height={70}
-                  className="rounded-full w-24 h-24 object-cover border-2 border-custom-primary bg-custom-white"
+                  className="object-cover w-24 h-24 border-2 rounded-full border-custom-primary bg-custom-white"
                 />
               ) : (
                 <Text className="uppercase">
@@ -92,7 +92,7 @@ export default function Group() {
             {/* )} */}
             <Text
               // style={{ fontFamily: "Grotesque" }}
-              className="font-grotesque text-xl tracking-wider capitalize max-w-52 text-wrap overflow-hidden text-ellipsis text-center"
+              className="overflow-hidden text-xl tracking-wider text-center capitalize font-grotesque max-w-52 text-wrap text-ellipsis"
             >
               {profile?.username}
             </Text>
@@ -110,7 +110,7 @@ export default function Group() {
         <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
           <Button
             withLoader={true}
-            className="w-full bg-red-500 flex items-center justify-center gap-2"
+            className="flex items-center justify-center w-full gap-2 bg-red-500"
             onClick={signOut}
             text={"Se déconnecter"}
           />

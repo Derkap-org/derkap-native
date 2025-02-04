@@ -61,7 +61,7 @@ export async function updateAvatarProfile(file_url: string) {
     // GET NEW AVATAR URL
     const { data: avatar_url } = await supabase.storage
       .from("avatars")
-      .getPublicUrl(`${user.id}/avatar`);
+      .getPublicUrl(`${user.id}/avatar?${new Date().getTime()}`);
 
     console.log("avatar_url", avatar_url);
 
