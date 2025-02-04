@@ -78,6 +78,10 @@ export default function Auth() {
       });
 
       if (error) console.error(error);
+      router.push({
+        pathname: "/confirm-email",
+        params: { email: email },
+      });
     } catch (error) {
       Alert.alert("Erreur", error.message);
     } finally {
