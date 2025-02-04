@@ -3,6 +3,7 @@ import { getCurrentChallengesStatus } from "@/functions/challenge-action";
 import { TGroupDB } from "@/types/types";
 import { create } from "zustand";
 import { addLastStatusSeenToGroups } from "@/lib/lastStatusSeen";
+import { Alert } from "react-native";
 
 interface GroupState {
   groups: TGroupDB[];
@@ -52,7 +53,7 @@ const useGroupStore = create<GroupState>((set, get) => ({
       );
       return {
         ...group,
-        challengeStatus: challengeStatus?.status || "ended",
+        challengeStatus: challengeStatus?.status || null,
       };
     });
 
@@ -82,7 +83,7 @@ const useGroupStore = create<GroupState>((set, get) => ({
     }
     if (data) {
       const groups = get().groups;
-      set({ groups: [...groups, data], isJoining: false });
+      set({ groups: [data, ...groups], isJoining: false });
       return { succes: true };
     }
     set({ isJoining: false });
