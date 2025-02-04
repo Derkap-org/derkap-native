@@ -42,32 +42,70 @@ export const joinGroup = async ({ invite_code }: { invite_code: string }) => {
     };
   }
   // GET GROUP FROM INVITE CODE
-  const { data: group, error: errorGroup } = await supabase
-    .from("group")
-    .select("*")
-    .eq("invite_code", invite_code)
-    .single();
-
-  console.log({ group });
+  // USE RPS TO BYPASS RLS
+  const { data: group, error: errorGroup } = await supabase.rpc(
+    "get_group_by_invite_code",
+    {
+      p_invite_code: invite_code,
+    },
+  );
 
   if (errorGroup) {
     return {
       error: errorGroup.message,
     };
   }
-  // INSERT IN MANY TO MANY TABLE
-  const { error: errorGroupProfil } = await supabase
-    .from("group_profile")
-    .insert({ profile_id: user.id, group_id: group.id });
-  if (errorGroupProfil) {
+  if (!group) {
     return {
-      error: errorGroupProfil.message,
+      error: "Aucun groupe trouvé",
     };
   }
-  return {
-    data: group,
-    error: null,
-  };
+
+  // INSERT IN MANY TO MANY TABLE
+
+  const { data: existingGroupProfile, error: checkError } = await supabase
+    .from("group_profile")
+    .select("*")
+    .eq("profile_id", user.id)
+    .eq("group_id", group[0].id);
+  // .single();
+
+  if (checkError) {
+    console.error("Erreur de vérification :", checkError);
+    return;
+  }
+
+  if (existingGroupProfile.length > 0) {
+    Alert.alert("Déjà membre", "Vous êtes déjà membre de ce groupe");
+    return {
+      error: checkError.message,
+    };
+  } else {
+    const { error: errorGroupProfil } = await supabase
+      .from("group_profile")
+      .insert({ profile_id: user.id, group_id: group[0].id });
+
+    if (errorGroupProfil) {
+      return {
+        error: errorGroupProfil.message,
+      };
+    }
+
+    const { data: newGroup, error } = await getGroup({
+      group_id: group[0].id.toString(),
+    });
+
+    if (error) {
+      return {
+        error: error.message,
+      };
+    }
+
+    return {
+      data: newGroup,
+      error: null,
+    };
+  }
 };
 
 export const createGroup = async ({ name }: { name: string }) => {
@@ -125,10 +163,12 @@ export const getGroup = async ({ group_id }: { group_id: string }) => {
     };
   }
   //select the single group and its members
+
+  const parsedGroupId = parseInt(group_id);
   const { data, error } = await supabase
     .from("group")
     .select("*, members:group_profile(profile(*))")
-    .eq("id", group_id)
+    .eq("id", parsedGroupId)
     .single();
   if (error) {
     return {
@@ -221,12 +261,17 @@ export const leaveGroup = async ({ group_id }: { group_id: string }) => {
     };
   }
   // DELETE FROM MANY TO MANY TABLE
-  const { error: errorGroupProfil } = await supabase
+  const parsedGroupId = parseInt(group_id);
+
+  const { data: groupLeaved, error: errorGroupProfil } = await supabase
     .from("group_profile")
     .delete()
     .eq("profile_id", user.id)
-    .eq("group_id", group_id);
+    .eq("group_id", parsedGroupId)
+    .select("group(*, members:group_profile(profile(*)))");
+  Alert.alert("Groupe quitté", "Vous avez quitté le groupe");
   if (errorGroupProfil) {
+    Alert.alert("Erreur", errorGroupProfil.message);
     return {
       error: errorGroupProfil.message,
     };

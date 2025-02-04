@@ -148,10 +148,24 @@ export default function Group() {
     }
   };
 
+  const handleConfirmLeaveGroup = async () => {
+    Alert.alert("Êtes-vous sûr de vouloir quitter le groupe ?", "", [
+      {
+        text: "Annuler",
+        style: "cancel",
+      },
+      {
+        text: "Quitter",
+        onPress: () => (handleLeaveGroup(), fetchGroups()),
+      },
+    ]);
+  };
+
   const handleLeaveGroup = async () => {
     if (!currentGroup?.id) {
       return;
     }
+
     const { error } = await leaveGroup({
       group_id: currentGroup.id?.toString(),
     });
@@ -286,7 +300,7 @@ export default function Group() {
               withLoader={true}
               className="w-full bg-red-500"
               onClick={() => {
-                handleLeaveGroup();
+                handleConfirmLeaveGroup();
               }}
               text={"Quitter le groupe"}
             />

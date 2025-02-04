@@ -124,27 +124,30 @@ const Home = () => {
 
                     {/* Photos des membres */}
                     <View className="flex-row">
-                      {group.members?.slice(0, 5).map((member, index) => (
-                        <View
-                          key={member.profile.id}
-                          className={`border-2 border-white rounded-full overflow-hidden ${
-                            index !== 0 ? "-ml-3" : ""
-                          }`}
-                        >
-                          {member.profile.avatar_url ? (
-                            <Image
-                              source={{ uri: member.profile.avatar_url }}
-                              className="w-10 h-10 rounded-full"
-                            />
-                          ) : (
-                            <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-                              <Text className="text-sm text-white">
-                                {member.profile.username?.charAt(0) || "?"}
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                      ))}
+                      {group.members?.slice(0, 5).map((member, index) => {
+                        if (!member.profile) return;
+                        return (
+                          <View
+                            key={member.profile.id}
+                            className={`border-2 border-white rounded-full overflow-hidden ${
+                              index !== 0 ? "-ml-3" : ""
+                            }`}
+                          >
+                            {member.profile?.avatar_url ? (
+                              <Image
+                                source={{ uri: member.profile?.avatar_url }}
+                                className="w-10 h-10 rounded-full"
+                              />
+                            ) : (
+                              <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
+                                <Text className="text-sm text-white">
+                                  {member.profile?.username?.charAt(0) || "?"}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        );
+                      })}
 
                       {/* Nombre de membres supplémentaires */}
                       {(group.members?.length || 0) > 5 && (

@@ -48,7 +48,8 @@ export default function Auth() {
         router.push("/");
       }
     } catch (error) {
-      Alert.alert("Erreur", error.message);
+      Alert.alert("Erreur", "Email ou mot de passe incorrect.");
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -190,7 +191,7 @@ export default function Auth() {
               <Text className="text-[#9747ff]">Inscris-toi !</Text>
             </Text>
           ) : (
-            <Text onPress={() => setIsSignIn(true)} className=" cursor-pointer">
+            <Text onPress={() => setIsSignIn(true)} className="cursor-pointer ">
               Déjà un compte ?{" "}
               <Text className="text-[#9747ff]">Connecte-toi !</Text>
             </Text>
