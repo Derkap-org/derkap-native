@@ -13,6 +13,10 @@ export default function CreateGroupModal({
   const [groupName, setGroupName] = useState("");
   const { createGroup } = useGroupStore();
 
+  const handleCreateGroup = async () => {
+    await createGroup(groupName);
+  };
+
   return (
     <SwipeModal
       ref={ref}
@@ -34,7 +38,7 @@ export default function CreateGroupModal({
         <Button
           withLoader={true}
           isCancel={!groupName.length}
-          onClick={() => createGroup(groupName)}
+          onClick={handleCreateGroup}
           text="Créer un groupe"
           className="w-fit"
         />

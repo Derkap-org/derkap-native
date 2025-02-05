@@ -13,6 +13,6 @@
     "source.fixAll.eslint": "always" // Run ESLint fixes on save
   },
   "prettier.configPath": ".prettierrc", // Use Prettier rules from your project
-  "deno.enablePaths": ["supabase/functions"],
+  "deno.enablePaths": ["application/supabase/functions"],
   "deno.lint": true
 }

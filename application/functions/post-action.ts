@@ -16,19 +16,21 @@ export const uploadPostToDB = async ({
     }
 
     const session = await supabase.auth.getSession();
-    const token = session?.data?.session?.access_token;
+    const access_token = session?.data?.session?.access_token;
+    const refresh_token = session?.data?.session?.refresh_token;
 
-    if (!token) {
+    if (!access_token || !refresh_token) {
       throw new Error("Not authorized");
     }
-    console.log("token", token);
+
     const response = await fetch(
       `${process.env.EXPO_PUBLIC_API_URL}/api/post/upload`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${access_token}`,
+          refresh_token: refresh_token,
         },
         body: JSON.stringify({
           base64_img: base64file,
@@ -67,8 +69,10 @@ export const getEncryptedPosts = async ({
     };
   }
   const session = await supabase.auth.getSession();
-  const token = session?.data?.session?.access_token;
-  if (!token) {
+  const access_token = session?.data?.session?.access_token;
+  const refresh_token = session?.data?.session?.refresh_token;
+
+  if (!access_token || !refresh_token) {
     return {
       data: null,
       error: "Token not found",
@@ -81,7 +85,8 @@ export const getEncryptedPosts = async ({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${access_token}`,
+        refresh_token: refresh_token,
       },
       body: JSON.stringify({
         challenge_id,

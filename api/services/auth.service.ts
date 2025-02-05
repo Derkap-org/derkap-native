@@ -10,14 +10,15 @@ if (!SUPABASE_JWT_SECRET) {
 export const verifyToken = async (req: Request) => {
   try {
     const authHeader = req.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const refresh_token = req.headers.get('refresh_token');
+    if (!authHeader || !authHeader.startsWith('Bearer ') || !refresh_token) {
       return { success: false, error: 'Unauthorized: No token provided' };
     }
 
-    const token = authHeader.split(' ')[1];
+    const access_token = authHeader.split(' ')[1];
     // Verify HS256 token using Supabase secret
-    const decoded = jwt.verify(token, SUPABASE_JWT_SECRET, { algorithms: ['HS256'] });
-    return { success: true, user: decoded, token };
+    const decoded = jwt.verify(access_token, SUPABASE_JWT_SECRET, { algorithms: ['HS256'] });
+    return { success: true, user: decoded, access_token, refresh_token };
   } catch (error) {
     console.error('JWT Verification Error:', error);
     return { success: false, error: 'Unauthorized: Invalid token' };

@@ -266,9 +266,7 @@ export default function Group() {
             <Button
               withLoader={true}
               className="flex items-center justify-center w-full gap-2"
-              onClick={() => {
-                handleUpdateGroupName();
-              }}
+              onClick={handleUpdateGroupName}
               isCancel={
                 !newGroupName.length || newGroupName === currentGroup?.name
               }
@@ -299,9 +297,7 @@ export default function Group() {
             <Button
               withLoader={true}
               className="w-full bg-red-500"
-              onClick={() => {
-                handleConfirmLeaveGroup();
-              }}
+              onClick={handleConfirmLeaveGroup}
               text={"Quitter le groupe"}
             />
           </View>

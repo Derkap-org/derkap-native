@@ -13,6 +13,11 @@ export default function JoinGroupModal({
   const [inviteCode, setInviteCode] = useState("");
 
   const { joinGroup } = useGroupStore();
+
+  const handleJoinGroup = async () => {
+    await joinGroup(inviteCode);
+  };
+
   return (
     <SwipeModal
       ref={ref}
@@ -34,7 +39,7 @@ export default function JoinGroupModal({
         <Button
           withLoader={true}
           isCancel={!inviteCode.length}
-          onClick={() => joinGroup(inviteCode)}
+          onClick={handleJoinGroup}
           text="Rejoindre"
           className="w-fit"
         />

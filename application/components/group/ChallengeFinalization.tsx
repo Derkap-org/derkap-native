@@ -46,7 +46,9 @@ const ChallengeFinalization = ({
   const handleVote = async () => {
     try {
       if (!selectedPost) return console.error("Aucun post sélectionné");
-
+      if (selectedPost.id === userVote?.postId) {
+        return console.log("Vous avez déjà voté pour ce post");
+      }
       await addVote({
         post_id: selectedPost.id,
         challenge_id: selectedPost.challenge_id,
@@ -194,7 +196,7 @@ const ChallengeFinalization = ({
             ))}
         </View>
 
-        {challenge?.status === "voting" && (
+        {challenge?.status === "voting" && posts && posts.length > 0 && (
           <View className="flex flex-col w-full gap-y-2">
             <Button
               withLoader={true}
@@ -202,20 +204,16 @@ const ChallengeFinalization = ({
               text={
                 userVote?.voted
                   ? `Changer mon vote pour @${selectedPost?.creator?.username}`
-                  : `Voter pour @${selectedPost?.creator?.username}`
+                  : `Voter pour @${selectedPost?.creator?.username || ""}`
               }
               isCancel={!selectedPost}
-              onClick={() => {
-                handleVote();
-              }}
+              onClick={handleVote}
             />
             {challenge?.creator_id === profile.id && (
               <Button
                 text="Fermer les votes"
                 //todo: add validation msg and confirm
-                onClick={() => {
-                  showModalEndVote();
-                }}
+                onClick={showModalEndVote}
               />
             )}
           </View>
@@ -247,9 +245,7 @@ const ChallengeFinalization = ({
             className="bg-purple-500 w-full font-grotesque"
             text="Confirmer"
             //todo: add validation msg and confirm
-            onClick={() => {
-              handleEndVote();
-            }}
+            onClick={handleEndVote}
             withLoader={true}
           />
         </View>

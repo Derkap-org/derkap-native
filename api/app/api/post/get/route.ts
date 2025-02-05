@@ -8,7 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: authResult.error }, { status: 401 })
     }
 
-    if (!authResult.token) {
+    if (!authResult.access_token || !authResult.refresh_token) {
       return NextResponse.json({ success: false, message: 'No token found' }, { status: 400 })
     }
 
@@ -24,7 +24,8 @@ export async function POST(req: Request) {
 
     const posts = await getPosts({
       challengeId: challenge_id,
-      token: authResult.token,
+      access_token: authResult.access_token,
+      refresh_token: authResult.refresh_token,
     })
 
     return NextResponse.json(
