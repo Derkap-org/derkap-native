@@ -9,7 +9,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: authResult.error }, { status: 401 })
     }
     
-    if (!authResult.token) {
+    if (!authResult.access_token || !authResult.refresh_token) {
       return NextResponse.json({ success: false, message: 'No token found' }, { status: 400 })
     }
 
@@ -42,7 +42,8 @@ export async function POST(req: Request) {
       base64img: base64_img,
       challengeId: challenge_id,
       profileID: profile_id,
-      token: authResult.token,
+      access_token: authResult.access_token,
+      refresh_token: authResult.refresh_token,
     })
     return NextResponse.json(
       { success: true, message: 'Post uploaded' },

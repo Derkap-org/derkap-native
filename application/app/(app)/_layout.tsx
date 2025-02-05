@@ -1,7 +1,7 @@
 import { Redirect, Stack } from "expo-router";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Text } from "react-native";
+import { Image, View } from "react-native";
 
 import "../../global.css";
 import { useSupabase } from "@/context/auth-context";
@@ -86,7 +86,7 @@ async function registerForPushNotificationsAsync() {
       handleRegistrationError(`${e}`);
     }
   } else {
-    handleRegistrationError("Must use physical device for push notifications");
+    // handleRegistrationError("Must use physical device for push notifications");
   }
 }
 
@@ -142,7 +142,16 @@ export default function RootLayout() {
   // }, [loaded, error]);
 
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return (
+      <View className="flex-1 items-center justify-center ">
+        <View className="bg-[#8C4BF5] p-1 rounded-xl animate-pulse">
+          <Image
+            source={require("../../assets/images/icon.png")}
+            style={{ width: 100, height: 100 }} // Adjust size as needed
+          />
+        </View>
+      </View>
+    );
   }
 
   // Only require authentication within the (app) group's layout as users

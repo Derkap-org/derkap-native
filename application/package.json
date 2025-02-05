@@ -1,5 +1,5 @@
 {
-  "name": "derkap-native",
+  "name": "derkap",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -26,6 +26,7 @@
   "dependencies": {
     "@babel/runtime": "^7.26.0",
     "@birdwingo/react-native-swipe-modal": "^1.2.3",
+    "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^7.0.0",
@@ -38,8 +39,8 @@
     "expo-camera": "~16.0.14",
     "expo-checkbox": "~4.0.1",
     "expo-clipboard": "~7.0.0",
-    "expo-constants": "~17.0.3",
-    "expo-device": "~7.0.1",
+    "expo-constants": "~17.0.5",
+    "expo-device": "~7.0.2",
     "expo-file-system": "^18.0.7",
     "expo-font": "~13.0.1",
     "expo-image-picker": "~16.0.5",
@@ -68,7 +69,8 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^3.4.14",
     "tailwindcss-animate": "^1.0.7",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.2",
+    "expo-image": "~2.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

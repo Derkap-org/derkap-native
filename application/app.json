@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "derkap-native",
-    "slug": "derkap-native",
+    "name": "derkap",
+    "slug": "derkap",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,15 +10,19 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#8C4BF5"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.nicoalz.derkap",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#8C4BF5"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -56,9 +60,10 @@
         "origin": false
       },
       "eas": {
-        "projectId": "fa29bf4d-62e9-4046-b658-b62e53e39db9"
+        "projectId": "98340d21-322b-4f69-ac34-670c0f298692"
       }
     },
-    "owner": "derkap"
+    "owner": "nicoalz",
+    "newArchEnabled": true
   }
 }

@@ -6,18 +6,20 @@ export const uploadPost = async ({
   base64img,
   challengeId,
   profileID,
-  token,
+  access_token,
+  refresh_token,
 }: {
   base64img: string
   challengeId: number
   profileID: UUID
-  token: string
+  access_token: string
+  refresh_token: string
 }) => {
   console.log(
     `Uploading post for profile ${profileID} and challenge ${challengeId}: ${base64img.substring(0, 5)}...`
   )
 
-  const supabase = await getSupabaseClient({ token })
+  const supabase = await getSupabaseClient({ access_token, refresh_token })
 
   const buffer = Buffer.from(base64img, 'base64')
   const { encryptedData, iv } = encrypt({ buffer })
@@ -42,8 +44,8 @@ export const uploadPost = async ({
   }
 }
 
-export const getPosts = async ({ challengeId, token }: { challengeId: number, token:string }) => {
-  const supabase = await getSupabaseClient({token})
+export const getPosts = async ({ challengeId, access_token, refresh_token }: { challengeId: number, access_token: string, refresh_token: string }) => {
+  const supabase = await getSupabaseClient({ access_token, refresh_token })
   console.log(`Fetching posts for challenge ${challengeId}`)
   const { data, error } = await supabase
     .from('encrypted_post')
