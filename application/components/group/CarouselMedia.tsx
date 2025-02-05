@@ -1,8 +1,16 @@
-import { Dimensions, Image, Text, View, ViewProps } from "react-native";
+import {
+  Dimensions,
+  Image,
+  Text,
+  View,
+  ViewProps,
+  ActivityIndicator,
+} from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { TPostDB, UserVote, TVoteDB } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { BlurView } from "expo-blur";
+
 interface CarouselMediaProps extends ViewProps {
   posts: TPostDB[];
   finalizationData?: {
@@ -60,6 +68,15 @@ export default function CarouselMedia({
     );
   };
 
+  if (!posts)
+    return (
+      <View className="flex h-[90%] w-full">
+        <View className="bg-black/50 flex items-center justify-center w-full h-full rounded-2xl ">
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </View>
+    );
+
   return (
     <View className="w-full relative rounded-2xl">
       <View className={cn("flex flex-row", className)}>
@@ -93,9 +110,11 @@ export default function CarouselMedia({
                   <Text className="font-grotesque text-white">
                     @{post.creator?.username}
                   </Text>
-                  <Text className="font-grotesque text-white">
-                    {getVoteCount({ postId: post.id })} vote(s)
-                  </Text>
+                  {challengeStatus === "ended" && (
+                    <Text className="font-grotesque text-white">
+                      {getVoteCount({ postId: post.id })} vote(s)
+                    </Text>
+                  )}
                 </View>
               )}
             </View>

@@ -228,7 +228,7 @@ export default function Capture({
           <Button
             isCancel={isValidatingFile}
             withLoader={true}
-            onClick={() => validatePhoto()}
+            onClick={validatePhoto}
             text="Poster mon derkap de fou"
             className="mt-4 mb-32 mx-auto w-full font-grotesque text-xl"
           />

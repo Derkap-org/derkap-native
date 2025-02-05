@@ -156,9 +156,7 @@ const PostTaken = ({
           <Button
             className="w-full bg-purple-500 font-grotesque"
             text="Confirmer"
-            onClick={() => {
-              handleGoVote();
-            }}
+            onClick={handleGoVote}
             withLoader={true}
           />
         </View>

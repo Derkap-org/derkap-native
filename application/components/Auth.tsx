@@ -185,14 +185,14 @@ export default function Auth() {
                 withLoader={true}
                 text="Connexion"
                 isCancel={loading}
-                onClick={() => signInWithEmail()}
+                onClick={signInWithEmail}
               />
             ) : (
               <Button
                 text="Inscription"
                 isCancel={loading}
                 withLoader={true}
-                onClick={() => signUpWithEmail()}
+                onClick={signUpWithEmail}
               />
             )}
           </View>
