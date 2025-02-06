@@ -1,3 +1,4 @@
+import "../gesture-handler";
 import { Slot } from "expo-router";
 import { useFonts } from "expo-font";
 import React, { useEffect } from "react";

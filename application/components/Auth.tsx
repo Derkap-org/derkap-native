@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Pressable,
 } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { Link, router } from "expo-router";
@@ -16,6 +17,7 @@ import Button from "./Button";
 import SwipeModal, {
   SwipeModalPublicMethods,
 } from "@birdwingo/react-native-swipe-modal";
+import { EyeOff, Eye } from "lucide-react-native";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -37,6 +39,9 @@ export default function Auth() {
   const [username, setUsername] = useState("");
   const [cguChecked, setChecked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const [isPasswordConfirmationVisible, setPasswordConfirmationVisible] =
+    useState(false);
 
   const modalCGURef = useRef<SwipeModalPublicMethods>(null);
 
@@ -126,28 +131,60 @@ export default function Auth() {
             />
           )}
 
-          <TextInput
-            // label="Password"
-            // leftIcon={{ type: "font-awesome", name: "lock" }}
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            secureTextEntry={true}
-            placeholder="Mot de passe"
-            autoCapitalize={"none"}
-            className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
-          />
-
-          {!isSignIn && (
+          <View className="flex flex-row items-center justify-between relative w-full bg-white border border-gray-300 rounded-xl pr-2">
             <TextInput
               // label="Password"
               // leftIcon={{ type: "font-awesome", name: "lock" }}
-              onChangeText={(text) => setPasswordConfirmation(text)}
-              value={passwordConfirmation}
-              secureTextEntry={true}
-              placeholder="Confirmer le mot de passe"
+              onChangeText={(text) => setPassword(text)}
+              value={password}
+              secureTextEntry={!isPasswordVisible}
+              placeholder="Mot de passe"
               autoCapitalize={"none"}
-              className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
+              className="w-10/12 h-16 p-2 placeholder:text-gray-500"
             />
+            {isPasswordVisible ? (
+              <Eye
+                size={24}
+                className=""
+                color={"#000"}
+                onPress={() => setPasswordVisible(false)}
+              />
+            ) : (
+              <EyeOff
+                size={24}
+                color={"#000"}
+                className=""
+                onPress={() => setPasswordVisible(true)}
+              />
+            )}
+          </View>
+
+          {!isSignIn && (
+            <View className="flex flex-row items-center justify-between relative w-full bg-white border border-gray-300 rounded-xl pr-2">
+              <TextInput
+                onChangeText={(text) => setPasswordConfirmation(text)}
+                value={passwordConfirmation}
+                secureTextEntry={!isPasswordConfirmationVisible}
+                placeholder="Confirmer le mot de passe"
+                autoCapitalize={"none"}
+                className="w-10/12 h-16 p-2 placeholder:text-gray-500"
+              />
+              {isPasswordConfirmationVisible ? (
+                <Eye
+                  size={24}
+                  className=""
+                  color={"#000"}
+                  onPress={() => setPasswordConfirmationVisible(false)}
+                />
+              ) : (
+                <EyeOff
+                  size={24}
+                  color={"#000"}
+                  className=""
+                  onPress={() => setPasswordConfirmationVisible(true)}
+                />
+              )}
+            </View>
           )}
 
           {!isSignIn && (
@@ -199,21 +236,25 @@ export default function Auth() {
 
           <View className="flex flex-row justify-start">
             {isSignIn ? (
-              <Text
+              <Pressable
                 onPress={() => setIsSignIn(false)}
                 className="cursor-pointer"
               >
-                Pas encore de compte ?{" "}
-                <Text className="text-[#9747ff]">Inscris-toi !</Text>
-              </Text>
+                <Text>
+                  Pas encore de compte ?{" "}
+                  <Text className="text-[#9747ff]">Inscris-toi !</Text>
+                </Text>
+              </Pressable>
             ) : (
-              <Text
+              <Pressable
                 onPress={() => setIsSignIn(true)}
                 className="cursor-pointer "
               >
-                Déjà un compte ?{" "}
-                <Text className="text-[#9747ff]">Connecte-toi !</Text>
-              </Text>
+                <Text>
+                  Déjà un compte ?{" "}
+                  <Text className="text-[#9747ff]">Connecte-toi !</Text>
+                </Text>
+              </Pressable>
             )}
           </View>
         </View>
