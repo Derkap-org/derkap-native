@@ -7,3 +7,8 @@ export const getSupabaseClient = async ({access_token, refresh_token}:{access_to
   supabase.auth.setSession({access_token, refresh_token})
   return supabase 
 }
+
+export const getSupabaseClientAdmin = async () => {
+  const supabase =  createClient(supabaseUrl, supabaseAnonKey)
+  return supabase
+}

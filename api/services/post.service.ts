@@ -1,25 +1,25 @@
 import { encrypt, decrypt } from '@/services/encryption.service'
 import { UUID } from 'crypto'
-import { getSupabaseClient } from '@/services/supabase.service'
+import { getSupabaseClient, getSupabaseClientAdmin } from '@/services/supabase.service'
 
 export const uploadPost = async ({
   base64img,
   challengeId,
   profileID,
-  access_token,
-  refresh_token,
+  // access_token,
+  // refresh_token,
 }: {
   base64img: string
   challengeId: number
   profileID: UUID
-  access_token: string
-  refresh_token: string
+  // access_token: string
+  // refresh_token: string
 }) => {
   console.log(
     `Uploading post for profile ${profileID} and challenge ${challengeId}: ${base64img.substring(0, 5)}...`
   )
 
-  const supabase = await getSupabaseClient({ access_token, refresh_token })
+  const supabase = await getSupabaseClientAdmin()
 
   const buffer = Buffer.from(base64img, 'base64')
   const { encryptedData, iv } = encrypt({ buffer })
