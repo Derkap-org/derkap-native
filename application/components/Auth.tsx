@@ -18,6 +18,7 @@ import SwipeModal, {
   SwipeModalPublicMethods,
 } from "@birdwingo/react-native-swipe-modal";
 import { EyeOff, Eye } from "lucide-react-native";
+import Toast from "react-native-toast-message";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -56,13 +57,16 @@ export default function Auth() {
       });
 
       setLoading(false);
-      if (error) console.error(error);
+      if (error) throw error;
       else {
         router.push("/");
       }
     } catch (error) {
-      Alert.alert("Erreur", "Email ou mot de passe incorrect.");
-      console.error(error);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la connexion",
+        text2: "Vérifiez vos identifiants",
+      });
     } finally {
       setLoading(false);
     }
@@ -71,15 +75,13 @@ export default function Auth() {
   async function signUpWithEmail() {
     try {
       if (!cguChecked) {
-        Alert.alert("Erreur", "Veuillez accepter les CGU pour continuer.");
-        return;
+        throw new Error("Veuillez accepter les CGU pour continuer.");
       }
 
       setLoading(true);
 
       if (password !== passwordConfirmation) {
-        Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
-        return;
+        throw new Error("Les mots de passe ne correspondent pas.");
       }
       const {
         data: { session },
@@ -90,13 +92,17 @@ export default function Auth() {
         options: { data: { username: username } },
       });
 
-      if (error) console.error(error);
+      if (error) throw error;
       router.push({
         pathname: "/confirm-email",
         params: { email: email },
       });
     } catch (error) {
-      Alert.alert("Erreur", error.message);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de l'inscription",
+        text2: error?.message || "Une erreur est survenue",
+      });
     } finally {
       setLoading(false);
     }

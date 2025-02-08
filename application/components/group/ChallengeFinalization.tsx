@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import { Image, View, Text, ViewProps, Pressable } from "react-native";
 import { useSupabase } from "@/context/auth-context";
 import { getVotes, addVote } from "@/functions/vote-action";
+import Toast from "react-native-toast-message";
 // import { useUser } from '@/contexts/user-context';
 import SwipeModal, {
   SwipeModalPublicMethods,
@@ -34,7 +35,6 @@ const ChallengeFinalization = ({
   const [selectedPost, setSelectedPost] = useState<TPostDB | null>(null);
   const [votes, setVotes] = useState<TVoteDB[]>([]);
   const [userVote, setUserVote] = useState<UserVote>(); // null
-  const [isEndVoteOpen, setIsEndVoteOpen] = useState<boolean>(false);
 
   // const [api, setApi] = useState<CarouselApi>();
   const [currentPost, setCurrentPost] = useState(0);
@@ -45,16 +45,21 @@ const ChallengeFinalization = ({
 
   const handleVote = async () => {
     try {
-      if (!selectedPost) return console.error("Aucun post sélectionné");
+      if (!selectedPost) throw new Error("Post inconnu");
       if (selectedPost.id === userVote?.postId) {
-        return console.log("Vous avez déjà voté pour ce post");
+        throw new Error("Tu ne peux pas voter pour le même post");
       }
       await addVote({
         post_id: selectedPost.id,
         challenge_id: selectedPost.challenge_id,
       });
     } catch (error) {
-      console.error("Erreur lors du vote");
+      console.error("Erreur lors du vote: ", error?.message);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du vote",
+        text2: error?.message || "Une erreur est survenue",
+      });
     } finally {
       await fetchAllGroupData();
       await fetchVotes();
@@ -63,10 +68,14 @@ const ChallengeFinalization = ({
 
   const handleEndVote = async () => {
     try {
-      if (!challenge) return console.error("Challenge inconnu");
+      if (!challenge) throw new Error("Challenge inconnu");
       await setChallengeToEnd({ challenge_id: challenge.id });
     } catch (error) {
-      console.error("Erreur lors du passage aux votes");
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la fermeture des votes",
+        text2: error?.message || "Une erreur est survenue",
+      });
     } finally {
       modalEndVoteRef.current?.hide();
       await fetchAllGroupData();
@@ -77,30 +86,26 @@ const ChallengeFinalization = ({
   const fetchVotes = async () => {
     try {
       if (!challenge) return;
-      const { data, error } = await getVotes({
+      const votes = await getVotes({
         challenge_id: challenge.id,
       });
-      if (error) {
-        throw new Error("");
-      } else {
-        setVotes(data || []);
-        const userVote = data?.find((vote) => vote.user_id === profile.id);
-        setUserVote({
-          voted: !!userVote,
-          postId: userVote?.post_id,
-        });
-      }
+      setVotes(votes || []);
+      const userVote = votes?.find((vote) => vote.user_id === profile.id);
+      setUserVote({
+        voted: !!userVote,
+        postId: userVote?.post_id,
+      });
     } catch (error) {
-      console.error("Erreur lors de la récupération des votes");
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la récupération des votes",
+        text2: error?.message || "Une erreur est survenue",
+      });
     }
   };
 
   useEffect(() => {
-    try {
-      fetchVotes();
-    } catch (error) {
-      console.error("Erreur lors de la récupération des votes");
-    }
+    fetchVotes();
   }, []);
 
   // useEffect(() => {
@@ -137,10 +142,7 @@ const ChallengeFinalization = ({
     <View>
       <View
         {...props}
-        className={cn(
-          "w-full flex flex-col items-center gap-2 mb-28",
-          className,
-        )}
+        className={cn("w-full flex flex-col items-center gap-2", className)}
       >
         {challenge?.status === "ended" && (
           <Text className="font-grotesque text-xl">

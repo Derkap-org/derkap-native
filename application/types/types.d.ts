@@ -36,19 +36,24 @@ export type TGroupsStatus = {
 //   creator: TProfileDB | null;
 // };
 
+/*
+
+*/
+
 export type TPostDB = {
-  id: number;
-  created_at: string;
-  challenge_id: number;
-  profile_id: string;
-  creator: {
-    id: string;
-    email: string;
-    username: string;
-    avatar_url: string;
-    created_at: string;
-  };
   base64img: string;
+  challenge_id: number | null;
+  created_at: string;
+  file_path: string | null;
+  id: number;
+  profile_id: string | null;
+  creator: {
+    avatar_url: string | null;
+    created_at: string;
+    email: string;
+    id: string;
+    username: string;
+  };
 };
 
 // VOTES

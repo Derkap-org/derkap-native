@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 
-import Auth from "@/components/Auth";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabase } from "@/context/auth-context";
-import { Link, Redirect, router, useLocalSearchParams } from "expo-router";
-import { View, Text, TextInput, Alert } from "react-native";
+import { Redirect, router, useLocalSearchParams } from "expo-router";
+import { View, Text, Alert } from "react-native";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
 import * as Linking from "expo-linking";
 import OtpInput from "@/components/OTPInput";
-import ProfileHeader from "@/components/group/ProfileHeader";
 import { Pressable } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
-
+import Toast from "react-native-toast-message";
 export default function ConfirmEmail() {
   const { session } = useSupabase();
   const { email: emailLocal } = useLocalSearchParams();
@@ -22,27 +19,32 @@ export default function ConfirmEmail() {
   const [email, setEmail] = useState((emailLocal as string) ?? "");
 
   async function signInOtp() {
-    setLoading(true);
-    if (!otp || !email) {
-      setLoading(false);
-      Alert.alert("Le code ou l'adresse email est manquant");
-      return;
-    }
-    const redirectUrl = Linking.createURL("/");
+    try {
+      setLoading(true);
+      if (!otp || !email) {
+        setLoading(false);
+        throw new Error("Le code ou l'adresse email est manquant");
+      }
+      const redirectUrl = Linking.createURL("/");
 
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: otp.join(""),
-      type: "signup",
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    setLoading(false);
-    if (error) Alert.alert("Le code est éronné");
-    if (error) console.error(error);
-    else {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp.join(""),
+        type: "signup",
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+      setLoading(false);
+      if (error) throw new Error(error?.message || "Le code est éronné");
       router.push("/");
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la confirmation",
+        text2: error?.message || "Une erreur est survenue",
+      });
+      setLoading(false);
     }
   }
 

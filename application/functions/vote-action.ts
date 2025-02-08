@@ -3,28 +3,21 @@ import { supabase } from "@/lib/supabase";
 export const getVotes = async ({ challenge_id }: { challenge_id: number }) => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
-    return {
-      data: null,
-      error: "User not found",
-    };
+    throw new Error("Utilisateur non trouvé");
   }
 
-  const { data, error } = await supabase
+  const { data: votes, error } = await supabase
     .from("vote")
     .select("*")
     .eq("challenge_id", challenge_id);
 
   if (error) {
-    return {
-      data: null,
-      error: error.message,
-    };
+    throw new Error(
+      error?.message || "Erreur lors de la récupération des votes",
+    );
   }
 
-  return {
-    data: data,
-    error: null,
-  };
+  return votes;
 };
 
 export const addVote = async ({
@@ -34,6 +27,7 @@ export const addVote = async ({
   post_id: number;
   challenge_id: number;
 }) => {
+  console.log("addVote", post_id, challenge_id);
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
     return {
@@ -42,28 +36,17 @@ export const addVote = async ({
     };
   }
 
-  const { data, error } = await supabase
-    .from("vote")
-    .upsert(
-      {
-        post_id,
-        challenge_id,
-      },
-      {
-        onConflict: "challenge_id, user_id",
-      },
-    )
-    .select("*");
+  const { error } = await supabase.from("vote").upsert(
+    {
+      post_id,
+      challenge_id,
+    },
+    {
+      onConflict: "challenge_id, user_id",
+    },
+  );
 
   if (error) {
-    return {
-      data: null,
-      error: error.message,
-    };
+    throw new Error(error.message);
   }
-
-  return {
-    data,
-    error: null,
-  };
 };

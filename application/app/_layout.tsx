@@ -5,7 +5,9 @@ import React, { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import "../global.css";
 import { SupabaseProvider } from "@/context/auth-context";
-import { Alert, Text, View, AppState, SafeAreaView } from "react-native";
+import { SafeAreaView } from "react-native";
+import Toast from "react-native-toast-message";
+global.Buffer = require("buffer").Buffer;
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -25,6 +27,7 @@ export default function RootLayout() {
       <SafeAreaView className="flex-1 bg-[#f1d7f3]">
         <Slot />
       </SafeAreaView>
+      <Toast topOffset={70} />
     </SupabaseProvider>
   );
 }

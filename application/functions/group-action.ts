@@ -91,15 +91,9 @@ export const joinGroup = async ({ invite_code }: { invite_code: string }) => {
       };
     }
 
-    const { data: newGroup, error } = await getGroup({
+    const newGroup = await getGroup({
       group_id: group[0].id.toString(),
     });
-
-    if (error) {
-      return {
-        error: error.message,
-      };
-    }
 
     return {
       data: newGroup,
@@ -157,29 +151,22 @@ export const createGroup = async ({ name }: { name: string }) => {
 export const getGroup = async ({ group_id }: { group_id: string }) => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
-    return {
-      data: null,
-      error: "User not found",
-    };
+    throw new Error("Utilisateur non trouvé");
   }
   //select the single group and its members
 
   const parsedGroupId = parseInt(group_id);
-  const { data, error } = await supabase
+  const { data: group, error } = await supabase
     .from("group")
     .select("*, members:group_profile(profile(*))")
     .eq("id", parsedGroupId)
     .single();
   if (error) {
-    return {
-      data: null,
-      error: error.message,
-    };
+    throw new Error(
+      error?.message || "Erreur lors de la récupération du groupe",
+    );
   }
-  return {
-    data,
-    error: null,
-  };
+  return group;
 };
 
 export const updateGroupName = async ({
@@ -191,34 +178,21 @@ export const updateGroupName = async ({
 }) => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
-    return {
-      error: "User not found",
-      data: null,
-    };
+    throw new Error("Utilisateur non trouvé");
   }
   if (!group_id || !name) {
-    return {
-      error: "Id and name are required",
-      data: null,
-    };
+    throw new Error("Id et nom requis");
   }
   // UPDATE GROUP TABLE
-  const { data, error: errorGroup } = await supabase
+  const { error: errorGroup } = await supabase
     .from("group")
     .update({ name: name })
     .eq("id", group_id)
     .select("name")
     .single();
   if (errorGroup) {
-    return {
-      error: errorGroup.message,
-      data: null,
-    };
+    throw new Error(errorGroup.message);
   }
-  return {
-    error: null,
-    data,
-  };
 };
 
 // export const deleteGroup = async ({ group_id }: { group_id: number }) => {
@@ -251,19 +225,15 @@ export const updateGroupName = async ({
 export const leaveGroup = async ({ group_id }: { group_id: string }) => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
-    return {
-      error: "User not found",
-    };
+    throw new Error("Utilisateur non trouvé");
   }
   if (!group_id) {
-    return {
-      error: "Id is required",
-    };
+    throw new Error("Id requis");
   }
   // DELETE FROM MANY TO MANY TABLE
   const parsedGroupId = parseInt(group_id);
 
-  const { data: groupLeaved, error: errorGroupProfil } = await supabase
+  const { error: errorGroupProfil } = await supabase
     .from("group_profile")
     .delete()
     .eq("profile_id", user.id)
@@ -271,12 +241,8 @@ export const leaveGroup = async ({ group_id }: { group_id: string }) => {
     .select("group(*, members:group_profile(profile(*)))");
   Alert.alert("Groupe quitté", "Vous avez quitté le groupe");
   if (errorGroupProfil) {
-    Alert.alert("Erreur", errorGroupProfil.message);
-    return {
-      error: errorGroupProfil.message,
-    };
+    throw new Error(
+      errorGroupProfil?.message || "Erreur lors de la suppression",
+    );
   }
-  return {
-    error: null,
-  };
 };

@@ -1,101 +1,128 @@
 import { supabase } from "@/lib/supabase";
+import { decryptPhoto } from "./encryption-action";
+import { getEncryptionKey } from "./encryption-action";
+
+const getPostPath = ({
+  challenge_id,
+  group_id,
+  user_id,
+}: {
+  challenge_id: number;
+  group_id: number;
+  user_id: string;
+}) => {
+  return `group_${group_id}/challenge_${challenge_id}/user_${user_id}`;
+};
 
 export const uploadPostToDB = async ({
-  base64file,
+  group_id,
   challenge_id,
+  encrypted_post,
 }: {
-  base64file: string;
+  group_id: number;
   challenge_id: number;
+  encrypted_post: Buffer;
 }) => {
-  try {
-    console.log("uploadPostToDB", challenge_id);
-    const user = await supabase.auth.getUser();
-    const user_id = user.data.user?.id;
-    if (!user || !user_id) {
-      throw new Error("Not authorized");
-    }
+  const user = await supabase.auth.getUser();
+  const user_id = user.data.user?.id;
+  if (!user || !user_id) {
+    throw new Error("Not authorized");
+  }
 
-    const session = await supabase.auth.getSession();
-    const access_token = session?.data?.session?.access_token;
-    const refresh_token = session?.data?.session?.refresh_token;
+  const filePath = getPostPath({
+    challenge_id,
+    group_id,
+    user_id,
+  });
 
-    if (!access_token || !refresh_token) {
-      throw new Error("Not authorized");
-    }
+  const bucketName = process.env.EXPO_PUBLIC_ENCRYPTED_POSTS_BUCKET_NAME;
 
-    const response = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/api/post/upload`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${access_token}`,
-          refresh_token: refresh_token,
-        },
-        body: JSON.stringify({
-          base64_img: base64file,
-          profile_id: user_id,
-          challenge_id: challenge_id,
-        }),
-      },
-    );
-    const data = await response.json();
-    console.log("data", data);
-    if (data.error) {
-      return {
-        error: data.error,
-      };
-    }
-    return {
-      error: null,
-    };
-  } catch (error) {
-    return {
-      error: error.message,
-    };
+  const { error: errorUpload } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, encrypted_post, {
+      upsert: true,
+    });
+
+  if (errorUpload) {
+    throw new Error(errorUpload.message);
+  }
+
+  // add post to db
+  const { error: errorCreate } = await supabase.from("post").upsert(
+    {
+      challenge_id,
+      profile_id: user_id,
+      file_path: filePath,
+    },
+    {
+      onConflict: "challenge_id, profile_id",
+    },
+  );
+
+  if (errorCreate) {
+    throw new Error(errorCreate.message);
   }
 };
 
-export const getEncryptedPosts = async ({
+export const getPostsFromDB = async ({
   challenge_id,
+  group_id,
 }: {
   challenge_id: number;
+  group_id: number;
 }) => {
-  const { user } = (await supabase.auth.getUser()).data;
-  if (!user) {
-    return {
-      data: null,
-      error: "User not found",
-    };
-  }
-  const session = await supabase.auth.getSession();
-  const access_token = session?.data?.session?.access_token;
-  const refresh_token = session?.data?.session?.refresh_token;
+  const { data, error } = await supabase
+    .from("post")
+    .select(`*, creator:profile(*)`)
+    .eq("challenge_id", challenge_id);
 
-  if (!access_token || !refresh_token) {
-    return {
-      data: null,
-      error: "Token not found",
-    };
+  if (error) {
+    throw new Error(error.message);
   }
 
-  const response = await fetch(
-    `${process.env.EXPO_PUBLIC_API_URL}/api/post/get`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${access_token}`,
-        refresh_token: refresh_token,
-      },
-      body: JSON.stringify({
-        challenge_id,
-      }),
-    },
+  if (!data) {
+    return [];
+  }
+
+  // fetch posts from storage
+  const posts = await Promise.all(
+    data.map(async (post) => {
+      const filePath = post.file_path;
+      const bucketName = process.env.EXPO_PUBLIC_ENCRYPTED_POSTS_BUCKET_NAME;
+      const { data: file, error: errorDownload } = await supabase.storage
+        .from(bucketName)
+        .download(filePath);
+
+      if (errorDownload) {
+        throw new Error(errorDownload.message);
+      }
+
+      return {
+        ...post,
+        file,
+      };
+    }),
   );
-  const data = await response.json();
-  return {
-    data: data.posts,
-    error: null,
-  };
+
+  // decrypt posts
+
+  const encryptionKey = await getEncryptionKey({
+    challenge_id,
+    group_id,
+  });
+
+  const decryptedPosts = await Promise.all(
+    posts.map(async (post) => {
+      const decryptedPost = await decryptPhoto({
+        encryptedBlob: post.file,
+        encryptionKey,
+      });
+      return {
+        ...post,
+        base64img: `data:image/jpeg;base64,${decryptedPost}`,
+      };
+    }),
+  );
+
+  return decryptedPosts;
 };

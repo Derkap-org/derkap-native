@@ -1,4 +1,4 @@
-import { Text, View, TextInput, Alert } from "react-native";
+import { Text, View, TextInput, Alert, ScrollView } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
@@ -19,11 +19,12 @@ import {
   getCurrentChallenge,
   createChallenge,
 } from "@/functions/challenge-action";
-import { getEncryptedPosts } from "@/functions/post-action";
+import { getPostsFromDB } from "@/functions/post-action";
 import Button from "@/components/Button";
 import * as Clipboard from "expo-clipboard";
 import useGroupStore from "@/store/useGroupStore";
 import { updateLastStatusSeen } from "@/lib/lastStatusSeen";
+import Toast from "react-native-toast-message";
 
 export default function Group() {
   const [currentGroup, setCurrentGroup] = useState<TGroupDB>();
@@ -41,9 +42,16 @@ export default function Group() {
   };
 
   const fetchCurrentGroup = async () => {
-    const { data: group, error } = await getGroup({ group_id: id });
-    if (error) return console.error(error);
-    if (group) setCurrentGroup(group);
+    try {
+      const group = await getGroup({ group_id: id });
+      if (group) setCurrentGroup(group);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur dans la récupération du groupe",
+        text2: error.message || "Veuillez réessayer",
+      });
+    }
   };
 
   const modalCreateChallengeRef = useRef<SwipeModalPublicMethods>(null);
@@ -56,14 +64,21 @@ export default function Group() {
   const showGroupSettingsModal = () => modalGroupSettingsRef.current?.show();
 
   const fetchCurrentChallenge = async () => {
-    const { data: challenges, error } = await getCurrentChallenge({
-      group_id: id,
-    });
-    if (error) console.error("Erreur dans la récupération du défi");
-    if (challenges) {
-      console.log(challenges);
-      setCurrentChallenge(challenges[0]);
-      return challenges[0];
+    try {
+      const challenge = await getCurrentChallenge({
+        group_id: id,
+      });
+
+      if (challenge) {
+        setCurrentChallenge(challenge);
+        return challenge;
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur dans la récupération du défi",
+        text2: error.message || "Veuillez réessayer",
+      });
     }
   };
 
@@ -72,32 +87,43 @@ export default function Group() {
   }: {
     challengeId: number;
   }) => {
-    const { data: posts, error } = await getEncryptedPosts({
-      challenge_id: challengeId,
-    });
-    if (error) {
-      console.error("Erreur dans la récupération des posts");
-    }
-    if (posts) {
-      console.log("posts:", posts.length);
-      setCurrentPosts(posts);
+    try {
+      const posts = await getPostsFromDB({
+        challenge_id: challengeId,
+        group_id: Number(id),
+      });
+
+      if (posts) {
+        setCurrentPosts(posts);
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur dans la récupération des posts",
+        text2: error.message || "Veuillez réessayer",
+      });
     }
   };
 
   const handleUpdateGroupName = async () => {
-    if (!newGroupName.length || newGroupName === currentGroup?.name) {
-      return;
-    }
-    const { error } = await updateGroupName({
-      group_id: currentGroup?.id,
-      name: newGroupName,
-    });
-    if (error) {
-      console.error("Erreur lors de la mise à jour du nom du groupe");
-    } else {
+    try {
+      if (!newGroupName.length || newGroupName === currentGroup?.name) {
+        return;
+      }
+      await updateGroupName({
+        group_id: currentGroup?.id,
+        name: newGroupName,
+      });
+
       fetchCurrentGroup();
       setNewGroupName("");
       modalGroupSettingsRef.current?.hide();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la modification du nom du groupe",
+        text2: error.message || "Veuillez réessayer",
+      });
     }
   };
 
@@ -108,7 +134,11 @@ export default function Group() {
       if (!challenge) return;
       await fetchCurrentPosts({ challengeId: challenge.id });
     } catch (error) {
-      console.error("Erreur dans la récupération des données du groupe", error);
+      Toast.show({
+        type: "error",
+        text1: "Erreur dans la récupération des données du groupe",
+        text2: error.message || "Veuillez réessayer",
+      });
     }
   };
 
@@ -129,22 +159,22 @@ export default function Group() {
     try {
       if (!currentGroup?.id) return;
 
-      const { error } = await createChallenge({
+      await createChallenge({
         challenge: {
           description: newChallengeDescription,
           group_id: currentGroup.id,
         },
       });
 
-      if (error) {
-        console.error("Erreur lors de la création du défi", error);
-        throw new Error("");
-      }
       fetchAllGroupData();
       setNewChallengeDescription("");
       modalCreateChallengeRef.current?.hide();
     } catch (error) {
-      console.error("Erreur lors de la création du défi");
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la création du défi",
+        text2: error.message || "Veuillez réessayer",
+      });
     }
   };
 
@@ -162,31 +192,38 @@ export default function Group() {
   };
 
   const handleLeaveGroup = async () => {
-    if (!currentGroup?.id) {
-      return;
-    }
+    try {
+      if (!currentGroup?.id) {
+        return;
+      }
 
-    const { error } = await leaveGroup({
-      group_id: currentGroup.id?.toString(),
-    });
-    if (error) {
-      console.error("Erreur lors de la sortie du groupe", error);
-    } else {
+      await leaveGroup({
+        group_id: currentGroup.id?.toString(),
+      });
+
       fetchGroups();
       router.back();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la sortie du groupe",
+        text2: "Veuillez réessayer",
+      });
     }
   };
 
   return (
     <>
-      <View className="flex-1">
+      <View className="">
         <GroupHeader
           group={currentGroup}
           challenge={currentChallenge}
           showModal={showGroupSettingsModal}
         />
-        <View className="flex-1 p-4 gap-y-4">
-          <ChallengeBox challenge={currentChallenge} />
+
+        {/* <View className="p-4 gap-y-4"> */}
+        <ChallengeBox challenge={currentChallenge} />
+        <ScrollView className="flex flex-col px-4 pt-4">
           {currentChallenge?.status === "posting" && (
             <ChallengeInProgress
               challenge={currentChallenge}
@@ -195,6 +232,7 @@ export default function Group() {
               fetchAllGroupData={fetchAllGroupData}
             />
           )}
+
           {(currentChallenge?.status === "voting" ||
             currentChallenge?.status === "ended") && (
             <ChallengeFinalization
@@ -204,16 +242,17 @@ export default function Group() {
               // setIsCreateChallengeOpen={setIsCreateChallengeOpen}
             />
           )}
-        </View>
-        {(!currentChallenge || currentChallenge?.status === "ended") && (
-          <>
-            <Button
-              className="mx-4"
-              onClick={showCreateChallengeModal}
-              text="Créer un défi"
-            />
-          </>
-        )}
+          {/* </View> */}
+          {(!currentChallenge || currentChallenge?.status === "ended") && (
+            <>
+              <Button
+                className="m-4"
+                onClick={showCreateChallengeModal}
+                text="Créer un défi"
+              />
+            </>
+          )}
+        </ScrollView>
       </View>
       <SwipeModal
         ref={modalCreateChallengeRef}

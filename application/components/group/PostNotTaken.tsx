@@ -41,7 +41,7 @@ const PostNotTaken = ({
               groupLength={group.members.length}
             />
           ) : (
-            <View className="aspect-image w-full h-[510px] rounded-xl bg-gray-400"></View>
+            <View className="aspect-image w-full h-[34rem] rounded-xl bg-gray-400"></View>
           )}
           <View className="flex flex-col gap-4">
             <Text className="text-xl font-grotesque text-center">

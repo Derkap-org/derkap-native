@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { Alert } from "react-native";
+import { generateChallengeBaseKey } from "./encryption-action";
 
 export const getCurrentChallenge = async ({
   group_id,
@@ -7,25 +7,19 @@ export const getCurrentChallenge = async ({
   group_id: string;
 }) => {
   // get the latest created challenge, and the profile of the creator
-  const { data, error } = await supabase
+  const { data: challenge, error } = await supabase
     .from("challenge")
     .select(`*, creator:profile(*)`)
-    .eq("group_id", group_id)
+    .eq("group_id", Number(group_id))
     .order("created_at", { ascending: false })
     .limit(1);
   // .single(); // => if single set and no row is found, it will return an error, but no challenge can be possible so no error
 
   if (error) {
-    return {
-      data: null,
-      error: error.message,
-    };
+    throw new Error(error.message);
   }
 
-  return {
-    data,
-    error: null,
-  };
+  return challenge[0];
 };
 
 export const createChallenge = async ({
@@ -36,30 +30,47 @@ export const createChallenge = async ({
     group_id: number;
   };
 }) => {
+  const challenge_key = await generateChallengeBaseKey({
+    text: challenge.description,
+  });
+
   const { user } = (await supabase.auth.getUser()).data;
   const user_id = user?.id;
 
   if (!user || !user_id) {
-    throw new Error("Not authorized");
+    throw new Error("Utilisateur non autorisé");
   }
-  //todo: check if there is already a challenge for this group, if so, return an error
+
+  // check if there is already a challenge for this group, if so, return an error
+  const lastChallenge = await getCurrentChallengesStatus({
+    group_ids: [challenge.group_id],
+  });
+
+  if (lastChallenge.error) {
+    throw new Error(
+      lastChallenge?.error || "Erreur lors de la récupération du défi",
+    );
+  }
+
+  if (lastChallenge.data && lastChallenge.data.length > 0) {
+    if (lastChallenge.data[0].status !== "ended") {
+      throw new Error("Un challenge est déjà en cours pour ce groupe");
+    }
+  }
+
   const { error: errorCreate } = await supabase.from("challenge").insert({
     description: challenge.description,
     creator_id: user_id,
     group_id: challenge.group_id,
+    base_key: challenge_key,
     status: "posting",
   });
 
   if (errorCreate) {
-    return {
-      error: errorCreate.message,
-    };
+    throw new Error(
+      errorCreate?.message || "Erreur lors de la création du challenge",
+    );
   }
-
-  return {
-    error: null,
-    data: null,
-  };
 };
 
 export const getCurrentChallengesStatus = async ({
@@ -95,16 +106,8 @@ export const setChallengeToVoting = async ({
     .eq("id", challenge_id);
 
   if (error) {
-    console.error("Error setting challenge to voting", error);
-    return {
-      error: error.message,
-    };
+    throw new Error(error?.message || "Erreur lors du passage aux votes");
   }
-
-  return {
-    data: null,
-    error: null,
-  };
 };
 
 export const setChallengeToEnd = async ({
@@ -118,13 +121,6 @@ export const setChallengeToEnd = async ({
     .eq("id", challenge_id);
 
   if (error) {
-    return {
-      error: error.message,
-    };
+    throw new Error(error?.message || "Erreur lors de la fin du challenge");
   }
-
-  return {
-    data: null,
-    error: null,
-  };
 };
