@@ -47,7 +47,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/grotesque/grotesque.ttf"]
+          "fonts": [
+            "./assets/fonts/grotesque/grotesque.ttf"
+          ]
         }
       ],
       [
@@ -55,7 +57,8 @@
         {
           "photosPermission": "The app can access your photos to let you share them with your friends."
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

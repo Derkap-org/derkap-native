@@ -8,7 +8,9 @@ import Button from "@/components/Button";
 import Title from "@/components/Title";
 import { uploadPostToDB } from "@/functions/post-action";
 import { TChallengeDB } from "@/types/types";
-import * as FileSystem from "expo-file-system";
+import Toast from "react-native-toast-message";
+import { encryptPhoto, getEncryptionKey } from "@/functions/encryption-action";
+import { compressImage } from "@/functions/image-action";
 interface CameraProps extends ViewProps {
   challenge: TChallengeDB;
   setIsCapturing: (isCapturing: boolean) => void;
@@ -52,32 +54,39 @@ export default function Capture({
   const validatePhoto = async () => {
     try {
       setIsValidatingFile(true);
-      if (!capturedPhoto) return;
+      if (!capturedPhoto) throw new Error("Aucune photo à valider");
 
       if (!challenge) {
-        throw new Error("Challenge not found");
+        throw new Error("Aucun défi sélectionné");
       }
-      console.log("capturedPhoto", capturedPhoto);
 
-      const base64Img = await fetch(capturedPhoto).then((res) => res.blob());
-      const formData = new FormData();
-      formData.append("file", base64Img);
-      console.log("formData", formData);
+      const compressedPhoto = await compressImage(capturedPhoto);
+      setCapturedPhoto(compressedPhoto.uri);
 
-      const base64 = await FileSystem.readAsStringAsync(capturedPhoto, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      const { error } = await uploadPostToDB({
-        base64file: base64,
+      const encryptionKey = await getEncryptionKey({
         challenge_id: challenge?.id,
+        group_id: challenge?.group_id,
       });
 
-      console.log("error", error);
+      const encryptedPhoto = await encryptPhoto({
+        capturedPhoto: compressedPhoto.uri,
+        encryptionKey,
+      });
+
+      await uploadPostToDB({
+        group_id: challenge.group_id,
+        challenge_id: challenge.id,
+        encrypted_post: encryptedPhoto,
+      });
 
       setIsCapturing(false);
     } catch (error) {
-      console.error("Une erreur est survenue: " + error);
+      console.error("Failed to validate photo:", error);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de l'envoi du Derkap",
+        text2: error.message || "Une erreur est survenue",
+      });
     } finally {
       setIsValidatingFile(false);
       fetchAllGroupData();
@@ -133,6 +142,11 @@ export default function Capture({
       setCapturedPhoto(photo.uri); // Save the photo URI
     } catch (error) {
       console.error("Failed to take picture:", error);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la capture",
+        text2: error.message || "Une erreur est survenue",
+      });
     }
   };
 
@@ -145,9 +159,7 @@ export default function Capture({
   };
 
   return (
-    <View className="flex flex-col h-full w-full gap-y-4">
-      <Title text="Capture ton Derkap !" />
-
+    <View className="flex flex-col h-full w-full gap-y-2">
       <View style={{ height: cameraHeight }} className="rounded-2xl">
         {/* Top bar with reset button */}
         <View className="absolute top-2 left-0 right-0 z-10 p-4 flex-row items-start justify-between">
@@ -224,7 +236,7 @@ export default function Capture({
         )}
       </View>
       {capturedPhoto && (
-        <View className="flex flex-col items-center justify-center w-full mt-2">
+        <View className="flex flex-col items-center justify-center w-full">
           <Button
             isCancel={isValidatingFile}
             withLoader={true}

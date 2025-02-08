@@ -70,7 +70,7 @@ export default function CarouselMedia({
 
   if (!posts)
     return (
-      <View className="flex h-[90%] w-full">
+      <View className="flex h-[34rem] w-full">
         <View className="bg-black/50 flex items-center justify-center w-full h-full rounded-2xl ">
           <ActivityIndicator size="large" color="#fff" />
         </View>

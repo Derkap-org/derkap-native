@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useSupabase } from "@/context/auth-context";
-import { Link, Redirect, router } from "expo-router";
+import { Link, router } from "expo-router";
 import { View, Text, TextInput, Alert } from "react-native";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
+import Toast from "react-native-toast-message";
 
 export default function UpdatePassword() {
   const { session } = useSupabase();
@@ -19,7 +20,10 @@ export default function UpdatePassword() {
     setLoading(false);
     if (error) console.error(error);
     else {
-      Alert.alert("Votre mot de passe a été mis à jour.");
+      Toast.show({
+        type: "success",
+        text1: "Votre mot de passe a été mis à jour.",
+      });
       router.push("/");
     }
   }

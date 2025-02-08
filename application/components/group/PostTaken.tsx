@@ -1,16 +1,8 @@
 import { cn } from "@/lib/utils";
 import { TPostDB, TGroupDB, TChallengeDB } from "@/types/types";
-// import { useUser } from '@/contexts/user-context';
-// import Button from '../Button';
-// import DrawerComponent from '@/components/DrawerComponent';
-import { useState, useRef } from "react";
-// import { setChallengeToVoting } from '@/functions/challenge-action';
-// import { toast } from 'sonner';
-// import CarouselComponent from '../CarousselComponent';
-// import { CarouselItem } from '../ui/carousel';
-import Image, { View, Text, StyleSheet } from "react-native";
+import { useRef } from "react";
+import { View, Text } from "react-native";
 import Button from "../Button";
-// import { Separator } from '@radix-ui/react-separator';
 import CarouselMedia from "@/components/group/CarouselMedia";
 import { BlurView } from "expo-blur";
 import { useSupabase } from "@/context/auth-context";
@@ -19,6 +11,7 @@ import SwipeModal, {
   SwipeModalPublicMethods,
 } from "@birdwingo/react-native-swipe-modal";
 import React from "react";
+import Toast from "react-native-toast-message";
 
 interface PostTakenProps {
   posts: TPostDB[] | undefined;
@@ -37,7 +30,6 @@ const PostTaken = ({
   ...props
 }: PostTakenProps) => {
   const { profile } = useSupabase();
-  const [isGoVoteOpen, setIsGoVoteOpen] = useState<boolean>(false);
 
   const modalGoVoteRef = useRef<SwipeModalPublicMethods>(null);
 
@@ -45,10 +37,13 @@ const PostTaken = ({
 
   const handleGoVote = async () => {
     try {
-      if (!challenge) return console.error("Challenge inconnu");
+      if (!challenge) throw new Error("Pas de challenge");
       await setChallengeToVoting({ challenge_id: challenge.id });
     } catch (error) {
-      console.error("Erreur lors du passage aux votes");
+      Toast.show({
+        type: "Erreur lors du passage aux votes",
+        text1: error?.message || "Erreur lors du passage aux votes",
+      });
     } finally {
       modalGoVoteRef.current?.hide();
       await fetchAllGroupData();
