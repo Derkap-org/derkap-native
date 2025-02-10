@@ -54,6 +54,7 @@ export type TPostDB = {
     id: string;
     username: string;
   };
+  caption: string;
 };
 
 // VOTES

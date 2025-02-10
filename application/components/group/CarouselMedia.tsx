@@ -10,6 +10,7 @@ import Carousel from "react-native-reanimated-carousel";
 import { TPostDB, UserVote, TVoteDB } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { BlurView } from "expo-blur";
+import { useEffect } from "react";
 
 interface CarouselMediaProps extends ViewProps {
   posts: TPostDB[];
@@ -55,6 +56,16 @@ export default function CarouselMedia({
   //   return postsWithVotes.find((post) => post.voteCount === highestVotes);
   // };
 
+  useEffect(() => {
+    // order posts by votes
+    if (challengeStatus === "ended" && posts && posts.length > 0) {
+      posts.sort(
+        (a, b) =>
+          getVoteCount({ postId: b.id }) - getVoteCount({ postId: a.id }),
+      );
+    }
+  }, [challengeStatus, posts]);
+
   const isPostHasMoreVotes = (postId: number) => {
     const postsWithVotesCount = posts.map((post) => ({
       ...post,
@@ -79,7 +90,7 @@ export default function CarouselMedia({
 
   return (
     <View className="w-full relative rounded-2xl">
-      <View className={cn("flex flex-row", className)}>
+      <View className={cn("flex flex-col", className)}>
         <Carousel
           loop={false}
           style={{ width: "100%", borderRadius: "1rem" }}
@@ -108,11 +119,12 @@ export default function CarouselMedia({
               {finalizationData && (
                 <View className="flex flex-row w-full justify-between absolute bottom-0 rounded-b-2xl py-1 px-4 bg-black/30">
                   <Text className="font-grotesque text-white">
-                    @{post.creator?.username}
+                    {post.creator?.username}
+                    {post.caption && ` : ${post.caption}`}
                   </Text>
                   {challengeStatus === "ended" && (
                     <Text className="font-grotesque text-white">
-                      {getVoteCount({ postId: post.id })} vote(s)
+                      {getVoteCount({ postId: post.id })} 🏆
                     </Text>
                   )}
                 </View>

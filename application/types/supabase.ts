@@ -196,6 +196,7 @@ export interface Database {
       };
       post: {
         Row: {
+          caption: string | null;
           challenge_id: number | null;
           created_at: string;
           file_path: string | null;
@@ -203,6 +204,7 @@ export interface Database {
           profile_id: string | null;
         };
         Insert: {
+          caption?: string | null;
           challenge_id?: number | null;
           created_at?: string;
           file_path?: string | null;
@@ -210,6 +212,7 @@ export interface Database {
           profile_id?: string | null;
         };
         Update: {
+          caption?: string | null;
           challenge_id?: number | null;
           created_at?: string;
           file_path?: string | null;

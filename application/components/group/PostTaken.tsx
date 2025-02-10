@@ -105,12 +105,12 @@ const PostTaken = ({
           </View>
         </View>
 
-        <View className="flex flex-col w-full gap-4">
+        <View className="flex flex-col w-full gap-1">
           <Text className="text-xl font-grotesque">Toujours en retard...</Text>
-          <View className="flex flex-col w-full gap-2">
+          <View className="flex flex-row flex-wrap w-full gap-2">
             {getWhoNotPost().map((member, index) => (
               <Text key={index} className="">
-                @{member.profile?.username}
+                {index !== 0 && ", "}@{member.profile?.username}
               </Text>
             ))}
           </View>

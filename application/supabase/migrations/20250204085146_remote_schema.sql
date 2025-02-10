@@ -1,5 +1,27 @@
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'storage' AND table_name = 's3_multipart_uploads') THEN
+        CREATE TABLE storage.s3_multipart_uploads (
+            id UUID PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT now()
+        );
+    END IF;
+END $$;
+
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'storage' AND table_name = 's3_multipart_uploads_parts') THEN
+        CREATE TABLE storage.s3_multipart_uploads_parts (
+            id UUID PRIMARY KEY,
+            upload_id UUID REFERENCES storage.s3_multipart_uploads(id) ON DELETE CASCADE,
+            part_number INTEGER NOT NULL,
+            etag TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT now()
+        );
+    END IF;
+END $$;
 
 grant delete on table "storage"."s3_multipart_uploads" to "postgres";
 

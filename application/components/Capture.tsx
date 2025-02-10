@@ -1,11 +1,17 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { useState, useRef } from "react";
-import { Text, Pressable, View, ViewProps, Dimensions } from "react-native";
+import {
+  Text,
+  Pressable,
+  View,
+  ViewProps,
+  Dimensions,
+  TextInput,
+} from "react-native";
 import { XIcon, RefreshCcw, Timer, ChevronLeft } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
-import Title from "@/components/Title";
 import { uploadPostToDB } from "@/functions/post-action";
 import { TChallengeDB } from "@/types/types";
 import Toast from "react-native-toast-message";
@@ -29,6 +35,7 @@ export default function Capture({
   const [captureDelay, setCaptureDelay] = useState<0 | 3 | 5 | 10>(0);
   const [countdown, setCountdown] = useState<number | null>(null); // State to manage countdown
   const [isValidatingFile, setIsValidatingFile] = useState<boolean>(false);
+  const [caption, setCaption] = useState<string>("");
   const cameraRef = useRef<CameraView>(null);
 
   const screenWidth = Dimensions.get("window").width;
@@ -77,6 +84,7 @@ export default function Capture({
         group_id: challenge.group_id,
         challenge_id: challenge.id,
         encrypted_post: encryptedPhoto,
+        caption,
       });
 
       setIsCapturing(false);
@@ -236,13 +244,19 @@ export default function Capture({
         )}
       </View>
       {capturedPhoto && (
-        <View className="flex flex-col items-center justify-center w-full">
+        <View className="flex flex-col gap-y-2 items-center justify-center w-full">
+          <TextInput
+            value={caption}
+            onChangeText={setCaption}
+            className="w-full p-4 bg-white rounded-xl"
+            placeholder="Une légende pour ton oeuvre d'art ?"
+          />
           <Button
             isCancel={isValidatingFile}
             withLoader={true}
             onClick={validatePhoto}
             text="Poster mon derkap de fou"
-            className="mt-4 mb-32 mx-auto w-full font-grotesque text-xl"
+            className="mb-32 mx-auto w-full font-grotesque text-xl"
           />
         </View>
       )}
