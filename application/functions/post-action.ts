@@ -18,10 +18,12 @@ export const uploadPostToDB = async ({
   group_id,
   challenge_id,
   encrypted_post,
+  caption,
 }: {
   group_id: number;
   challenge_id: number;
   encrypted_post: Buffer;
+  caption: string;
 }) => {
   const user = await supabase.auth.getUser();
   const user_id = user.data.user?.id;
@@ -53,6 +55,7 @@ export const uploadPostToDB = async ({
       challenge_id,
       profile_id: user_id,
       file_path: filePath,
+      caption,
     },
     {
       onConflict: "challenge_id, profile_id",

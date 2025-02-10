@@ -3,7 +3,13 @@ import Button from "@/components/Button";
 // import CarouselComponent from '@/components/CarousselComponent';
 // import { CarouselApi, CarouselItem } from '@/components/ui/carousel';
 import CarouselMedia from "@/components/group/CarouselMedia";
-import { TPostDB, TVoteDB, TChallengeDB, UserVote } from "@/types/types";
+import {
+  TPostDB,
+  TVoteDB,
+  TChallengeDB,
+  UserVote,
+  TGroupDB,
+} from "@/types/types";
 import { useState, useEffect, useRef } from "react";
 import { Image, View, Text, ViewProps, Pressable } from "react-native";
 import { useSupabase } from "@/context/auth-context";
@@ -20,13 +26,13 @@ interface ChallengeFinalizationProps extends ViewProps {
   posts: TPostDB[];
   fetchAllGroupData: () => Promise<void>;
   challenge: TChallengeDB;
-  // setIsCreateChallengeOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  group: TGroupDB;
 }
 
 const ChallengeFinalization = ({
   posts,
+  group,
   challenge,
-  // setIsCreateChallengeOpen,
   fetchAllGroupData,
   className,
   ...props
@@ -102,6 +108,15 @@ const ChallengeFinalization = ({
         text2: error?.message || "Une erreur est survenue",
       });
     }
+  };
+
+  const getWhoNotVote = () => {
+    if (!challenge || !posts) return [];
+    const groupMembers = group.members;
+    const votesProfiles = votes.map((vote) => vote.user_id);
+    return groupMembers?.filter(
+      (member) => !votesProfiles.includes(member.profile?.id ?? ""),
+    );
   };
 
   useEffect(() => {
@@ -218,6 +233,18 @@ const ChallengeFinalization = ({
                 onClick={showModalEndVote}
               />
             )}
+            <View className="flex flex-col w-full gap-1">
+              <Text className="text-xl font-grotesque">
+                On attend leurs votes...
+              </Text>
+              <View className="flex flex-row flex-wrap w-full gap-2">
+                {getWhoNotVote().map((member, index) => (
+                  <Text key={index} className="">
+                    {index !== 0 && ", "}@{member.profile?.username}
+                  </Text>
+                ))}
+              </View>
+            </View>
           </View>
         )}
       </View>

@@ -214,7 +214,7 @@ export default function Group() {
 
   return (
     <>
-      <View className="">
+      <View className="mb-32">
         <GroupHeader
           group={currentGroup}
           challenge={currentChallenge}
@@ -236,6 +236,7 @@ export default function Group() {
           {(currentChallenge?.status === "voting" ||
             currentChallenge?.status === "ended") && (
             <ChallengeFinalization
+              group={currentGroup}
               posts={currentPosts}
               challenge={currentChallenge}
               fetchAllGroupData={fetchAllGroupData}
