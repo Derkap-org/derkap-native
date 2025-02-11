@@ -52,46 +52,6 @@ export interface Database {
           },
         ];
       };
-      encrypted_post: {
-        Row: {
-          challenge_id: number | null;
-          created_at: string;
-          encrypted_data: string | null;
-          id: number;
-          iv: string | null;
-          profile_id: string | null;
-        };
-        Insert: {
-          challenge_id?: number | null;
-          created_at?: string;
-          encrypted_data?: string | null;
-          id?: number;
-          iv?: string | null;
-          profile_id?: string | null;
-        };
-        Update: {
-          challenge_id?: number | null;
-          created_at?: string;
-          encrypted_data?: string | null;
-          id?: number;
-          iv?: string | null;
-          profile_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "encrypted_photo_challenge_id_fkey";
-            columns: ["challenge_id"];
-            referencedRelation: "challenge";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "encrypted_photo_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       group: {
         Row: {
           created_at: string;
@@ -165,7 +125,6 @@ export interface Database {
           created_at: string;
           expo_push_token: string | null;
           id: number;
-          subscription: Json | null;
           updated_at: string | null;
           user_id: string;
         };
@@ -173,7 +132,6 @@ export interface Database {
           created_at?: string;
           expo_push_token?: string | null;
           id?: number;
-          subscription?: Json | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -181,7 +139,6 @@ export interface Database {
           created_at?: string;
           expo_push_token?: string | null;
           id?: number;
-          subscription?: Json | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -297,7 +254,7 @@ export interface Database {
           {
             foreignKeyName: "vote_post_id_fkey";
             columns: ["post_id"];
-            referencedRelation: "encrypted_post";
+            referencedRelation: "post";
             referencedColumns: ["id"];
           },
           {
@@ -320,6 +277,31 @@ export interface Database {
       generate_unique_invite_code: {
         Args: Record<PropertyKey, never>;
         Returns: string;
+      };
+      get_group_by_invite_code: {
+        Args: {
+          p_invite_code: string;
+        };
+        Returns: {
+          created_at: string;
+          creator_id: string | null;
+          id: number;
+          img_url: string | null;
+          invite_code: string | null;
+          name: string;
+        }[];
+      };
+      get_group_ranking: {
+        Args: {
+          group_id_param: number;
+        };
+        Returns: {
+          rank: number;
+          profile_id: string;
+          username: string;
+          avatar_url: string;
+          winned_challenges: number;
+        }[];
       };
       get_group_user_count: {
         Args: {

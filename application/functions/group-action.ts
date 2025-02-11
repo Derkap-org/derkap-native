@@ -239,10 +239,22 @@ export const leaveGroup = async ({ group_id }: { group_id: string }) => {
     .eq("profile_id", user.id)
     .eq("group_id", parsedGroupId)
     .select("group(*, members:group_profile(profile(*)))");
-  Alert.alert("Groupe quitté", "Vous avez quitté le groupe");
+
   if (errorGroupProfil) {
     throw new Error(
       errorGroupProfil?.message || "Erreur lors de la suppression",
     );
   }
 };
+
+export async function getGroupRanking({ group_id }: { group_id: number }) {
+  const { data, error } = await supabase.rpc("get_group_ranking", {
+    group_id_param: group_id,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}

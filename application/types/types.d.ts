@@ -64,3 +64,6 @@ export type UserVote = {
   voted: boolean;
   postId?: number;
 } | null;
+
+export type GroupRanking =
+  Database["public"]["Functions"]["get_group_ranking"]["Returns"];
