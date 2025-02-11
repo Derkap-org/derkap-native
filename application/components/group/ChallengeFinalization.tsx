@@ -233,7 +233,7 @@ const ChallengeFinalization = ({
                 onClick={showModalEndVote}
               />
             )}
-            <View className="flex flex-col w-full gap-1">
+            <View className="flex flex-col w-full gap-1 mb-28">
               <Text className="text-xl font-grotesque">
                 On attend leurs votes...
               </Text>
