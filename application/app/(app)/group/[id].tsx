@@ -1,9 +1,23 @@
-import { Text, View, TextInput, Alert, Pressable } from "react-native";
+import {
+  Text,
+  View,
+  TextInput,
+  Alert,
+  Pressable,
+  Image,
+  ScrollView,
+} from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
 import ChallengeBox from "@/components/ChallengeBox";
-import { GroupRanking, TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
+import {
+  GroupRanking,
+  TChallengeDB,
+  TGroupDB,
+  TPostDB,
+  TProfileInGroup,
+} from "@/types/types";
 import {
   getGroup,
   getGroupRanking,
@@ -24,6 +38,11 @@ import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
 import PostsTab from "@/components/group/PostsTab";
 import GroupRankingTab from "@/components/group/GroupRankingTab";
+import { Plus } from "lucide-react-native";
+import JoinGroupModal from "../_components/modals/JoinGroupModal";
+import { getProfileByUsername } from "@/functions/profile-action";
+import ProfileLine from "@/components/profile/ProfileLine";
+import { useDebounce } from "use-debounce";
 
 export default function Group() {
   const [selectedTab, setSelectedTab] = useState<"posts" | "ranking">("posts");
@@ -34,6 +53,9 @@ export default function Group() {
   const router = useRouter();
   const [newGroupName, setNewGroupName] = useState("");
   const [groupRanking, setGroupRanking] = useState<GroupRanking>();
+  const [searchedUsers, setSearchedUsers] = useState<TProfileInGroup[]>([]);
+  const [queryUser, setQueryUser] = useState("");
+  const [debouncedQuery] = useDebounce(queryUser, 400);
 
   const { fetchGroups } = useGroupStore();
 
@@ -56,7 +78,13 @@ export default function Group() {
 
   const modalGroupSettingsRef = useRef<SwipeModalPublicMethods>(null);
 
+  const modalAddMemberRef = useRef<SwipeModalPublicMethods>(null);
+
   const showGroupSettingsModal = () => modalGroupSettingsRef.current?.show();
+
+  const showAddMemberModal = () => {
+    modalAddMemberRef.current?.show();
+  };
 
   const fetchCurrentChallenge = async () => {
     try {
@@ -154,9 +182,28 @@ export default function Group() {
     }
   };
 
+  const fetchUserByUsername = async (query: string) => {
+    const { data } = await getProfileByUsername(query);
+
+    const enrichedUsers = data.map((user) => ({
+      ...user,
+      alreadyInGroup:
+        currentGroup?.members?.some(
+          (member) => member.profile.username === user.username,
+        ) || false,
+    }));
+    setSearchedUsers(enrichedUsers);
+  };
+
   useEffect(() => {
     fetchAllGroupData();
   }, [id]);
+
+  useEffect(() => {
+    if (debouncedQuery) {
+      fetchUserByUsername(debouncedQuery);
+    }
+  }, [debouncedQuery]);
 
   useEffect(() => {
     if (currentGroup?.id && currentChallenge?.status) {
@@ -216,7 +263,7 @@ export default function Group() {
 
         {/* <View className="p-4 gap-y-4"> */}
         <ChallengeBox challenge={currentChallenge} />
-        <View className="flex flex-row justify-between px-4  mt-4 mb-2">
+        <View className="flex flex-row justify-between px-4 mt-4 mb-2">
           <Pressable
             className={cn(
               "w-1/2 flex justify-center items-center rounded-xl py-2",
@@ -262,6 +309,7 @@ export default function Group() {
           <GroupRankingTab groupRanking={groupRanking} />
         )}
       </View>
+
       <SwipeModal
         ref={modalGroupSettingsRef}
         showBar
@@ -270,32 +318,33 @@ export default function Group() {
         style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
         wrapInGestureHandlerRootView
       >
-        <View className="flex-col items-center justify-between flex-1 px-10 py-5 gap-y-4">
-          <Text className="text-2xl font-bold font-grotesque">
-            Gérer le groupe
-          </Text>
+        <ScrollView className="">
+          <View className="flex-col items-center justify-between flex-1 px-10 py-5 gap-y-4">
+            <Text className="text-2xl font-bold font-grotesque">
+              Gérer le groupe
+            </Text>
 
-          <View className="flex flex-col items-center justify-center w-full gap-2">
-            <Text className="text-xl ">Nom du groupe</Text>
-            <TextInput
-              className="w-full p-2 border border-gray-300 rounded-xl"
-              onChangeText={setNewGroupName}
-              value={newGroupName}
-              placeholder={currentGroup?.name}
-              placeholderTextColor="#888"
-            />
-            <Button
-              withLoader={true}
-              className="flex items-center justify-center w-full gap-2"
-              onClick={handleUpdateGroupName}
-              isCancel={
-                !newGroupName.length || newGroupName === currentGroup?.name
-              }
-              text={"Modifier le nom du groupe"}
-            />
-          </View>
+            <View className="flex flex-col items-center justify-center w-full gap-2">
+              <Text className="text-xl ">Nom du groupe</Text>
+              <TextInput
+                className="w-full p-2 border border-gray-300 rounded-xl"
+                onChangeText={setNewGroupName}
+                value={newGroupName}
+                placeholder={currentGroup?.name}
+                placeholderTextColor="#888"
+              />
+              <Button
+                withLoader={true}
+                className="flex items-center justify-center w-full gap-2"
+                onClick={handleUpdateGroupName}
+                isCancel={
+                  !newGroupName.length || newGroupName === currentGroup?.name
+                }
+                text={"Modifier le nom du groupe"}
+              />
+            </View>
 
-          <View className="flex flex-col items-center justify-center gap-2">
+            {/* <View className="flex flex-col items-center justify-center gap-2">
             <Text className="text-2xl font-bold font-grotesque">
               Code d'accès
             </Text>
@@ -309,19 +358,73 @@ export default function Group() {
               }}
               text={"Copier le code"}
             />
-          </View>
+          </View> */}
 
-          <View className="flex flex-col items-center justify-center w-full gap-2">
-            <Text className="font-bold ">
-              {currentGroup?.members?.length}/10 membres
-            </Text>
-            <Button
-              withLoader={true}
-              className="w-full bg-red-500"
-              onClick={handleConfirmLeaveGroup}
-              text={"Quitter le groupe"}
-            />
+            <View className="flex flex-col items-center justify-center w-full gap-2 mt-10">
+              <Text className="text-xl font-bold ">Membres du groupe</Text>
+              <View className="flex flex-col w-full gap-y-4">
+                <View className="flex-row items-center justify-between w-full pb-4 mt-4 border-b-[1px] border-custom-primary">
+                  {/* <Button onClick={showModalCreateGroup} text="Créer un groupe" />
+          <Button onClick={showModalJoinGroup} text="Rejoindre un groupe" /> */}
+                  <Pressable
+                    className="flex flex-row items-center gap-x-2"
+                    onPress={showAddMemberModal}
+                  >
+                    <View className="p-2 rounded-full bg-custom-primary w-fit">
+                      <Plus color={"white"} size={22} />
+                    </View>
+                    <Text>Ajouter un membre</Text>
+                  </Pressable>
+                </View>
+                <Text className="font-bold ">
+                  {currentGroup?.members?.length}/10 membres
+                </Text>
+                {currentGroup?.members?.map((member) => (
+                  <>
+                    <ProfileLine member={member.profile} />
+                  </>
+                ))}
+              </View>
+              <View className="flex flex-col items-center justify-center w-full gap-2 mt-5">
+                <Button
+                  withLoader={true}
+                  className="w-full bg-red-500"
+                  onClick={handleConfirmLeaveGroup}
+                  text={"Quitter le groupe"}
+                />
+              </View>
+            </View>
           </View>
+        </ScrollView>
+      </SwipeModal>
+      <SwipeModal
+        ref={modalAddMemberRef}
+        topOffset={100}
+        bg="white"
+        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+        wrapInGestureHandlerRootView
+      >
+        <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
+          <Text className="text-2xl font-bold">Ajoute tes amis</Text>
+          <TextInput
+            className="w-full p-2 border border-gray-300 rounded-xl"
+            onChangeText={setQueryUser}
+            // value={queryUser}
+            placeholder="Cherche un username"
+            placeholderTextColor="#888"
+          />
+          {searchedUsers.map((user) => (
+            <View className="flex flex-row items-center justify-between w-full gap-2">
+              <ProfileLine member={user} className="w-fit" />
+              <Button
+                disabled={user.alreadyInGroup}
+                withLoader={true}
+                className=""
+                onClick={() => {}}
+                text={"Ajouter"}
+              />
+            </View>
+          ))}
         </View>
       </SwipeModal>
     </>

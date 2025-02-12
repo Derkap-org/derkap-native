@@ -26,6 +26,10 @@ export type TGroupDB = Database["public"]["Tables"]["group"]["Row"] & {
   hasNewStatus?: boolean;
 };
 
+export type TProfileInGroup = TProfileDB & {
+  alreadyInGroup: boolean;
+};
+
 export type TGroupsStatus = {
   group_id: number;
   status: "posting" | "voting" | "ended";
