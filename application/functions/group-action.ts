@@ -28,6 +28,53 @@ export const getGroups = async ({ user_id }: { user_id?: string }) => {
   };
 };
 
+export const addMemberToGroup = async ({
+  group_id,
+  user_id,
+}: {
+  group_id: number;
+  user_id: string;
+}) => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    return {
+      error: "User not found",
+    };
+  }
+  if (!group_id || !user_id) {
+    return {
+      error: "Id is required",
+    };
+  }
+  // INSERT IN MANY TO MANY TABLE
+
+  const { data: existingGroupProfile, error: checkError } = await supabase
+    .from("group_profile")
+    .select("*")
+    .eq("profile_id", user_id)
+    .eq("group_id", group_id);
+
+  if (checkError) {
+    console.error("Erreur de vérification :", checkError);
+    return;
+  }
+  if (existingGroupProfile.length > 0) {
+    return {
+      error: "Le membre est déjà dans le groupe",
+    };
+  }
+
+  const { error: errorGroupProfil } = await supabase
+    .from("group_profile")
+    .insert({ profile_id: user_id, group_id: group_id });
+
+  if (errorGroupProfil) {
+    return {
+      error: errorGroupProfil.message,
+    };
+  }
+};
+
 export const joinGroup = async ({ invite_code }: { invite_code: string }) => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {

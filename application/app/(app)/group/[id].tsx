@@ -19,6 +19,7 @@ import {
   TProfileInGroup,
 } from "@/types/types";
 import {
+  addMemberToGroup,
   getGroup,
   getGroupRanking,
   leaveGroup,
@@ -117,6 +118,69 @@ export default function Group() {
         type: "error",
         text1: "Erreur dans la récupération du classement",
         text2: error.message || "Veuillez réessayer",
+      });
+    }
+  };
+
+  const handleAddMember = async (user_id: string) => {
+    if (!currentGroup?.id) {
+      console.error("No group id");
+      return;
+    }
+
+    if (currentGroup?.members?.length >= 10) {
+      Toast.show({
+        type: "error",
+        text1: "Le groupe est complet",
+      });
+      return;
+    }
+
+    if (
+      currentGroup?.members?.some((member) => member.profile.id === user_id)
+    ) {
+      Toast.show({
+        type: "error",
+        text1: "Le membre est déjà dans le groupe",
+      });
+      return;
+    }
+
+    try {
+      const result = await addMemberToGroup({
+        group_id: currentGroup.id,
+        user_id,
+      });
+
+      if (result?.error) {
+        Toast.show({
+          type: "error",
+          text1: result.error || "Erreur lors de l'ajout du membre",
+        });
+      } else {
+        const newGroup = {
+          ...currentGroup,
+          members: [
+            ...currentGroup.members,
+            {
+              profile: searchedUsers.find((user) => user.id === user_id),
+            },
+          ],
+        };
+        setCurrentGroup(newGroup);
+        const newSearchUsers = searchedUsers.map((user) => {
+          if (user.id === user_id) {
+            return { ...user, alreadyInGroup: true };
+          }
+          return user;
+        });
+        setSearchedUsers(newSearchUsers);
+      }
+    } catch (err) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de l'ajout du membre",
+        text2: "Veuillez réessayer",
       });
     }
   };
@@ -363,19 +427,21 @@ export default function Group() {
             <View className="flex flex-col items-center justify-center w-full gap-2 mt-10">
               <Text className="text-xl font-bold ">Membres du groupe</Text>
               <View className="flex flex-col w-full gap-y-4">
-                <View className="flex-row items-center justify-between w-full pb-4 mt-4 border-b-[1px] border-custom-primary">
-                  {/* <Button onClick={showModalCreateGroup} text="Créer un groupe" />
+                {currentGroup?.members.length <= 10 && (
+                  <View className="flex-row items-center justify-between w-full pb-4 mt-4 border-b-[1px] border-custom-primary">
+                    {/* <Button onClick={showModalCreateGroup} text="Créer un groupe" />
           <Button onClick={showModalJoinGroup} text="Rejoindre un groupe" /> */}
-                  <Pressable
-                    className="flex flex-row items-center gap-x-2"
-                    onPress={showAddMemberModal}
-                  >
-                    <View className="p-2 rounded-full bg-custom-primary w-fit">
-                      <Plus color={"white"} size={22} />
-                    </View>
-                    <Text>Ajouter un membre</Text>
-                  </Pressable>
-                </View>
+                    <Pressable
+                      className="flex flex-row items-center gap-x-2"
+                      onPress={showAddMemberModal}
+                    >
+                      <View className="p-2 rounded-full bg-custom-primary w-fit">
+                        <Plus color={"white"} size={22} />
+                      </View>
+                      <Text>Ajouter un membre</Text>
+                    </Pressable>
+                  </View>
+                )}
                 <Text className="font-bold ">
                   {currentGroup?.members?.length}/10 membres
                 </Text>
@@ -414,14 +480,17 @@ export default function Group() {
             placeholderTextColor="#888"
           />
           {searchedUsers.map((user) => (
-            <View className="flex flex-row items-center justify-between w-full gap-2">
+            <View
+              className="flex flex-row items-center justify-between w-full gap-2"
+              key={user.id}
+            >
               <ProfileLine member={user} className="w-fit" />
               <Button
-                disabled={user.alreadyInGroup}
+                className="text-xs "
+                isCancel={!!user?.alreadyInGroup}
                 withLoader={true}
-                className=""
-                onClick={() => {}}
-                text={"Ajouter"}
+                onClick={() => handleAddMember(user.id)}
+                text={user?.alreadyInGroup ? "Ajouté" : "Ajouter"}
               />
             </View>
           ))}
