@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { Alert } from "react-native";
 
 export const getProfile = async () => {
   const { user } = (await supabase.auth.getUser()).data;
@@ -58,3 +59,15 @@ export async function updateAvatarProfile(file_url: string) {
 
   return avatar_url;
 }
+
+export const getProfileByUsername = async (username: string) => {
+  const { data, error } = await supabase
+    .from("profile")
+    .select("*")
+    .ilike("username", `%${username}%`);
+  if (error) {
+    console.error("Error fetching profile", error);
+    throw error;
+  }
+  return { data };
+};
