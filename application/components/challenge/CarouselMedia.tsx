@@ -57,6 +57,7 @@ export default function CarouselMedia({
   // };
 
   useEffect(() => {
+    //marche pas
     // order posts by votes
     if (challengeStatus === "ended" && posts && posts.length > 0) {
       posts.sort(

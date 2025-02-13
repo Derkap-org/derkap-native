@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, Image } from "react-native";
 import React from "react";
 import { GroupRanking } from "@/types/types";
 import { useSupabase } from "@/context/auth-context";
