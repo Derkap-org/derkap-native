@@ -1,8 +1,6 @@
 import { cn } from "@/lib/utils";
 import Button from "@/components/Button";
-// import CarouselComponent from '@/components/CarousselComponent';
-// import { CarouselApi, CarouselItem } from '@/components/ui/carousel';
-import CarouselMedia from "@/components/group/CarouselMedia";
+import CarouselMedia from "@/components/challenge/CarouselMedia";
 import {
   TPostDB,
   TVoteDB,
@@ -11,11 +9,11 @@ import {
   TGroupDB,
 } from "@/types/types";
 import { useState, useEffect, useRef } from "react";
-import { Image, View, Text, ViewProps, Pressable } from "react-native";
+import { View, Text, ViewProps } from "react-native";
 import { useSupabase } from "@/context/auth-context";
 import { getVotes, addVote } from "@/functions/vote-action";
 import Toast from "react-native-toast-message";
-// import { useUser } from '@/contexts/user-context';
+
 import SwipeModal, {
   SwipeModalPublicMethods,
 } from "@birdwingo/react-native-swipe-modal";
@@ -24,7 +22,7 @@ import React from "react";
 
 interface ChallengeFinalizationProps extends ViewProps {
   posts: TPostDB[];
-  fetchAllGroupData: () => Promise<void>;
+  refreshChallengeData: () => Promise<void>;
   challenge: TChallengeDB;
   group: TGroupDB;
 }
@@ -33,7 +31,7 @@ const ChallengeFinalization = ({
   posts,
   group,
   challenge,
-  fetchAllGroupData,
+  refreshChallengeData,
   className,
   ...props
 }: ChallengeFinalizationProps) => {
@@ -67,7 +65,7 @@ const ChallengeFinalization = ({
         text2: error?.message || "Une erreur est survenue",
       });
     } finally {
-      await fetchAllGroupData();
+      await refreshChallengeData();
       await fetchVotes();
     }
   };
@@ -84,7 +82,7 @@ const ChallengeFinalization = ({
       });
     } finally {
       modalEndVoteRef.current?.hide();
-      await fetchAllGroupData();
+      await refreshChallengeData();
       await fetchVotes();
     }
   };
@@ -159,36 +157,6 @@ const ChallengeFinalization = ({
         {...props}
         className={cn("w-full flex flex-col items-center gap-2", className)}
       >
-        {challenge?.status === "ended" && (
-          <Text className="font-grotesque text-xl">
-            Défi terminé ! Check les résultats:
-          </Text>
-        )}
-        {/* <CarouselComponent setApi={setApi}>
-      {posts.map((post, index) => (
-        <CarouselItem onClick={() => setSelectedPost(post)} key={index}>
-          <Image
-            className={cn(
-              'rounded-xl w-full object-cover max-h-[510px] aspect-image',
-              challenge?.status === 'voting' &&
-                post.id === userVote?.postId &&
-                'border-4 border-green-500',
-              challenge?.status === 'ended' &&
-                isPostHasMoreVotes(post.id) &&
-                'border-4 border-yellow-500',
-            )}
-            src={post.img_url}
-            alt="post"
-            width={300}
-            height={300}
-          />
-          <View className="flex w-full justify-between">
-            <Text className="font-grotesque">@{post.creator?.username}</Text>
-            <Text className="font-grotesque">{getVoteCount(post.id)} vote(s)</Text>
-          </View>
-        </CarouselItem>
-      ))}
-    </CarouselComponent> */}
         <CarouselMedia
           posts={posts}
           challengeStatus={challenge?.status}
@@ -233,7 +201,7 @@ const ChallengeFinalization = ({
                 onClick={showModalEndVote}
               />
             )}
-            <View className="flex flex-col w-full gap-1 mb-28">
+            <View className="flex flex-col w-full gap-1 mb-40">
               <Text className="text-xl font-grotesque">
                 On attend leurs votes...
               </Text>

@@ -20,13 +20,13 @@ import { compressImage } from "@/functions/image-action";
 interface CameraProps extends ViewProps {
   challenge: TChallengeDB;
   setIsCapturing: (isCapturing: boolean) => void;
-  fetchAllGroupData: () => Promise<void>;
+  refreshChallengeData: () => Promise<void>;
 }
 
 export default function Capture({
   setIsCapturing,
   challenge,
-  fetchAllGroupData,
+  refreshChallengeData,
   ...props
 }: CameraProps) {
   const [facing, setFacing] = useState<CameraType>("front");
@@ -97,7 +97,7 @@ export default function Capture({
       });
     } finally {
       setIsValidatingFile(false);
-      fetchAllGroupData();
+      refreshChallengeData();
     }
   };
 

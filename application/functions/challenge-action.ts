@@ -1,25 +1,29 @@
 import { supabase } from "@/lib/supabase";
 import { generateChallengeBaseKey } from "./encryption-action";
 
-export const getCurrentChallenge = async ({
+export const getChallenges = async ({
   group_id,
+  page = 1,
 }: {
-  group_id: string;
+  group_id: number;
+  page?: number;
 }) => {
-  // get the latest created challenge, and the profile of the creator
-  const { data: challenge, error } = await supabase
+  const CHALLENGES_PER_PAGE = 20;
+
+  const offset = (page - 1) * CHALLENGES_PER_PAGE;
+
+  const { data: challenges, error } = await supabase
     .from("challenge")
     .select(`*, creator:profile(*)`)
     .eq("group_id", Number(group_id))
     .order("created_at", { ascending: false })
-    .limit(1);
-  // .single(); // => if single set and no row is found, it will return an error, but no challenge can be possible so no error
+    .range(offset, offset + CHALLENGES_PER_PAGE - 1);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return challenge[0];
+  return challenges;
 };
 
 export const createChallenge = async ({

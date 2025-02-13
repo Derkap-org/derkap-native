@@ -4,18 +4,16 @@ import {
   TextInput,
   Alert,
   Pressable,
-  Image,
   ScrollView,
 } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
-import ChallengeBox from "@/components/ChallengeBox";
+
 import {
   GroupRanking,
   TChallengeDB,
   TGroupDB,
-  TPostDB,
   TProfileInGroup,
 } from "@/types/types";
 import {
@@ -29,27 +27,25 @@ import SwipeModal, {
   SwipeModalPublicMethods,
 } from "@birdwingo/react-native-swipe-modal";
 import { useRouter } from "expo-router";
-import { getCurrentChallenge } from "@/functions/challenge-action";
-import { getPostsFromDB } from "@/functions/post-action";
+
 import Button from "@/components/Button";
-import * as Clipboard from "expo-clipboard";
 import useGroupStore from "@/store/useGroupStore";
 import { updateLastStatusSeen } from "@/lib/lastStatusSeen";
 import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
-import PostsTab from "@/components/group/PostsTab";
 import GroupRankingTab from "@/components/group/GroupRankingTab";
 import { Plus } from "lucide-react-native";
-import JoinGroupModal from "../_components/modals/JoinGroupModal";
 import { getProfileByUsername } from "@/functions/profile-action";
 import ProfileLine from "@/components/profile/ProfileLine";
 import { useDebounce } from "use-debounce";
+import { ChallengesTab } from "@/components/group/ChallengesTab";
 
 export default function Group() {
-  const [selectedTab, setSelectedTab] = useState<"posts" | "ranking">("posts");
+  const [selectedTab, setSelectedTab] = useState<"challenges" | "ranking">(
+    "challenges",
+  );
   const [currentGroup, setCurrentGroup] = useState<TGroupDB>();
   const [currentChallenge, setCurrentChallenge] = useState<TChallengeDB>();
-  const [currentPosts, setCurrentPosts] = useState<TPostDB[]>();
   const { id } = useLocalSearchParams() as { id: string };
   const router = useRouter();
   const [newGroupName, setNewGroupName] = useState("");
@@ -59,10 +55,6 @@ export default function Group() {
   const [debouncedQuery] = useDebounce(queryUser, 400);
 
   const { fetchGroups } = useGroupStore();
-
-  const copyInviteCode = async () => {
-    await Clipboard.setStringAsync(currentGroup?.invite_code);
-  };
 
   const fetchCurrentGroup = async () => {
     try {
@@ -85,25 +77,6 @@ export default function Group() {
 
   const showAddMemberModal = () => {
     modalAddMemberRef.current?.show();
-  };
-
-  const fetchCurrentChallenge = async () => {
-    try {
-      const challenge = await getCurrentChallenge({
-        group_id: id,
-      });
-
-      if (challenge) {
-        setCurrentChallenge(challenge);
-        return challenge;
-      }
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur dans la récupération du défi",
-        text2: error.message || "Veuillez réessayer",
-      });
-    }
   };
 
   const fetchGroupRanking = async () => {
@@ -185,29 +158,6 @@ export default function Group() {
     }
   };
 
-  const fetchCurrentPosts = async ({
-    challengeId,
-  }: {
-    challengeId: number;
-  }) => {
-    try {
-      const posts = await getPostsFromDB({
-        challenge_id: challengeId,
-        group_id: Number(id),
-      });
-
-      if (posts) {
-        setCurrentPosts(posts);
-      }
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur dans la récupération des posts",
-        text2: error.message || "Veuillez réessayer",
-      });
-    }
-  };
-
   const handleUpdateGroupName = async () => {
     try {
       if (!newGroupName.length || newGroupName === currentGroup?.name) {
@@ -234,9 +184,9 @@ export default function Group() {
     try {
       await fetchCurrentGroup();
       await fetchGroupRanking();
-      const challenge = await fetchCurrentChallenge();
-      if (!challenge) return;
-      await fetchCurrentPosts({ challengeId: challenge.id });
+      // const challenge = await fetchCurrentChallenge();
+      // if (!challenge) return;
+      // await fetchCurrentPosts({ challengeId: challenge.id });
     } catch (error) {
       Toast.show({
         type: "error",
@@ -321,32 +271,32 @@ export default function Group() {
       <View className="mb-28">
         <GroupHeader
           group={currentGroup}
-          challenge={currentChallenge}
+          // challenge={currentChallenge}
           showModal={showGroupSettingsModal}
         />
 
         {/* <View className="p-4 gap-y-4"> */}
-        <ChallengeBox challenge={currentChallenge} />
-        <View className="flex flex-row justify-between px-4 mt-4 mb-2">
+
+        <View className="flex flex-row justify-between px-4 my-2">
           <Pressable
             className={cn(
-              "w-1/2 flex justify-center items-center rounded-xl py-2",
-              selectedTab === "posts" && "bg-custom-primary/50",
+              "w-1/2 flex justify-center items-center rounded-xl py-4",
+              selectedTab === "challenges" && "bg-custom-primary/50",
             )}
-            onPress={() => setSelectedTab("posts")}
+            onPress={() => setSelectedTab("challenges")}
           >
             <Text
               className={cn(
                 "text-gray-500",
-                selectedTab === "posts" && "text-black font-bold",
+                selectedTab === "challenges" && "text-black font-bold",
               )}
             >
-              Posts
+              Défis
             </Text>
           </Pressable>
           <Pressable
             className={cn(
-              "w-1/2 flex justify-center items-center rounded-xl py-2",
+              "w-1/2 flex justify-center items-center rounded-xl py-4",
               selectedTab === "ranking" && "bg-custom-primary/50",
             )}
             onPress={() => setSelectedTab("ranking")}
@@ -361,14 +311,7 @@ export default function Group() {
             </Text>
           </Pressable>
         </View>
-        {selectedTab === "posts" && (
-          <PostsTab
-            currentGroup={currentGroup}
-            currentPosts={currentPosts}
-            currentChallenge={currentChallenge}
-            fetchAllGroupData={fetchAllGroupData}
-          />
-        )}
+        {selectedTab === "challenges" && <ChallengesTab group={currentGroup} />}
         {selectedTab === "ranking" && (
           <GroupRankingTab groupRanking={groupRanking} />
         )}
@@ -445,10 +388,10 @@ export default function Group() {
                 <Text className="font-bold ">
                   {currentGroup?.members?.length}/10 membres
                 </Text>
-                {currentGroup?.members?.map((member) => (
-                  <>
+                {currentGroup?.members?.map((member, i) => (
+                  <Fragment key={i}>
                     <ProfileLine member={member.profile} />
-                  </>
+                  </Fragment>
                 ))}
               </View>
               <View className="flex flex-col items-center justify-center w-full gap-2 mt-5">

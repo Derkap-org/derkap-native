@@ -3,7 +3,7 @@ import { TPostDB, TGroupDB, TChallengeDB } from "@/types/types";
 import { useRef } from "react";
 import { View, Text } from "react-native";
 import Button from "../Button";
-import CarouselMedia from "@/components/group/CarouselMedia";
+import CarouselMedia from "@/components/challenge/CarouselMedia";
 import { BlurView } from "expo-blur";
 import { useSupabase } from "@/context/auth-context";
 import { setChallengeToVoting } from "@/functions/challenge-action";
@@ -17,7 +17,7 @@ interface PostTakenProps {
   posts: TPostDB[] | undefined;
   group: TGroupDB | undefined;
   challenge: TChallengeDB;
-  fetchAllGroupData: () => Promise<void>;
+  refreshChallengeData: () => Promise<void>;
   className?: string;
 }
 
@@ -26,7 +26,7 @@ const PostTaken = ({
   posts,
   challenge,
   group,
-  fetchAllGroupData,
+  refreshChallengeData,
   ...props
 }: PostTakenProps) => {
   const { profile } = useSupabase();
@@ -46,7 +46,7 @@ const PostTaken = ({
       });
     } finally {
       modalGoVoteRef.current?.hide();
-      await fetchAllGroupData();
+      await refreshChallengeData();
     }
   };
 
@@ -119,7 +119,7 @@ const PostTaken = ({
         {challenge?.creator_id === profile.id && (
           <Button
             text="Passer aux votes"
-            className="w-full font-grotesque"
+            className="w-full font-grotesque mb-40"
             onClick={() => {
               showModalGoVote();
             }}
