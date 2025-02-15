@@ -49,7 +49,7 @@ export default function Group() {
   const { id } = useLocalSearchParams() as { id: string };
   const router = useRouter();
   const [newGroupName, setNewGroupName] = useState("");
-  const [groupRanking, setGroupRanking] = useState<GroupRanking>();
+
   const [searchedUsers, setSearchedUsers] = useState<TProfileInGroup[]>([]);
   const [queryUser, setQueryUser] = useState("");
   const [debouncedQuery] = useDebounce(queryUser, 400);
@@ -77,22 +77,6 @@ export default function Group() {
 
   const showAddMemberModal = () => {
     modalAddMemberRef.current?.show();
-  };
-
-  const fetchGroupRanking = async () => {
-    try {
-      const groupRanking = await getGroupRanking({ group_id: Number(id) });
-
-      if (groupRanking) {
-        setGroupRanking(groupRanking);
-      }
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur dans la récupération du classement",
-        text2: error.message || "Veuillez réessayer",
-      });
-    }
   };
 
   const handleAddMember = async (user_id: string) => {
@@ -180,22 +164,6 @@ export default function Group() {
     }
   };
 
-  const fetchAllGroupData = async () => {
-    try {
-      await fetchCurrentGroup();
-      await fetchGroupRanking();
-      // const challenge = await fetchCurrentChallenge();
-      // if (!challenge) return;
-      // await fetchCurrentPosts({ challengeId: challenge.id });
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur dans la récupération des données du groupe",
-        text2: error.message || "Veuillez réessayer",
-      });
-    }
-  };
-
   const fetchUserByUsername = async (query: string) => {
     const { data } = await getProfileByUsername(query);
 
@@ -210,7 +178,7 @@ export default function Group() {
   };
 
   useEffect(() => {
-    fetchAllGroupData();
+    fetchCurrentGroup();
   }, [id]);
 
   useEffect(() => {
@@ -312,9 +280,7 @@ export default function Group() {
           </Pressable>
         </View>
         {selectedTab === "challenges" && <ChallengesTab group={currentGroup} />}
-        {selectedTab === "ranking" && (
-          <GroupRankingTab groupRanking={groupRanking} />
-        )}
+        {selectedTab === "ranking" && <GroupRankingTab groupId={Number(id)} />}
       </View>
 
       <SwipeModal

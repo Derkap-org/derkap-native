@@ -1,21 +1,50 @@
 import { View, Text, Image } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GroupRanking } from "@/types/types";
 import { useSupabase } from "@/context/auth-context";
-
-interface GroupRankingTabProps {
-  groupRanking: GroupRanking;
-}
-
-const GroupRankingTab = ({ groupRanking }: GroupRankingTabProps) => {
+import { Toast } from "react-native-toast-message/lib/src/Toast";
+import { getGroupRanking } from "@/functions/group-action";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+const GroupRankingTab = ({ groupId }: { groupId: number }) => {
   const { user } = useSupabase();
+
+  const [groupRanking, setGroupRanking] = useState<GroupRanking>();
+
+  const fetchGroupRanking = async () => {
+    try {
+      const key = `group_ranking_${groupId}`;
+      const cachedGroupRanking = await AsyncStorage.getItem(key);
+
+      if (cachedGroupRanking) {
+        setGroupRanking(JSON.parse(cachedGroupRanking));
+      }
+
+      const groupRanking = await getGroupRanking({ group_id: groupId });
+
+      if (groupRanking) {
+        setGroupRanking(groupRanking);
+        AsyncStorage.setItem(key, JSON.stringify(groupRanking));
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur dans la récupération du classement",
+        text2: error.message || "Veuillez réessayer",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchGroupRanking();
+  }, [groupId]);
+
   return (
     <View className="p-4">
       <Text className="text-lg font-bold mb-4 text-center">
         Classement du Groupe
       </Text>
 
-      {groupRanking?.length === 0 ? (
+      {!groupRanking || groupRanking?.length === 0 ? (
         <Text className="text-center text-gray-500">
           Aucun classement disponible
         </Text>

@@ -89,7 +89,6 @@ export default function Capture({
 
       setIsCapturing(false);
     } catch (error) {
-      console.error("Failed to validate photo:", error);
       Toast.show({
         type: "error",
         text1: "Erreur lors de l'envoi du Derkap",

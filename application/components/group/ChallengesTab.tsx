@@ -60,7 +60,6 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
       });
 
       if (challenges) {
-        console.log("challenges", challenges);
         setChallenges(challenges);
       }
     } catch (error) {
