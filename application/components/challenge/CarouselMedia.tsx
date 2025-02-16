@@ -47,7 +47,10 @@ export default function CarouselMedia({
 
   useEffect(() => {
     if (!posts) return;
-
+    if (challengeStatus !== "ended") {
+      setSortedPosts(posts);
+      return;
+    }
     const sorted = [...posts].sort((a, b) => {
       const votesA = getVoteCount({ postId: a.id });
       const votesB = getVoteCount({ postId: b.id });

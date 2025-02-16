@@ -1,11 +1,11 @@
-import { TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
+import { TChallengeDB, TGroupDB, TPostDB, TVoteDB } from "@/types/types";
 import { X } from "lucide-react-native";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView, Pressable, RefreshControl } from "react-native";
 import ChallengeBox from "@/components/ChallengeBox";
 import ChallengeSteps from "@/components/challenge/ChallengeSteps";
 import { getPosts } from "@/functions/post-action";
 import Toast from "react-native-toast-message";
-
+import { getVotes } from "@/functions/vote-action";
 import { useEffect, useState } from "react";
 
 interface ChallengeScreenProps {
@@ -22,7 +22,8 @@ export const ChallengeScreen = ({
   refreshChallenge,
 }: ChallengeScreenProps) => {
   const [posts, setPosts] = useState<TPostDB[]>();
-
+  const [votes, setVotes] = useState<TVoteDB[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const fetchPosts = async () => {
     try {
       if (!group?.id) return;
@@ -46,17 +47,57 @@ export const ChallengeScreen = ({
     }
   };
 
+  const fetchVotes = async () => {
+    try {
+      if (!challenge) return;
+      const votes = await getVotes({
+        challenge_id: challenge.id,
+      });
+      setVotes(votes || []);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la récupération des votes",
+        text2: error?.message || "Une erreur est survenue",
+      });
+    }
+  };
+
   const refreshChallengeData = async () => {
     await fetchPosts();
     await refreshChallenge();
+    await fetchVotes();
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await refreshChallengeData();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du rafraîchissement des données du défi",
+      });
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   useEffect(() => {
     fetchPosts();
   }, [challenge, group]);
 
+  useEffect(() => {
+    fetchVotes();
+  }, [challenge]);
+
   return (
-    <ScrollView className="flex flex-col min-h-full">
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+      }
+      className="flex flex-col min-h-full"
+    >
       <View className="relative my-2 px-4">
         <Pressable
           className="absolute -top-2 right-3 z-10 p-1 rounded-full bg-red-500"
@@ -70,6 +111,7 @@ export const ChallengeScreen = ({
         challenge={challenge}
         group={group}
         posts={posts}
+        votes={votes}
         refreshChallengeData={refreshChallengeData}
       />
     </ScrollView>

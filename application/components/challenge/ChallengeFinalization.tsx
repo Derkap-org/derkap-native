@@ -11,7 +11,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { View, Text, ViewProps } from "react-native";
 import { useSupabase } from "@/context/auth-context";
-import { getVotes, addVote } from "@/functions/vote-action";
+import { addVote } from "@/functions/vote-action";
 import Toast from "react-native-toast-message";
 
 import SwipeModal, {
@@ -25,6 +25,7 @@ interface ChallengeFinalizationProps extends ViewProps {
   refreshChallengeData: () => Promise<void>;
   challenge: TChallengeDB;
   group: TGroupDB;
+  votes: TVoteDB[];
 }
 
 const ChallengeFinalization = ({
@@ -33,11 +34,11 @@ const ChallengeFinalization = ({
   challenge,
   refreshChallengeData,
   className,
+  votes,
   ...props
 }: ChallengeFinalizationProps) => {
   const { profile } = useSupabase();
   const [selectedPost, setSelectedPost] = useState<TPostDB | null>(null);
-  const [votes, setVotes] = useState<TVoteDB[]>([]);
   const [userVote, setUserVote] = useState<UserVote>(); // null
 
   // const [api, setApi] = useState<CarouselApi>();
@@ -65,7 +66,6 @@ const ChallengeFinalization = ({
       });
     } finally {
       await refreshChallengeData();
-      await fetchVotes();
     }
   };
 
@@ -82,28 +82,6 @@ const ChallengeFinalization = ({
     } finally {
       modalEndVoteRef.current?.hide();
       await refreshChallengeData();
-      await fetchVotes();
-    }
-  };
-
-  const fetchVotes = async () => {
-    try {
-      if (!challenge) return;
-      const votes = await getVotes({
-        challenge_id: challenge.id,
-      });
-      setVotes(votes || []);
-      const userVote = votes?.find((vote) => vote.user_id === profile.id);
-      setUserVote({
-        voted: !!userVote,
-        postId: userVote?.post_id,
-      });
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur lors de la récupération des votes",
-        text2: error?.message || "Une erreur est survenue",
-      });
     }
   };
 
@@ -117,33 +95,17 @@ const ChallengeFinalization = ({
   };
 
   useEffect(() => {
-    fetchVotes();
-  }, []);
+    if (!votes) return;
+    const userVote = votes?.find((vote) => vote.user_id === profile.id);
+    setUserVote({
+      voted: !!userVote,
+      postId: userVote?.post_id,
+    });
+  }, [votes]);
 
   // useEffect(() => {
-  //   if (challenge?.status === 'ended') {
-  //     const highestVotedPost = getPostWithMostVotes();
-  //     if (highestVotedPost && api) {
-  //       const postIndex = posts.findIndex(
-  //         post => post.id === highestVotedPost.id,
-  //       );
-  //       if (postIndex !== -1) {
-  //         setCurrentPost(postIndex + 1);
-  //         api.scrollTo(postIndex);
-  //       }
-  //     }
-  //   }
-  // }, [challenge, posts, api, votes]);
-
-  // useEffect(() => {
-  //   if (!api) {
-  //     return;
-  //   }
-  //   setCurrentPost(api.selectedScrollSnap() + 1);
-  //   api.on('select', () => {
-  //     setCurrentPost(api.selectedScrollSnap() + 1);
-  //   });
-  // }, [api]);
+  //   fetchVotes();
+  // }, []);
 
   useEffect(() => {
     if (!posts) return;
