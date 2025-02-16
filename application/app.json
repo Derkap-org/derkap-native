@@ -7,6 +7,9 @@
     "icon": "./assets/icon.png",
     "scheme": "derkap",
     "userInterfaceStyle": "automatic",
+    "locales": {
+      "fr": "./locales/fr.json"
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,7 +19,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.nicoalz.derkap",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": ["fr"],
+        "CFBundleDevelopmentRegion": "fr"
       }
     },
     "android": {
