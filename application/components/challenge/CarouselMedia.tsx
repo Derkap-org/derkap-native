@@ -10,7 +10,7 @@ import Carousel from "react-native-reanimated-carousel";
 import { TPostDB, UserVote, TVoteDB } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { BlurView } from "expo-blur";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface CarouselMediaProps extends ViewProps {
   posts: TPostDB[];
@@ -31,6 +31,7 @@ export default function CarouselMedia({
   className,
   ...props
 }: CarouselMediaProps) {
+  const [sortedPosts, setSortedPosts] = useState<TPostDB[]>();
   const width = Dimensions.get("window").width;
   const { setCurrentPostIndex, userVote, votes } = finalizationData || {};
   const handleSnapToItem = (index: number) => {
@@ -44,43 +45,26 @@ export default function CarouselMedia({
     return votes.filter((vote) => vote.post_id === postId).length;
   };
 
-  // used to scroll to the post with the most votes
-  // const getPostWithMostVotes = () => {
-  //   const postsWithVotes = posts.map((post) => ({
-  //     ...post,
-  //     voteCount: getVoteCount({ postId: post.id }),
-  //   }));
-  //   const highestVotes = Math.max(
-  //     ...postsWithVotes.map((post) => post.voteCount),
-  //   );
-  //   return postsWithVotes.find((post) => post.voteCount === highestVotes);
-  // };
-
   useEffect(() => {
-    //marche pas
-    // order posts by votes
-    if (challengeStatus === "ended" && posts && posts.length > 0) {
-      posts.sort(
-        (a, b) =>
-          getVoteCount({ postId: b.id }) - getVoteCount({ postId: a.id }),
-      );
-    }
-  }, [challengeStatus, posts]);
+    if (!posts) return;
+
+    const sorted = [...posts].sort((a, b) => {
+      const votesA = getVoteCount({ postId: a.id });
+      const votesB = getVoteCount({ postId: b.id });
+      return votesB - votesA;
+    });
+    setSortedPosts(sorted);
+  }, [challengeStatus, posts, votes]);
 
   const isPostHasMoreVotes = (postId: number) => {
-    const postsWithVotesCount = posts.map((post) => ({
-      ...post,
-      votes: getVoteCount({ postId: post.id }),
-    }));
-    const highestPostVotes = Math.max(
-      ...postsWithVotesCount.map((post) => post.votes),
+    if (!sortedPosts) return false;
+    const highestVotes = Math.max(
+      ...sortedPosts.map((post) => getVoteCount({ postId: post.id })),
     );
-    return postsWithVotesCount.find(
-      (post) => post.id === postId && post.votes === highestPostVotes,
-    );
+    return getVoteCount({ postId: postId }) === highestVotes;
   };
 
-  if (!posts)
+  if (!sortedPosts)
     return (
       <View className="flex h-[34rem] w-full">
         <View className="bg-black/50 flex items-center justify-center w-full h-full rounded-2xl ">
@@ -99,7 +83,7 @@ export default function CarouselMedia({
           width={width - 28}
           height={width * (5 / 4)}
           autoPlay={false}
-          data={posts}
+          data={sortedPosts}
           scrollAnimationDuration={400}
           onSnapToItem={(index) => handleSnapToItem(index)}
           renderItem={({ item: post, index }) => (
@@ -123,11 +107,10 @@ export default function CarouselMedia({
                     {post.creator?.username}
                     {post.caption && ` : ${post.caption}`}
                   </Text>
-                  {challengeStatus === "ended" && (
-                    <Text className="font-grotesque text-white">
-                      {getVoteCount({ postId: post.id })} 🏆
-                    </Text>
-                  )}
+
+                  <Text className="font-grotesque text-white">
+                    {getVoteCount({ postId: post.id })} 🏆
+                  </Text>
                 </View>
               )}
             </View>
@@ -145,7 +128,7 @@ export default function CarouselMedia({
               En attente de tous les participants !
             </Text>
             <Text className="text-4xl w-fit">
-              {posts?.length} / {groupLength || 0}
+              {sortedPosts?.length} / {groupLength || 0}
             </Text>
           </BlurView>
         </View>
