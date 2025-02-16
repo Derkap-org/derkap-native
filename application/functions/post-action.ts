@@ -109,7 +109,6 @@ const getPostsFromDB = async ({
     .from("post")
     .select(`*, creator:profile(*)`)
     .eq("challenge_id", challenge_id);
-  console.log("data", data);
   if (error) {
     throw new Error(error.message);
   }

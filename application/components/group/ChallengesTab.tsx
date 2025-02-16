@@ -122,7 +122,9 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
         }
         className="flex flex-col px-4 min-h-full"
       >
-        {(!challenges || challenges[0]?.status === "ended") && (
+        {(!challenges ||
+          challenges.length === 0 ||
+          challenges[0]?.status === "ended") && (
           <View className="flex flex-col gap-y-1">
             <TextInput
               className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
