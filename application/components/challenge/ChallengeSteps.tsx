@@ -1,6 +1,6 @@
 import { ScrollView } from "react-native";
-
-import { TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
+import React from "react";
+import { TChallengeDB, TGroupDB, TPostDB, TVoteDB } from "@/types/types";
 import ChallengeInProgress from "@/components/challenge/ChallengeInProgress";
 import ChallengeFinalization from "@/components/challenge/ChallengeFinalization";
 
@@ -9,6 +9,7 @@ interface ChallengeStepsProps {
   group: TGroupDB | undefined;
   challenge: TChallengeDB | undefined;
   posts: TPostDB[] | undefined;
+  votes: TVoteDB[] | undefined;
 }
 
 export default function ChallengeSteps({
@@ -16,6 +17,7 @@ export default function ChallengeSteps({
   group,
   challenge,
   posts,
+  votes,
 }: ChallengeStepsProps) {
   return (
     <>
@@ -35,7 +37,7 @@ export default function ChallengeSteps({
             posts={posts}
             challenge={challenge}
             refreshChallengeData={refreshChallengeData}
-            // setIsCreateChallengeOpen={setIsCreateChallengeOpen}
+            votes={votes}
           />
         )}
       </ScrollView>

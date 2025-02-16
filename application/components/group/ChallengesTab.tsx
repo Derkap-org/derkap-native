@@ -10,6 +10,7 @@ import {
   Pressable,
   TextInput,
   Keyboard,
+  RefreshControl,
 } from "react-native";
 import { ChallengeScreen } from "../challenge/ChallengeScreen";
 import Button from "../Button";
@@ -21,6 +22,7 @@ interface ChallengesTabProps {
 }
 
 export const ChallengesTab = ({ group }: ChallengesTabProps) => {
+  const [refreshing, setRefreshing] = useState(false);
   const [challenges, setChallenges] = useState<TChallengeDB[] | undefined>(
     undefined,
   );
@@ -71,6 +73,20 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await fetchChallenges();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du rafraîchissement des défis",
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     fetchChallenges();
   }, [group]);
@@ -100,7 +116,12 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView className="flex flex-col px-4 min-h-full">
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+        className="flex flex-col px-4 min-h-full"
+      >
         {(!challenges || challenges[0]?.status === "ended") && (
           <View className="flex flex-col gap-y-1">
             <TextInput

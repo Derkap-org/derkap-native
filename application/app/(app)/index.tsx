@@ -5,8 +5,9 @@ import {
   ScrollView,
   TextInput,
   Pressable,
+  RefreshControl,
 } from "react-native";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Link } from "expo-router";
 import { Plus, User } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 import Toast from "react-native-toast-message";
 
 const Home = () => {
+  const [refreshing, setRefreshing] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [isJoinSelected, setIsJoinSelected] = useState(false);
 
@@ -48,6 +50,20 @@ const Home = () => {
         type: "error",
         text1: "Erreur lors de la création du groupe",
       });
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await fetchGroups();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du rafraîchissement des groupes",
+      });
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -83,7 +99,15 @@ const Home = () => {
             </View>
           </View>
         ) : (
-          <ScrollView className="w-full">
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+              />
+            }
+            className="w-full"
+          >
             {groups.map((group) => (
               <Link
                 key={group.id}
