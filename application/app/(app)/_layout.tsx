@@ -135,11 +135,13 @@ export default function RootLayout() {
 
   const { session, isLoading } = useSupabase();
 
-  // useEffect(() => {
-  //   if (loaded || error) {
-  //     SplashScreen.hideAsync();
-  //   }
-  // }, [loaded, error]);
+  const emptyBadgeCount = async () => {
+    await Notifications.setBadgeCountAsync(0);
+  };
+
+  useEffect(() => {
+    emptyBadgeCount();
+  }, []);
 
   if (isLoading) {
     return (

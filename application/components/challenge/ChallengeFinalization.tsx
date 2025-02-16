@@ -58,7 +58,6 @@ const ChallengeFinalization = ({
         challenge_id: selectedPost.challenge_id,
       });
     } catch (error) {
-      console.error("Erreur lors du vote: ", error?.message);
       Toast.show({
         type: "error",
         text1: "Erreur lors du vote",

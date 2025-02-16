@@ -23,6 +23,7 @@ export const sendNotification = async ({
       title,
       subtitle,
       body: message,
+      badge: 1,
     }),
   });
   //.then((res) => res.json());
