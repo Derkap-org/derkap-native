@@ -3,6 +3,7 @@ import {
   View,
   TextInput,
   Alert,
+  Image,
   Pressable,
   ScrollView,
 } from "react-native";
@@ -21,6 +22,7 @@ import {
   getGroup,
   getGroupRanking,
   leaveGroup,
+  updateDbGroupImg,
   updateGroupName,
 } from "@/functions/group-action";
 import SwipeModal, {
@@ -34,11 +36,12 @@ import { updateLastStatusSeen } from "@/lib/lastStatusSeen";
 import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
 import GroupRankingTab from "@/components/group/GroupRankingTab";
-import { Plus } from "lucide-react-native";
+import { Pencil, Plus } from "lucide-react-native";
 import { getProfileByUsername } from "@/functions/profile-action";
 import ProfileLine from "@/components/profile/ProfileLine";
 import { useDebounce } from "use-debounce";
 import { ChallengesTab } from "@/components/group/ChallengesTab";
+import * as ImagePicker from "expo-image-picker";
 
 export default function Group() {
   const [selectedTab, setSelectedTab] = useState<"challenges" | "ranking">(
@@ -49,12 +52,13 @@ export default function Group() {
   const { id } = useLocalSearchParams() as { id: string };
   const router = useRouter();
   const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupImage, setNewGroupImage] = useState<string | null>(null);
 
   const [searchedUsers, setSearchedUsers] = useState<TProfileInGroup[]>([]);
   const [queryUser, setQueryUser] = useState("");
   const [debouncedQuery] = useDebounce(queryUser, 400);
 
-  const { fetchGroups } = useGroupStore();
+  const { fetchGroups, updateGroupImg } = useGroupStore();
 
   const fetchCurrentGroup = async () => {
     try {
@@ -234,6 +238,32 @@ export default function Group() {
     }
   };
 
+  const pickImage = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.3,
+      });
+
+      if (result.canceled) return;
+
+      const imgUrl = result.assets[0].uri;
+
+      setNewGroupImage(imgUrl);
+
+      await updateDbGroupImg(currentGroup.id, imgUrl);
+      updateGroupImg(currentGroup.id, imgUrl);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la mise à jour de l'image",
+        text2: error?.message || "Une erreur inconnue est survenue",
+      });
+    }
+  };
+
   return (
     <>
       <View className="mb-28">
@@ -293,6 +323,34 @@ export default function Group() {
       >
         <ScrollView className="">
           <View className="flex-col items-center justify-between flex-1 px-10 py-5 gap-y-4">
+            <View className="relative flex items-center justify-center w-24 h-24 border-2 rounded-full bg-custom-white border-custom-primary">
+              <Pressable
+                onPress={pickImage}
+                className="absolute z-10 p-2 rounded-full -right-2 -top-2 bg-custom-primary"
+              >
+                <Pencil size={20} color={"white"} />
+              </Pressable>
+              {currentGroup?.img_url || newGroupImage ? (
+                <Image
+                  src={
+                    newGroupImage ||
+                    `${currentGroup?.img_url}?t=${new Date().getTime()}`
+                  }
+                  alt={currentGroup?.name ?? ""}
+                  width={70}
+                  height={70}
+                  className="object-cover w-24 h-24 border-2 rounded-full border-custom-primary bg-custom-white"
+                />
+              ) : (
+                <Text className="text-2xl uppercase">
+                  {currentGroup?.name
+                    .split(" ")
+                    .map((word) => word.charAt(0))
+                    .join("")}
+                </Text>
+              )}
+            </View>
+
             <Text className="text-2xl font-bold font-grotesque">
               Gérer le groupe
             </Text>
