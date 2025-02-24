@@ -120,16 +120,36 @@ const Home = () => {
                 <View className="flex-row items-center justify-between">
                   <View className="w-full">
                     <View className="flex-row items-center justify-between w-full">
-                      <View className="">
-                        <Text className="text-lg font-semibold">
-                          {group.name}
-                        </Text>
-
-                        {/* Statut du groupe */}
-                        <View className="w-24 text-white">
-                          <StatusLabel
-                            challengeStatus={group.challengeStatus}
+                      <View className="flex flex-row items-center gap-x-4">
+                        {group?.img_url ? (
+                          <Image
+                            src={`${group?.img_url}?t=${new Date().getTime()}`}
+                            alt={group?.name ?? ""}
+                            width={70}
+                            height={70}
+                            className="object-cover w-16 h-16 border-2 rounded-full border-custom-primary bg-custom-white"
                           />
+                        ) : (
+                          <View className="flex items-center justify-center w-16 h-16 border-2 rounded-full border-custom-primary">
+                            <Text className="uppercase">
+                              {group?.name
+                                .split(" ")
+                                .map((word) => word.charAt(0))
+                                .join("")}
+                            </Text>
+                          </View>
+                        )}
+                        <View className="">
+                          <Text className="text-lg font-semibold">
+                            {group.name}
+                          </Text>
+
+                          {/* Statut du groupe */}
+                          <View className="w-24 text-white">
+                            <StatusLabel
+                              challengeStatus={group.challengeStatus}
+                            />
+                          </View>
                         </View>
                       </View>
 

@@ -305,3 +305,47 @@ export async function getGroupRanking({ group_id }: { group_id: number }) {
 
   return data;
 }
+
+export async function updateDbGroupImg(group_id: number, file_url: string) {
+  const { user } = (await supabase.auth.getUser()).data;
+
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+
+  const response = await fetch(file_url);
+  const blob = await response.blob();
+  const arrayBuffer = await new Response(blob).arrayBuffer();
+
+  // UPLOAD NEW GROUP IMG
+  const { data, error } = await supabase.storage
+    .from("groups")
+    .upload(`${group_id}`, arrayBuffer, {
+      upsert: true,
+      contentType: "image/png",
+    });
+
+  if (error) {
+    throw error;
+  }
+  if (!data) {
+    throw new Error("No data");
+  }
+
+  const { data: group_img_url } = await supabase.storage
+    .from("groups")
+    .getPublicUrl(`${group_id}?${new Date().getTime()}`);
+
+  const { error: updateError } = await supabase
+    .from("group")
+    .update({
+      img_url: group_img_url.publicUrl,
+    })
+    .eq("id", group_id);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  return group_img_url;
+}
