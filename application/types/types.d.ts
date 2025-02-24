@@ -71,3 +71,8 @@ export type UserVote = {
 
 export type GroupRanking =
   Database["public"]["Functions"]["get_group_ranking"]["Returns"];
+
+// COMMENTS
+export type TCommentDB = Database["public"]["Tables"]["comment"]["Row"] & {
+  creator: TProfileDB | null;
+};

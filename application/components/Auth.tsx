@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import {
-  Alert,
   Text,
   View,
   AppState,
@@ -14,11 +13,10 @@ import { Link, router } from "expo-router";
 import { TextInput } from "react-native";
 import Checkbox from "expo-checkbox";
 import Button from "./Button";
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
 import { EyeOff, Eye } from "lucide-react-native";
 import Toast from "react-native-toast-message";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -44,7 +42,7 @@ export default function Auth() {
   const [isPasswordConfirmationVisible, setPasswordConfirmationVisible] =
     useState(false);
 
-  const modalCGURef = useRef<SwipeModalPublicMethods>(null);
+  const modalCGURef = useRef<ActionSheetRef>(null);
 
   const showCGUModal = () => modalCGURef.current?.show();
 
@@ -265,15 +263,8 @@ export default function Auth() {
           </View>
         </View>
 
-        <SwipeModal
-          ref={modalCGURef}
-          showBar
-          maxHeight={600}
-          bg="white"
-          style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-          wrapInGestureHandlerRootView
-        >
-          <ScrollView className="flex flex-col px-10 py-10 bg-white gap-y-4">
+        <Modal fullScreen={true} actionSheetRef={modalCGURef}>
+          <ScrollView className="flex flex-col bg-white gap-y-4">
             <Text className="text-2xl font-bold">
               Conditions Générales d'Utilisation (CGU) de Derkap {"\n"}
             </Text>
@@ -332,7 +323,7 @@ export default function Auth() {
               Dernière mise à jour : 03/02/2025
             </Text>
           </ScrollView>
-        </SwipeModal>
+        </Modal>
       </View>
     </TouchableWithoutFeedback>
   );

@@ -1448,5 +1448,5 @@ CREATE POLICY "allow crud 21vog_3" ON "storage"."objects" FOR SELECT USING (true
 
 
 
-GRANT ALL ON TABLE "storage"."s3_multipart_uploads" TO "postgres";
-GRANT ALL ON TABLE "storage"."s3_multipart_uploads_parts" TO "postgres";
+-- GRANT ALL ON TABLE "storage"."s3_multipart_uploads" TO "postgres";
+-- GRANT ALL ON TABLE "storage"."s3_multipart_uploads_parts" TO "postgres";

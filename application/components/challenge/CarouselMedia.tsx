@@ -5,13 +5,20 @@ import {
   View,
   ViewProps,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
-import { TPostDB, UserVote, TVoteDB } from "@/types/types";
+import { TPostDB, UserVote, TVoteDB, TCommentDB } from "@/types/types";
 import { cn } from "@/lib/utils";
 import { BlurView } from "expo-blur";
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef } from "react";
+import { Pressable, TextInput } from "react-native";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
+import { createComment, getCommentsFromDB } from "@/functions/comments-action";
+import Toast from "react-native-toast-message";
+import Button from "../Button";
+import { Comment } from "@/components/comment/Comment";
 interface CarouselMediaProps extends ViewProps {
   posts: TPostDB[];
   finalizationData?: {
@@ -31,9 +38,69 @@ export default function CarouselMedia({
   className,
   ...props
 }: CarouselMediaProps) {
+  const [comments, setComments] = useState<Record<number, TCommentDB[]>>({}); // { post_id: [comment1, comment2, ...] }
   const [sortedPosts, setSortedPosts] = useState<TPostDB[]>();
   const width = Dimensions.get("window").width;
+  const [newComment, setNewComment] = useState("");
   const { setCurrentPostIndex, userVote, votes } = finalizationData || {};
+  const [postingComment, setPostingComment] = useState(false);
+  const [activePostId, setActivePostId] = useState<number>(0);
+  const modalCommentRef = useRef<ActionSheetRef>(null);
+
+  const fetchAllComments = async () => {
+    if (!sortedPosts) return;
+    for (const post of sortedPosts) {
+      await fetchComments({ post_id: post.id });
+    }
+  };
+
+  useEffect(() => {
+    fetchAllComments();
+  }, [sortedPosts]);
+
+  useEffect(() => {
+    if (sortedPosts?.length) {
+      setActivePostId(sortedPosts[0].id);
+    }
+  }, [sortedPosts]);
+
+  const fetchComments = async ({ post_id }: { post_id: number }) => {
+    try {
+      const comments = await getCommentsFromDB({ post_id });
+      setComments((prev) => ({ ...prev, [post_id]: comments }));
+    } catch (error) {
+      Toast.show({
+        text1: "Erreur lors de la récupération des commentaires",
+        type: "error",
+      });
+    }
+  };
+
+  const handleCreateComment = async () => {
+    if (!newComment) return;
+    try {
+      setPostingComment(true);
+      await createComment({
+        post_id: activePostId,
+        content: newComment,
+      });
+      setNewComment("");
+      await fetchComments({ post_id: activePostId });
+    } catch (error) {
+      Toast.show({
+        text1: "Erreur lors de la création du commentaire",
+        type: "error",
+      });
+    } finally {
+      setPostingComment(false);
+    }
+  };
+
+  const openModalComment = async () => {
+    await fetchComments({ post_id: activePostId });
+    modalCommentRef.current?.show();
+  };
+
   const handleSnapToItem = (index: number) => {
     if (setCurrentPostIndex) {
       setCurrentPostIndex(index);
@@ -88,7 +155,10 @@ export default function CarouselMedia({
           autoPlay={false}
           data={sortedPosts}
           scrollAnimationDuration={400}
-          onSnapToItem={(index) => handleSnapToItem(index)}
+          onSnapToItem={(index) => {
+            handleSnapToItem(index);
+            setActivePostId(sortedPosts[index].id);
+          }}
           renderItem={({ item: post, index }) => (
             <View className="flex-1 rounded-2xl gap-y-2 relative">
               <Image
@@ -119,6 +189,13 @@ export default function CarouselMedia({
             </View>
           )}
         />
+        <View className="flex flex-row justify-end px-4 my-2">
+          <Pressable onPress={openModalComment}>
+            <Text className="">
+              {comments[activePostId]?.length || 0} commentaires
+            </Text>
+          </Pressable>
+        </View>
       </View>
       {challengeStatus === "posting" && (
         <View className="absolute flex flex-col w-full h-full gap-4 font-grotesque rounded-2xl overflow-hidden">
@@ -136,6 +213,45 @@ export default function CarouselMedia({
           </BlurView>
         </View>
       )}
+      <Modal fullScreen={true} actionSheetRef={modalCommentRef}>
+        <View className="flex flex-col h-full">
+          <Text className="text-2xl font-bold font-grotesque text-center py-4">
+            Commentaires
+          </Text>
+          <ScrollView className="flex-1 flex-col gap-y-2 px-10">
+            {comments[activePostId]?.length > 0 ? (
+              comments[activePostId]?.map((comment) => (
+                <Comment
+                  key={comment.id}
+                  comment={comment}
+                  refreshComments={() =>
+                    fetchComments({ post_id: activePostId })
+                  }
+                />
+              ))
+            ) : (
+              <Text className="text-center text-gray-500">
+                Aucun commentaire pour le moment
+              </Text>
+            )}
+          </ScrollView>
+          <View className="flex flex-row gap-x-2 px-4 py-4 justify-center items-center">
+            <TextInput
+              value={newComment}
+              onChangeText={setNewComment}
+              className="w-8/12 p-2 border border-gray-300 rounded-xl"
+              placeholder="Ajouter un commentaire"
+            />
+            <Button
+              className="w-4/12 p-0 bg-custom-primary rounded-xl"
+              isCancel={postingComment}
+              text="Envoyer"
+              onClick={handleCreateComment}
+              withLoader={true}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
