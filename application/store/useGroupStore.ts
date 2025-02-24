@@ -13,6 +13,7 @@ interface GroupState {
   fetchGroups: () => Promise<void>;
   joinGroup: (invite_code: string) => Promise<{ succes: boolean }>;
   createGroup: (name: string) => Promise<{ succes: boolean }>;
+  updateGroupImg: (id: number, newImgUrl: string) => void;
 }
 
 const useGroupStore = create<GroupState>((set, get) => ({
@@ -20,6 +21,16 @@ const useGroupStore = create<GroupState>((set, get) => ({
   isJoining: false,
   isCreating: false,
   setGroups: (groups) => set({ groups }),
+  updateGroupImg(id, newImgUrl) {
+    const groups = get().groups;
+    const updatedGroups = groups.map((group) => {
+      if (group.id === id) {
+        return { ...group, avatar_url: newImgUrl };
+      }
+      return group;
+    });
+    set({ groups: updatedGroups });
+  },
   fetchGroups: async () => {
     const { data, error } = await getGroups({});
 
