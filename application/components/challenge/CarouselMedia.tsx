@@ -13,9 +13,8 @@ import { cn } from "@/lib/utils";
 import { BlurView } from "expo-blur";
 import { useEffect, useState, useRef } from "react";
 import { Pressable, TextInput } from "react-native";
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 import { createComment, getCommentsFromDB } from "@/functions/comments-action";
 import Toast from "react-native-toast-message";
 import Button from "../Button";
@@ -46,7 +45,7 @@ export default function CarouselMedia({
   const { setCurrentPostIndex, userVote, votes } = finalizationData || {};
   const [postingComment, setPostingComment] = useState(false);
   const [activePostId, setActivePostId] = useState<number>(0);
-  const modalCommentRef = useRef<SwipeModalPublicMethods>(null);
+  const modalCommentRef = useRef<ActionSheetRef>(null);
 
   const fetchAllComments = async () => {
     if (!sortedPosts) return;
@@ -214,21 +213,14 @@ export default function CarouselMedia({
           </BlurView>
         </View>
       )}
-      <SwipeModal
-        ref={modalCommentRef}
-        showBar
-        maxHeight={400}
-        bg="white"
-        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-        wrapInGestureHandlerRootView
-      >
-        <View className="flex flex-col bg-white h-full gap-y-4 pb-10">
-          <Text className="text-2xl font-bold font-grotesque text-center">
+      <Modal fullScreen={true} actionSheetRef={modalCommentRef}>
+        <View className="flex flex-col h-full">
+          <Text className="text-2xl font-bold font-grotesque text-center py-4">
             Commentaires
           </Text>
-          <ScrollView className="flex-1 px-10">
-            <View className="flex flex-col gap-y-2 pb-4">
-              {comments[activePostId]?.map((comment) => (
+          <ScrollView className="flex-1 flex-col gap-y-2 px-10">
+            {comments[activePostId]?.length > 0 ? (
+              comments[activePostId]?.map((comment) => (
                 <Comment
                   key={comment.id}
                   comment={comment}
@@ -236,10 +228,14 @@ export default function CarouselMedia({
                     fetchComments({ post_id: activePostId })
                   }
                 />
-              ))}
-            </View>
+              ))
+            ) : (
+              <Text className="text-center text-gray-500">
+                Aucun commentaire pour le moment
+              </Text>
+            )}
           </ScrollView>
-          <View className="flex flex-row gap-x-2 px-4 justify-center items-center">
+          <View className="flex flex-row gap-x-2 px-4 py-4 justify-center items-center">
             <TextInput
               value={newComment}
               onChangeText={setNewComment}
@@ -255,7 +251,7 @@ export default function CarouselMedia({
             />
           </View>
         </View>
-      </SwipeModal>
+      </Modal>
     </View>
   );
 }

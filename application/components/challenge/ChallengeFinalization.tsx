@@ -14,9 +14,8 @@ import { useSupabase } from "@/context/auth-context";
 import { addVote } from "@/functions/vote-action";
 import Toast from "react-native-toast-message";
 
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 import { setChallengeToEnd } from "@/functions/challenge-action";
 import React from "react";
 
@@ -44,7 +43,7 @@ const ChallengeFinalization = ({
   // const [api, setApi] = useState<CarouselApi>();
   const [currentPost, setCurrentPost] = useState(0);
 
-  const modalEndVoteRef = useRef<SwipeModalPublicMethods>(null);
+  const modalEndVoteRef = useRef<ActionSheetRef>(null);
 
   const showModalEndVote = () => modalEndVoteRef.current?.show();
 
@@ -177,37 +176,25 @@ const ChallengeFinalization = ({
           </View>
         )}
       </View>
-      <SwipeModal
-        ref={modalEndVoteRef}
-        showBar
-        maxHeight={400}
-        bg="white"
-        style={{
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-        }}
-        wrapInGestureHandlerRootView
-      >
-        <View className="flex flex-col px-10 justify-between items-center bg-white gap-y-4">
-          <Text className="text-2xl font-bold">Fermer les votes</Text>
-          <Text className="text-xs">
-            En tant que créateur du défi, tu peux décider de fermer les votes,
-            sans attendre que tous les participants aient voté.
-            {"\n"}
-            <Text className="font-bold">
-              Attention, une fois les votes clos, les participants ne pourront
-              plus voter et le défi sera terminé.
-            </Text>
+      <Modal actionSheetRef={modalEndVoteRef}>
+        <Text className="text-2xl font-bold">Fermer les votes</Text>
+        <Text className="">
+          En tant que créateur du défi, tu peux décider de fermer les votes,
+          sans attendre que tous les participants aient voté.
+          {"\n"}
+          <Text className="font-bold">
+            Attention, une fois les votes clos, les participants ne pourront
+            plus voter et le défi sera terminé.
           </Text>
-          <Button
-            className="bg-purple-500 w-full font-grotesque"
-            text="Confirmer"
-            //todo: add validation msg and confirm
-            onClick={handleEndVote}
-            withLoader={true}
-          />
-        </View>
-      </SwipeModal>
+        </Text>
+        <Button
+          className="bg-purple-500 w-full font-grotesque"
+          text="Confirmer"
+          //todo: add validation msg and confirm
+          onClick={handleEndVote}
+          withLoader={true}
+        />
+      </Modal>
     </View>
   );
 };

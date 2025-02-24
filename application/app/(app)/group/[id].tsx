@@ -10,23 +10,16 @@ import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
 
-import {
-  GroupRanking,
-  TChallengeDB,
-  TGroupDB,
-  TProfileInGroup,
-} from "@/types/types";
+import { TChallengeDB, TGroupDB, TProfileInGroup } from "@/types/types";
 import {
   addMemberToGroup,
   getGroup,
-  getGroupRanking,
   leaveGroup,
   updateGroupName,
 } from "@/functions/group-action";
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
 import { useRouter } from "expo-router";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 
 import Button from "@/components/Button";
 import useGroupStore from "@/store/useGroupStore";
@@ -69,9 +62,9 @@ export default function Group() {
     }
   };
 
-  const modalGroupSettingsRef = useRef<SwipeModalPublicMethods>(null);
+  const modalGroupSettingsRef = useRef<ActionSheetRef>(null);
 
-  const modalAddMemberRef = useRef<SwipeModalPublicMethods>(null);
+  const modalAddMemberRef = useRef<ActionSheetRef>(null);
 
   const showGroupSettingsModal = () => modalGroupSettingsRef.current?.show();
 
@@ -283,16 +276,9 @@ export default function Group() {
         {selectedTab === "ranking" && <GroupRankingTab groupId={Number(id)} />}
       </View>
 
-      <SwipeModal
-        ref={modalGroupSettingsRef}
-        showBar
-        maxHeight={600}
-        bg="white"
-        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-        wrapInGestureHandlerRootView
-      >
+      <Modal actionSheetRef={modalGroupSettingsRef}>
         <ScrollView className="">
-          <View className="flex-col items-center justify-between flex-1 px-10 py-5 gap-y-4">
+          <View className="flex-col items-center justify-between flex-1 gap-y-4">
             <Text className="text-2xl font-bold font-grotesque">
               Gérer le groupe
             </Text>
@@ -371,21 +357,13 @@ export default function Group() {
             </View>
           </View>
         </ScrollView>
-      </SwipeModal>
-      <SwipeModal
-        ref={modalAddMemberRef}
-        topOffset={100}
-        bg="white"
-        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-        wrapInGestureHandlerRootView
-      >
-        <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
+        <Modal actionSheetRef={modalAddMemberRef} fullScreen={true}>
           <Text className="text-2xl font-bold">Ajoute tes amis</Text>
           <TextInput
             className="w-full p-2 border border-gray-300 rounded-xl"
             onChangeText={setQueryUser}
             // value={queryUser}
-            placeholder="Cherche un username"
+            placeholder="Cherche quelqu'un"
             placeholderTextColor="#888"
           />
           {searchedUsers.map((user) => (
@@ -403,8 +381,8 @@ export default function Group() {
               />
             </View>
           ))}
-        </View>
-      </SwipeModal>
+        </Modal>
+      </Modal>
     </>
   );
 }

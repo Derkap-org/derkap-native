@@ -13,18 +13,17 @@ import { Plus, User } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
 import Button from "@/components/Button";
 import StatusLabel from "@/components/group/StatusLabel";
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
+
 import useGroupStore from "@/store/useGroupStore";
 import { useFocusEffect } from "@react-navigation/native";
-import { cn } from "@/lib/utils";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
+
 import Toast from "react-native-toast-message";
 
 const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [groupName, setGroupName] = useState("");
-  const [isJoinSelected, setIsJoinSelected] = useState(false);
 
   const { user } = useSupabase();
 
@@ -36,14 +35,15 @@ const Home = () => {
     }, []),
   );
 
-  const modalGroupOptionsRef = useRef<SwipeModalPublicMethods>(null);
+  const actionSheetRef = useRef<ActionSheetRef>(null);
 
-  const showModalGroupOptions = () => modalGroupOptionsRef.current?.show();
+  const showModal = () => actionSheetRef.current?.show();
+  const hideModal = () => actionSheetRef.current?.hide();
 
   const handleCreateGroup = async () => {
     const { succes } = await createGroup(groupName);
     if (succes) {
-      modalGroupOptionsRef.current?.hide();
+      hideModal();
       setGroupName("");
     } else {
       Toast.show({
@@ -84,7 +84,7 @@ const Home = () => {
         <View className="flex-row items-center justify-between w-full py-4">
           <Pressable
             className="p-2 rounded-full bg-custom-primary"
-            onPress={showModalGroupOptions}
+            onPress={showModal}
           >
             <Plus color={"white"} />
           </Pressable>
@@ -190,54 +190,25 @@ const Home = () => {
           </ScrollView>
         )}
       </View>
-
-      <SwipeModal
-        ref={modalGroupOptionsRef}
-        showBar
-        maxHeight={400}
-        bg="white"
-        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-        wrapInGestureHandlerRootView
-      >
-        <View className="flex flex-col px-10 pt-4 bg-white pb-18 gap-y-4">
-          <View className="flex flex-row items-center justify-center w-full gap-x-2">
-            <Pressable
-              onPress={() => setIsJoinSelected(false)}
-              className={cn(
-                " w-1/2  rounded-xl p-2",
-                !isJoinSelected ? "bg-custom-primary/50" : "bg-gray-300 ",
-              )}
-            >
-              <Text
-                className={cn(
-                  "text-2xl text-center font-bold ",
-                  isJoinSelected && "text-gray-500 ",
-                )}
-              >
-                Créer
-              </Text>
-            </Pressable>
-          </View>
-
-          <View className="flex flex-col gap-y-4">
-            <Text className="text-2xl font-bold">Créer un groupe</Text>
-            <TextInput
-              className="w-full p-2 border border-gray-300 rounded-xl"
-              onChangeText={setGroupName}
-              value={groupName}
-              placeholder="Entre le nom de groupe ici"
-              placeholderTextColor="#888"
-            />
-            <Button
-              withLoader={true}
-              isCancel={!groupName.length}
-              onClick={handleCreateGroup}
-              text="Créer"
-              className="w-fit"
-            />
-          </View>
+      <Modal actionSheetRef={actionSheetRef}>
+        <View className="flex flex-col gap-y-4">
+          <Text className="text-2xl font-bold">Créer un groupe</Text>
+          <TextInput
+            className="w-full p-2 border border-gray-300 rounded-xl"
+            onChangeText={setGroupName}
+            value={groupName}
+            placeholder="Entre le nom de groupe ici"
+            placeholderTextColor="#888"
+          />
+          <Button
+            withLoader={true}
+            isCancel={!groupName.length}
+            onClick={handleCreateGroup}
+            text="Créer"
+            className="w-fit"
+          />
         </View>
-      </SwipeModal>
+      </Modal>
     </>
   );
 };

@@ -7,9 +7,8 @@ import CarouselMedia from "@/components/challenge/CarouselMedia";
 import { BlurView } from "expo-blur";
 import { useSupabase } from "@/context/auth-context";
 import { setChallengeToVoting } from "@/functions/challenge-action";
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 import React from "react";
 import Toast from "react-native-toast-message";
 
@@ -31,7 +30,7 @@ const PostTaken = ({
 }: PostTakenProps) => {
   const { profile } = useSupabase();
 
-  const modalGoVoteRef = useRef<SwipeModalPublicMethods>(null);
+  const modalGoVoteRef = useRef<ActionSheetRef>(null);
 
   const showModalGoVote = () => modalGoVoteRef.current?.show();
 
@@ -126,36 +125,24 @@ const PostTaken = ({
           />
         )}
       </View>
-      <SwipeModal
-        ref={modalGoVoteRef}
-        showBar
-        maxHeight={400}
-        bg="white"
-        style={{
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-        }}
-        wrapInGestureHandlerRootView
-      >
-        <View className="flex flex-col items-center justify-between px-10 bg-white gap-y-4">
-          <Text className="text-2xl font-bold">Passer aux votes</Text>
-          <Text className="text-xs">
-            En tant que créateur du défi, tu peux décider de passer aux votes,
-            sans attendre que tous les participants aient posté leur Derkap.
-            {"\n"}
-            <Text className="font-bold">
-              Attention, une fois les votes lancés, les participants ne pourront
-              plus poster leur Derkap.
-            </Text>
+      <Modal actionSheetRef={modalGoVoteRef}>
+        <Text className="text-2xl font-bold">Passer aux votes</Text>
+        <Text className="">
+          En tant que créateur du défi, tu peux décider de passer aux votes,
+          sans attendre que tous les participants aient posté leur Derkap.
+          {"\n"}
+          <Text className="font-bold">
+            Attention, une fois les votes lancés, les participants ne pourront
+            plus poster leur Derkap.
           </Text>
-          <Button
-            className="w-full bg-purple-500 font-grotesque"
-            text="Confirmer"
-            onClick={handleGoVote}
-            withLoader={true}
-          />
-        </View>
-      </SwipeModal>
+        </Text>
+        <Button
+          className="w-full bg-purple-500 font-grotesque"
+          text="Confirmer"
+          onClick={handleGoVote}
+          withLoader={true}
+        />
+      </Modal>
     </>
   );
 };
