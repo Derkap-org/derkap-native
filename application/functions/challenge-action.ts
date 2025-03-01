@@ -9,8 +9,13 @@ export const getChallenges = async ({
   page?: number;
 }) => {
   const CHALLENGES_PER_PAGE = 20;
-
   const offset = (page - 1) * CHALLENGES_PER_PAGE;
+
+  // First, get total count
+  const { count } = await supabase
+    .from("challenge")
+    .select("*", { count: "exact", head: true })
+    .eq("group_id", Number(group_id));
 
   const { data: challenges, error } = await supabase
     .from("challenge")
@@ -23,7 +28,9 @@ export const getChallenges = async ({
     throw new Error(error.message);
   }
 
-  return challenges;
+  const hasMore = count ? offset + CHALLENGES_PER_PAGE < count : false;
+
+  return { challenges, hasMore };
 };
 
 export const createChallenge = async ({

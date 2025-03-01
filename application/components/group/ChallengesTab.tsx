@@ -28,6 +28,9 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
   );
   const [selectedChallenge, setSelectedChallenge] =
     useState<TChallengeDB | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [newChallengeDescription, setNewChallengeDescription] = useState("");
 
@@ -53,16 +56,19 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
     }
   };
 
-  const fetchChallenges = async () => {
+  const fetchChallenges = async (pageNum = 1, append = false) => {
     if (!group?.id) return;
     try {
-      // todo: add pagination
-      const challenges = await getChallenges({
+      const result = await getChallenges({
         group_id: group.id,
+        page: pageNum,
       });
 
-      if (challenges) {
-        setChallenges(challenges);
+      if (result.challenges) {
+        setChallenges((prev) =>
+          append ? [...(prev || []), ...result.challenges] : result.challenges,
+        );
+        setHasMore(result.hasMore);
       }
     } catch (error) {
       Toast.show({
@@ -73,10 +79,28 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
     }
   };
 
+  const handleLoadMore = async () => {
+    if (!hasMore || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      await fetchChallenges(page + 1, true);
+      setPage((prev) => prev + 1);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du chargement des défis supplémentaires",
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
-      await fetchChallenges();
+      setPage(1);
+      await fetchChallenges(1, false);
     } catch (error) {
       Toast.show({
         type: "error",
@@ -121,6 +145,17 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         className="flex flex-col px-4 min-h-full"
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const isCloseToBottom =
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - 20;
+
+          if (isCloseToBottom) {
+            handleLoadMore();
+          }
+        }}
+        scrollEventThrottle={400}
       >
         {(!challenges ||
           challenges.length === 0 ||
