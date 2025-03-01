@@ -37,7 +37,7 @@ const ChallengeInProgress = ({
   }, [posts, profile, challenge]);
 
   return (
-    <View {...props} className={cn("w-full", className)}>
+    <View {...props} className={cn("w-full mb-48", className)}>
       {isMyPostTaken ? (
         <PostTaken
           refreshChallengeData={refreshChallengeData}

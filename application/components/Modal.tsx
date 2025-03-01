@@ -29,7 +29,7 @@ export const Modal = ({
             }
       }
     >
-      <View className="flex flex-col px-6 pt-4 bg-white gap-y-4">
+      <View className="flex flex-col px-6 py-4 bg-white gap-y-4">
         {children}
       </View>
     </ActionSheet>

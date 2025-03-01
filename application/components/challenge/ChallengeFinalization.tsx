@@ -175,6 +175,10 @@ const ChallengeFinalization = ({
             </View>
           </View>
         )}
+        {
+          //todo: find a better way to handle full scroll instead of mb-48
+        }
+        {challenge?.status === "ended" && <View className="mb-48"></View>}
       </View>
       <Modal actionSheetRef={modalEndVoteRef}>
         <Text className="text-2xl font-bold">Fermer les votes</Text>

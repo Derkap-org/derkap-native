@@ -255,7 +255,7 @@ export default function Capture({
             withLoader={true}
             onClick={validatePhoto}
             text="Poster mon derkap de fou"
-            className="mb-32 mx-auto w-full font-grotesque text-xl"
+            className=" mx-auto w-full font-grotesque text-xl"
           />
         </View>
       )}
