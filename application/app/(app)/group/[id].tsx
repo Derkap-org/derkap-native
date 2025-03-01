@@ -34,13 +34,13 @@ import ProfileLine from "@/components/profile/ProfileLine";
 import { useDebounce } from "use-debounce";
 import { ChallengesTab } from "@/components/group/ChallengesTab";
 import * as ImagePicker from "expo-image-picker";
+import { updateLastActivitySeen } from "@/lib/last-activity-storage";
 
 export default function Group() {
   const [selectedTab, setSelectedTab] = useState<"challenges" | "ranking">(
     "challenges",
   );
   const [currentGroup, setCurrentGroup] = useState<TGroupDB>();
-  const [currentChallenge, setCurrentChallenge] = useState<TChallengeDB>();
   const { id } = useLocalSearchParams() as { id: string };
   const router = useRouter();
   const [newGroupName, setNewGroupName] = useState("");
@@ -51,6 +51,12 @@ export default function Group() {
   const [debouncedQuery] = useDebounce(queryUser, 400);
 
   const { fetchGroups, updateGroupImg } = useGroupStore();
+
+  useEffect(() => {
+    if (currentGroup) {
+      updateLastActivitySeen(currentGroup);
+    }
+  }, [currentGroup]);
 
   const fetchCurrentGroup = async () => {
     try {
@@ -297,8 +303,8 @@ export default function Group() {
       </View>
 
       <Modal fullScreen={true} actionSheetRef={modalGroupSettingsRef}>
-        <ScrollView className="">
-          <View className="flex-col items-center justify-between flex-1 gap-y-4 mt-2">
+        <ScrollView className="min-h-full">
+          <View className="flex-col h-full items-center justify-between flex-1 gap-y-4 mt-2">
             <View className="relative flex items-center justify-center w-24 h-24 border-2 rounded-full bg-custom-white border-custom-primary">
               <Pressable
                 onPress={pickImage}
@@ -351,7 +357,16 @@ export default function Group() {
               />
             </View>
 
-            <View className="flex flex-col items-center justify-center w-full gap-2 mt-10">
+            <View className="flex flex-col items-center justify-center w-full gap-2">
+              <Button
+                withLoader={true}
+                className="w-full bg-red-500"
+                onClick={handleConfirmLeaveGroup}
+                text={"Quitter le groupe"}
+              />
+            </View>
+
+            <View className="flex flex-grow flex-col items-center justify-center w-full gap-2 mt-10">
               <Text className="text-xl font-bold ">Membres du groupe</Text>
               <View className="flex flex-col w-full gap-y-4">
                 {currentGroup?.members.length <= 10 && (
@@ -370,19 +385,13 @@ export default function Group() {
                 <Text className="font-bold ">
                   {currentGroup?.members?.length}/10 membres
                 </Text>
-                {currentGroup?.members?.map((member, i) => (
-                  <Fragment key={i}>
-                    <ProfileLine member={member.profile} />
-                  </Fragment>
-                ))}
-              </View>
-              <View className="flex flex-col items-center justify-center w-full gap-2 mt-5">
-                <Button
-                  withLoader={true}
-                  className="w-full bg-red-500"
-                  onClick={handleConfirmLeaveGroup}
-                  text={"Quitter le groupe"}
-                />
+                <View className="flex flex-col w-full gap-y-4">
+                  {currentGroup?.members?.map((member, i) => (
+                    <Fragment key={i}>
+                      <ProfileLine member={member.profile} />
+                    </Fragment>
+                  ))}
+                </View>
               </View>
             </View>
           </View>
@@ -403,7 +412,7 @@ export default function Group() {
             >
               <ProfileLine member={user} className="w-fit" />
               <Button
-                className="text-xs "
+                className="text-xs"
                 isCancel={!!user?.alreadyInGroup}
                 withLoader={true}
                 onClick={() => handleAddMember(user.id)}

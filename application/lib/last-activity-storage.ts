@@ -5,16 +5,19 @@ const hasNewLastActivity = async (group: TGroupDB) => {
   const key = `last_activity_${group.id}`;
   const lastActivity = await AsyncStorage.getItem(key);
   if (!lastActivity) {
-    await AsyncStorage.setItem(key, group.last_activity);
     return true;
   }
   if (lastActivity && group.last_activity) {
     if (lastActivity !== group.last_activity) {
-      await AsyncStorage.setItem(key, group.last_activity);
       return true;
     }
   }
   return false;
+};
+
+export const updateLastActivitySeen = async (group: TGroupDB) => {
+  const key = `last_activity_${group.id}`;
+  await AsyncStorage.setItem(key, group.last_activity);
 };
 
 const addLastActivityToGroup = async (group: TGroupDB): Promise<TGroupDB> => {

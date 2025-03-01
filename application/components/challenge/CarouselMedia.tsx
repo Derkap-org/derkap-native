@@ -191,7 +191,7 @@ export default function CarouselMedia({
         />
         <View className="flex flex-row justify-end px-4 my-2">
           <Pressable onPress={openModalComment}>
-            <Text className="">
+            <Text className="text-xl px-4 py-2 rounded-xl">
               {comments[activePostId]?.length || 0} commentaires
             </Text>
           </Pressable>
