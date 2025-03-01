@@ -3,6 +3,18 @@ import { getCurrentChallengesStatus } from "@/functions/challenge-action";
 import { TGroupDB } from "@/types/types";
 import { create } from "zustand";
 import { addLastActivityToGroups } from "@/lib/last-activity-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const GROUP_KEY = "groups";
+
+const getGroupsFromStorage = async () => {
+  const groups = await AsyncStorage.getItem(GROUP_KEY);
+  return groups ? JSON.parse(groups) : [];
+};
+
+const saveGroupsToStorage = async (groups: TGroupDB[]) => {
+  await AsyncStorage.setItem(GROUP_KEY, JSON.stringify(groups));
+};
 
 interface GroupState {
   groups: TGroupDB[];
@@ -31,6 +43,10 @@ const useGroupStore = create<GroupState>((set, get) => ({
     set({ groups: updatedGroups });
   },
   fetchGroups: async () => {
+    const groupsFromStorage = await getGroupsFromStorage();
+    if (groupsFromStorage.length > 0) {
+      set({ groups: groupsFromStorage });
+    }
     const { data, error } = await getGroups({});
 
     if (error) {
@@ -41,6 +57,7 @@ const useGroupStore = create<GroupState>((set, get) => ({
 
     if (!data) {
       set({ groups: [] });
+      saveGroupsToStorage([]);
       return;
     }
 
@@ -59,6 +76,7 @@ const useGroupStore = create<GroupState>((set, get) => ({
       const groupsWithNewActivity =
         await addLastActivityToGroups(groupsOrdered);
       set({ groups: groupsWithNewActivity });
+      saveGroupsToStorage(groupsWithNewActivity);
       return;
     }
 
@@ -77,7 +95,7 @@ const useGroupStore = create<GroupState>((set, get) => ({
     );
 
     set({ groups: groupsWithNewActivity });
-
+    saveGroupsToStorage(groupsWithNewActivity);
     return;
   },
   joinGroup: async (invite_code) => {
