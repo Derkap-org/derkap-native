@@ -25,7 +25,6 @@ import { ActionSheetRef } from "react-native-actions-sheet";
 
 import Button from "@/components/Button";
 import useGroupStore from "@/store/useGroupStore";
-import { updateLastStatusSeen } from "@/lib/lastStatusSeen";
 import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
 import GroupRankingTab from "@/components/group/GroupRankingTab";
@@ -183,15 +182,6 @@ export default function Group() {
       fetchUserByUsername(debouncedQuery);
     }
   }, [debouncedQuery]);
-
-  useEffect(() => {
-    if (currentGroup?.id && currentChallenge?.status) {
-      updateLastStatusSeen({
-        groupId: currentGroup.id,
-        newStatus: currentChallenge.status,
-      });
-    }
-  }, [currentGroup, currentChallenge]);
 
   const handleConfirmLeaveGroup = async () => {
     Alert.alert("Êtes-vous sûr de vouloir quitter le groupe ?", "", [

@@ -2,8 +2,7 @@ import { createGroup, getGroups, joinGroup } from "@/functions/group-action";
 import { getCurrentChallengesStatus } from "@/functions/challenge-action";
 import { TGroupDB } from "@/types/types";
 import { create } from "zustand";
-import { addLastStatusSeenToGroups } from "@/lib/lastStatusSeen";
-import { Alert } from "react-native";
+import { addLastActivityToGroups } from "@/lib/last-activity-storage";
 
 interface GroupState {
   groups: TGroupDB[];
@@ -48,15 +47,20 @@ const useGroupStore = create<GroupState>((set, get) => ({
     const groups: TGroupDB[] = data;
     const groupsOrdered = groups.sort(
       (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        new Date(b.last_activity).getTime() -
+        new Date(a.last_activity).getTime(),
     );
-    set({ groups: groupsOrdered });
 
     const { data: challengesStatus } = await getCurrentChallengesStatus({
       group_ids: groupsOrdered.map((group) => group.id),
     });
 
-    if (!challengesStatus) return;
+    if (!challengesStatus) {
+      const groupsWithNewActivity =
+        await addLastActivityToGroups(groupsOrdered);
+      set({ groups: groupsWithNewActivity });
+      return;
+    }
 
     const groupsWithChallengesStatus = groupsOrdered.map((group) => {
       const challengeStatus = challengesStatus.find(
@@ -68,19 +72,11 @@ const useGroupStore = create<GroupState>((set, get) => ({
       };
     });
 
-    set({ groups: groupsWithChallengesStatus });
+    const groupsWithNewActivity = await addLastActivityToGroups(
+      groupsWithChallengesStatus,
+    );
 
-    const groupsWLastSeenStatus = await addLastStatusSeenToGroups({
-      groups: groupsWithChallengesStatus,
-    });
-
-    const orderedByNewStatus = groupsWLastSeenStatus.sort((a, b) => {
-      if (a.hasNewStatus && !b.hasNewStatus) return -1;
-      if (!a.hasNewStatus && b.hasNewStatus) return 1;
-      return 0;
-    }); // new status first
-
-    set({ groups: orderedByNewStatus });
+    set({ groups: groupsWithNewActivity });
 
     return;
   },

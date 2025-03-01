@@ -67,6 +67,40 @@ const Home = () => {
     }
   };
 
+  const formatDate = (date: string) => {
+    // < 1 min => à l'instant
+    // < 1 h => il y a x minutes
+    // < 1 j => il y a x heures
+    // < 1 mois => il y a x jours
+    // < 1 an => il y a x mois
+    // > 1 an => il y a x ans
+    const now = new Date();
+    const dateObj = new Date(date);
+    const diffTime = Math.abs(now.getTime() - dateObj.getTime());
+    const diffMinutes = Math.round(diffTime / (1000 * 60));
+    const diffHours = Math.round(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    const diffMonths = Math.round(diffTime / (1000 * 60 * 60 * 24 * 30));
+    const diffYears = Math.round(diffTime / (1000 * 60 * 60 * 24 * 30 * 12));
+
+    if (diffMinutes < 1) {
+      return "à l'instant";
+    }
+    if (diffMinutes < 60) {
+      return `${diffMinutes} minutes`;
+    }
+    if (diffHours < 24) {
+      return `${diffHours} heures`;
+    }
+    if (diffDays < 30) {
+      return `${diffDays} jours`;
+    }
+    if (diffMonths < 12) {
+      return `${diffMonths} mois`;
+    }
+    return `${diffYears} ans`;
+  };
+
   return (
     <>
       <View className="relative flex flex-col items-center justify-start flex-1 gap-4 p-4">
@@ -153,8 +187,14 @@ const Home = () => {
                         </View>
                       </View>
 
-                      {group.hasNewStatus === true && (
-                        <Text className="flex flex-col text-center pt-[1px] items-center justify-center text-white rounded-full aspect-square h-5 w-5 bg-red-500 text-xs">
+                      <Text className="text-gray-500">
+                        {group.last_activity
+                          ? formatDate(group.last_activity)
+                          : "Aujourd'hui"}
+                      </Text>
+
+                      {group.new_activity === true && (
+                        <Text className="absolute -top-1 right-0 flex flex-col text-center pt-[1px] items-center justify-center text-white rounded-full aspect-square h-5 w-5 bg-red-500 text-xs">
                           1
                         </Text>
                       )}
