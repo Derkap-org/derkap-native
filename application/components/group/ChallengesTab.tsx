@@ -11,6 +11,7 @@ import {
   TextInput,
   Keyboard,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { ChallengeScreen } from "../challenge/ChallengeScreen";
 import Button from "../Button";
@@ -22,6 +23,7 @@ interface ChallengesTabProps {
 }
 
 export const ChallengesTab = ({ group }: ChallengesTabProps) => {
+  const [isFetchingChallenges, setIsFetchingChallenges] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [challenges, setChallenges] = useState<TChallengeDB[] | undefined>(
     undefined,
@@ -57,8 +59,9 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
   };
 
   const fetchChallenges = async (pageNum = 1, append = false) => {
-    if (!group?.id) return;
     try {
+      setIsFetchingChallenges(true);
+      if (!group?.id) return;
       const result = await getChallenges({
         group_id: group.id,
         page: pageNum,
@@ -76,6 +79,8 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
         text1: "Erreur dans la récupération des défis",
         text2: error.message || "Veuillez réessayer",
       });
+    } finally {
+      setIsFetchingChallenges(false);
     }
   };
 
@@ -157,26 +162,33 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
         }}
         scrollEventThrottle={400}
       >
-        {(!challenges ||
-          challenges.length === 0 ||
-          challenges[0]?.status === "ended") && (
+        {isFetchingChallenges && (!challenges || challenges?.length === 0) && (
           <View className="flex flex-col gap-y-1">
-            <TextInput
-              className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
-              onChangeText={setNewChallengeDescription}
-              value={newChallengeDescription}
-              placeholder="Crée un nouveau défi !"
-              placeholderTextColor="#888"
-            />
-            <Button
-              withLoader={true}
-              isCancel={!newChallengeDescription.length}
-              onClick={handleCreateChallenge}
-              text="Créer"
-              className="w-fit"
-            />
+            <ActivityIndicator size="large" />
           </View>
         )}
+
+        {(!challenges ||
+          challenges.length === 0 ||
+          challenges[0]?.status === "ended") &&
+          !isFetchingChallenges && (
+            <View className="flex flex-col gap-y-1">
+              <TextInput
+                className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
+                onChangeText={setNewChallengeDescription}
+                value={newChallengeDescription}
+                placeholder="Crée un nouveau défi !"
+                placeholderTextColor="#888"
+              />
+              <Button
+                withLoader={true}
+                isCancel={!newChallengeDescription.length}
+                onClick={handleCreateChallenge}
+                text="Créer"
+                className="w-fit"
+              />
+            </View>
+          )}
         {challenges?.map((challenge, i) => (
           <Pressable
             // className="my-2"

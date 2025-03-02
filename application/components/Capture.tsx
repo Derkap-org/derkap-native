@@ -17,6 +17,9 @@ import { TChallengeDB } from "@/types/types";
 import Toast from "react-native-toast-message";
 import { encryptPhoto, getEncryptionKey } from "@/functions/encryption-action";
 import { compressImage } from "@/functions/image-action";
+import { Modal } from "./Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
+import React from "react";
 interface CameraProps extends ViewProps {
   challenge: TChallengeDB;
   setIsCapturing: (isCapturing: boolean) => void;
@@ -37,6 +40,10 @@ export default function Capture({
   const [isValidatingFile, setIsValidatingFile] = useState<boolean>(false);
   const [caption, setCaption] = useState<string>("");
   const cameraRef = useRef<CameraView>(null);
+  const actionSheetRef = useRef<ActionSheetRef>(null);
+
+  const showModal = () => actionSheetRef.current?.show();
+  const hideModal = () => actionSheetRef.current?.hide();
 
   const screenWidth = Dimensions.get("window").width;
   const cameraHeight = (screenWidth * 5) / 4;
@@ -166,88 +173,110 @@ export default function Capture({
   };
 
   return (
-    <View className="flex flex-col h-full w-full gap-y-2">
-      <View style={{ height: cameraHeight }} className="rounded-2xl">
-        {/* Top bar with reset button */}
-        <View className="absolute top-2 left-0 right-0 z-10 p-4 flex-row items-start justify-between">
-          <Pressable
-            className=""
-            onPress={() => {
-              if (capturedPhoto) {
-                setCapturedPhoto(null);
-              } else {
-                setIsCapturing(false);
-              }
-            }}
-          >
-            {capturedPhoto ? (
-              <XIcon size={40} color="white" />
-            ) : (
-              <ChevronLeft size={40} color="white" />
-            )}
-          </Pressable>
-        </View>
-
-        {/* Countdown */}
-        {countdown !== null && (
-          <View className="absolute top-1/2 left-0 right-0 z-10 p-4 flex-row items-center justify-center">
-            <Text className="text-white text-6xl">{countdown}</Text>
-          </View>
-        )}
-
-        <View
-          style={{ height: cameraHeight }}
-          className="rounded-2xl overflow-hidden"
-        >
-          {/* Camera View */}
-          {capturedPhoto ? (
-            <Image source={{ uri: capturedPhoto }} className="flex-1" />
-          ) : (
-            <CameraView
-              mirror={true}
-              style={[styles.camera]}
-              ref={cameraRef}
-              facing={facing}
-            />
-          )}
-        </View>
-
-        {/* Bottom controls */}
-        {!capturedPhoto && (
-          <View className="absolute bottom-2 left-0 right-0 z-10 p-4 flex-row items-center justify-around">
-            {/* Timer Button */}
+    <>
+      <View className="flex flex-col h-full w-full gap-y-2">
+        <View style={{ height: cameraHeight }} className="rounded-2xl">
+          {/* Top bar with reset button */}
+          <View className="absolute top-2 left-0 right-0 z-10 p-4 flex-row items-start justify-between">
             <Pressable
-              onPress={handleChangeDelay}
-              className="flex flex-row items-center"
-            >
-              <Timer size={32} color="white" />
-              <Text className="text-white text-2xl">{captureDelay}s</Text>
-            </Pressable>
-
-            {/* Capture Button */}
-            <Pressable
-              className="h-20 w-20 rounded-full bg-white border-2 border-gray-300 items-center justify-center"
+              className=""
               onPress={() => {
-                // Add capture functionality if needed
-                handleCapture();
+                if (capturedPhoto) {
+                  setCapturedPhoto(null);
+                } else {
+                  setIsCapturing(false);
+                }
               }}
             >
-              <View className="h-14 w-14 rounded-full bg-gray-100" />
+              {capturedPhoto ? (
+                <XIcon size={40} color="white" />
+              ) : (
+                <ChevronLeft size={40} color="white" />
+              )}
             </Pressable>
+          </View>
 
-            {/* Toggle Camera Button */}
-            <Pressable className="items-center" onPress={toggleCameraFacing}>
-              <RefreshCcw size={32} color="white" />
+          {/* Countdown */}
+          {countdown !== null && (
+            <View className="absolute top-1/2 left-0 right-0 z-10 p-4 flex-row items-center justify-center">
+              <Text className="text-white text-6xl">{countdown}</Text>
+            </View>
+          )}
+
+          <View
+            style={{ height: cameraHeight }}
+            className="rounded-2xl overflow-hidden"
+          >
+            {/* Camera View */}
+            {capturedPhoto ? (
+              <Image source={{ uri: capturedPhoto }} className="flex-1" />
+            ) : (
+              <CameraView
+                mirror={true}
+                style={[styles.camera]}
+                ref={cameraRef}
+                facing={facing}
+              />
+            )}
+          </View>
+
+          {/* Bottom controls */}
+          {!capturedPhoto && (
+            <View className="absolute bottom-2 left-0 right-0 z-10 p-4 flex-row items-center justify-around">
+              {/* Timer Button */}
+              <Pressable
+                onPress={handleChangeDelay}
+                className="flex flex-row items-center"
+              >
+                <Timer size={32} color="white" />
+                <Text className="text-white text-2xl">{captureDelay}s</Text>
+              </Pressable>
+
+              {/* Capture Button */}
+              <Pressable
+                className="h-20 w-20 rounded-full bg-white border-2 border-gray-300 items-center justify-center"
+                onPress={() => {
+                  // Add capture functionality if needed
+                  handleCapture();
+                }}
+              >
+                <View className="h-14 w-14 rounded-full bg-gray-100" />
+              </Pressable>
+
+              {/* Toggle Camera Button */}
+              <Pressable className="items-center" onPress={toggleCameraFacing}>
+                <RefreshCcw size={32} color="white" />
+              </Pressable>
+            </View>
+          )}
+        </View>
+        {capturedPhoto && (
+          <View className="flex flex-col gap-y-2 items-center justify-center w-full">
+            <Pressable
+              className="w-full p-4 bg-white rounded-xl"
+              onPress={showModal}
+            >
+              <Text className="text-gray-500">
+                Une légende pour ton oeuvre d'art ?
+              </Text>
             </Pressable>
+            <Button
+              isCancel={isValidatingFile}
+              withLoader={true}
+              onClick={validatePhoto}
+              text="Poster mon derkap de fou"
+              className=" mx-auto w-full font-grotesque text-xl"
+            />
           </View>
         )}
       </View>
-      {capturedPhoto && (
+      <Modal actionSheetRef={actionSheetRef}>
         <View className="flex flex-col gap-y-2 items-center justify-center w-full">
           <TextInput
             value={caption}
             onChangeText={setCaption}
-            className="w-full p-4 bg-white rounded-xl"
+            className="w-full p-4 bg-gray-100 rounded-xl"
+            autoFocus={true}
             placeholder="Une légende pour ton oeuvre d'art ?"
           />
           <Button
@@ -258,8 +287,8 @@ export default function Capture({
             className=" mx-auto w-full font-grotesque text-xl"
           />
         </View>
-      )}
-    </View>
+      </Modal>
+    </>
   );
 }
 
