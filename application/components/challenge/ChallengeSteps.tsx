@@ -10,6 +10,7 @@ interface ChallengeStepsProps {
   challenge: TChallengeDB | undefined;
   posts: TPostDB[] | undefined;
   votes: TVoteDB[] | undefined;
+  isLoading: boolean;
 }
 
 export default function ChallengeSteps({
@@ -18,12 +19,14 @@ export default function ChallengeSteps({
   challenge,
   posts,
   votes,
+  isLoading,
 }: ChallengeStepsProps) {
   return (
     <>
       <ScrollView className="flex flex-col px-4 my-2 min-h-full">
         {challenge?.status === "posting" && (
           <ChallengeInProgress
+            isLoading={isLoading}
             challenge={challenge}
             group={group}
             posts={posts}

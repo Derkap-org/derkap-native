@@ -21,11 +21,13 @@ export const ChallengeScreen = ({
   handleBack,
   refreshChallenge,
 }: ChallengeScreenProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [posts, setPosts] = useState<TPostDB[]>();
   const [votes, setVotes] = useState<TVoteDB[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const fetchPosts = async () => {
     try {
+      setIsLoading(true);
       if (!group?.id) return;
       if (!challenge?.id) return;
       // add cache for posts
@@ -44,6 +46,8 @@ export const ChallengeScreen = ({
         text1: "Erreur dans la récupération des posts",
         text2: error.message || "Veuillez réessayer",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,9 +68,17 @@ export const ChallengeScreen = ({
   };
 
   const refreshChallengeData = async () => {
-    await fetchPosts();
-    await refreshChallenge();
-    await fetchVotes();
+    try {
+      setIsLoading(true);
+      await Promise.all([fetchPosts(), refreshChallenge(), fetchVotes()]);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du rafraîchissement des données du défi",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRefresh = async () => {
@@ -108,6 +120,7 @@ export const ChallengeScreen = ({
         <ChallengeBox challenge={challenge} />
       </View>
       <ChallengeSteps
+        isLoading={isLoading}
         challenge={challenge}
         group={group}
         posts={posts}

@@ -23,7 +23,6 @@ export type TGroupDB = Database["public"]["Tables"]["group"]["Row"] & {
     profile: TProfileDB | null;
   }[];
   challengeStatus?: "posting" | "voting" | "ended";
-  last_activity?: string;
   new_activity?: boolean;
 };
 

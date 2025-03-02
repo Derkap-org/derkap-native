@@ -12,6 +12,7 @@ interface ChallengeInProgressProps extends ViewProps {
   posts: TPostDB[] | undefined;
   refreshChallengeData: () => Promise<void>;
   challenge: TChallengeDB;
+  isLoading: boolean;
 }
 
 const ChallengeInProgress = ({
@@ -20,6 +21,7 @@ const ChallengeInProgress = ({
   challenge,
   refreshChallengeData,
   className,
+  isLoading,
   ...props
 }: ChallengeInProgressProps) => {
   const { profile } = useSupabase();
@@ -47,6 +49,7 @@ const ChallengeInProgress = ({
         />
       ) : (
         <PostNotTaken
+          isLoading={isLoading}
           group={group}
           posts={posts}
           challenge={challenge}

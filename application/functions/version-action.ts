@@ -31,7 +31,7 @@ export const getAppVersionDB = async () => {
 
     return data[0];
   } catch (error) {
-    console.error("Error getting app version:", error);
+    // console.error("Error getting app version:", error);
     return {
       version: "0.0.0",
       min_supported_version: "0.0.0",
@@ -80,7 +80,7 @@ export const mustUpdateApp = async () => {
     // Compare full version (X.Y.Z) instead of just major version
     return compareVersions(appVersion, min_supported_version) < 0;
   } catch (error) {
-    console.error("Error checking if app needs update:", error);
+    // console.error("Error checking if app needs update:", error);
     // Default to not requiring update if there's an error
     return false;
   }
