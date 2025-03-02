@@ -28,6 +28,53 @@ export const getGroups = async ({ user_id }: { user_id?: string }) => {
   };
 };
 
+export const addMemberToGroup = async ({
+  group_id,
+  user_id,
+}: {
+  group_id: number;
+  user_id: string;
+}) => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    return {
+      error: "User not found",
+    };
+  }
+  if (!group_id || !user_id) {
+    return {
+      error: "Id is required",
+    };
+  }
+  // INSERT IN MANY TO MANY TABLE
+
+  const { data: existingGroupProfile, error: checkError } = await supabase
+    .from("group_profile")
+    .select("*")
+    .eq("profile_id", user_id)
+    .eq("group_id", group_id);
+
+  if (checkError) {
+    console.error("Erreur de vérification :", checkError);
+    return;
+  }
+  if (existingGroupProfile.length > 0) {
+    return {
+      error: "Le membre est déjà dans le groupe",
+    };
+  }
+
+  const { error: errorGroupProfil } = await supabase
+    .from("group_profile")
+    .insert({ profile_id: user_id, group_id: group_id });
+
+  if (errorGroupProfil) {
+    return {
+      error: errorGroupProfil.message,
+    };
+  }
+};
+
 export const joinGroup = async ({ invite_code }: { invite_code: string }) => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
@@ -239,10 +286,66 @@ export const leaveGroup = async ({ group_id }: { group_id: string }) => {
     .eq("profile_id", user.id)
     .eq("group_id", parsedGroupId)
     .select("group(*, members:group_profile(profile(*)))");
-  Alert.alert("Groupe quitté", "Vous avez quitté le groupe");
+
   if (errorGroupProfil) {
     throw new Error(
       errorGroupProfil?.message || "Erreur lors de la suppression",
     );
   }
 };
+
+export async function getGroupRanking({ group_id }: { group_id: number }) {
+  const { data, error } = await supabase.rpc("get_group_ranking", {
+    group_id_param: group_id,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function updateDbGroupImg(group_id: number, file_url: string) {
+  const { user } = (await supabase.auth.getUser()).data;
+
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+
+  const response = await fetch(file_url);
+  const blob = await response.blob();
+  const arrayBuffer = await new Response(blob).arrayBuffer();
+
+  // UPLOAD NEW GROUP IMG
+  const { data, error } = await supabase.storage
+    .from("groups")
+    .upload(`${group_id}`, arrayBuffer, {
+      upsert: true,
+      contentType: "image/png",
+    });
+
+  if (error) {
+    throw error;
+  }
+  if (!data) {
+    throw new Error("No data");
+  }
+
+  const { data: group_img_url } = await supabase.storage
+    .from("groups")
+    .getPublicUrl(`${group_id}?${new Date().getTime()}`);
+
+  const { error: updateError } = await supabase
+    .from("group")
+    .update({
+      img_url: group_img_url.publicUrl,
+    })
+    .eq("id", group_id);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  return group_img_url;
+}

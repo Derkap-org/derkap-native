@@ -6,9 +6,54 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
+      "app_ maintenance": {
+        Row: {
+          created_at: string;
+          id: number;
+          maintenance_active: boolean;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          maintenance_active?: boolean;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          maintenance_active?: boolean;
+        };
+        Relationships: [];
+      };
+      app_version: {
+        Row: {
+          created_at: string | null;
+          id: number;
+          min_supported_version: string;
+          notes: string | null;
+          updated_at: string | null;
+          version: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: number;
+          min_supported_version: string;
+          notes?: string | null;
+          updated_at?: string | null;
+          version: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: number;
+          min_supported_version?: string;
+          notes?: string | null;
+          updated_at?: string | null;
+          version?: string;
+        };
+        Relationships: [];
+      };
       challenge: {
         Row: {
           base_key: string | null;
@@ -41,53 +86,54 @@ export interface Database {
           {
             foreignKeyName: "challenge_creator_id_fkey";
             columns: ["creator_id"];
+            isOneToOne: false;
             referencedRelation: "profile";
             referencedColumns: ["id"];
           },
           {
             foreignKeyName: "challenge_group_id_fkey";
             columns: ["group_id"];
+            isOneToOne: false;
             referencedRelation: "group";
             referencedColumns: ["id"];
           },
         ];
       };
-      encrypted_post: {
+      comment: {
         Row: {
-          challenge_id: number | null;
+          content: string | null;
           created_at: string;
-          encrypted_data: string | null;
+          creator_id: string | null;
           id: number;
-          iv: string | null;
-          profile_id: string | null;
+          post_id: number | null;
         };
         Insert: {
-          challenge_id?: number | null;
+          content?: string | null;
           created_at?: string;
-          encrypted_data?: string | null;
+          creator_id?: string | null;
           id?: number;
-          iv?: string | null;
-          profile_id?: string | null;
+          post_id?: number | null;
         };
         Update: {
-          challenge_id?: number | null;
+          content?: string | null;
           created_at?: string;
-          encrypted_data?: string | null;
+          creator_id?: string | null;
           id?: number;
-          iv?: string | null;
-          profile_id?: string | null;
+          post_id?: number | null;
         };
         Relationships: [
           {
-            foreignKeyName: "encrypted_photo_challenge_id_fkey";
-            columns: ["challenge_id"];
-            referencedRelation: "challenge";
+            foreignKeyName: "comment_creator_id_fkey";
+            columns: ["creator_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "encrypted_photo_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "profile";
+            foreignKeyName: "comment_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "post";
             referencedColumns: ["id"];
           },
         ];
@@ -99,6 +145,7 @@ export interface Database {
           id: number;
           img_url: string | null;
           invite_code: string | null;
+          last_activity: string | null;
           name: string;
         };
         Insert: {
@@ -107,6 +154,7 @@ export interface Database {
           id?: number;
           img_url?: string | null;
           invite_code?: string | null;
+          last_activity?: string | null;
           name: string;
         };
         Update: {
@@ -115,12 +163,14 @@ export interface Database {
           id?: number;
           img_url?: string | null;
           invite_code?: string | null;
+          last_activity?: string | null;
           name?: string;
         };
         Relationships: [
           {
             foreignKeyName: "group_creator_id_fkey";
             columns: ["creator_id"];
+            isOneToOne: false;
             referencedRelation: "profile";
             referencedColumns: ["id"];
           },
@@ -149,12 +199,14 @@ export interface Database {
           {
             foreignKeyName: "group_profile_group_id_fkey";
             columns: ["group_id"];
+            isOneToOne: false;
             referencedRelation: "group";
             referencedColumns: ["id"];
           },
           {
             foreignKeyName: "group_profile_profile_id_fkey";
             columns: ["profile_id"];
+            isOneToOne: false;
             referencedRelation: "profile";
             referencedColumns: ["id"];
           },
@@ -165,7 +217,6 @@ export interface Database {
           created_at: string;
           expo_push_token: string | null;
           id: number;
-          subscription: Json | null;
           updated_at: string | null;
           user_id: string;
         };
@@ -173,7 +224,6 @@ export interface Database {
           created_at?: string;
           expo_push_token?: string | null;
           id?: number;
-          subscription?: Json | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -181,7 +231,6 @@ export interface Database {
           created_at?: string;
           expo_push_token?: string | null;
           id?: number;
-          subscription?: Json | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -189,6 +238,7 @@ export interface Database {
           {
             foreignKeyName: "notification_subscription_user_id_fkey";
             columns: ["user_id"];
+            isOneToOne: true;
             referencedRelation: "profile";
             referencedColumns: ["id"];
           },
@@ -196,6 +246,7 @@ export interface Database {
       };
       post: {
         Row: {
+          caption: string | null;
           challenge_id: number | null;
           created_at: string;
           file_path: string | null;
@@ -203,6 +254,7 @@ export interface Database {
           profile_id: string | null;
         };
         Insert: {
+          caption?: string | null;
           challenge_id?: number | null;
           created_at?: string;
           file_path?: string | null;
@@ -210,6 +262,7 @@ export interface Database {
           profile_id?: string | null;
         };
         Update: {
+          caption?: string | null;
           challenge_id?: number | null;
           created_at?: string;
           file_path?: string | null;
@@ -220,12 +273,14 @@ export interface Database {
           {
             foreignKeyName: "post_challenge_id_fkey";
             columns: ["challenge_id"];
+            isOneToOne: false;
             referencedRelation: "challenge";
             referencedColumns: ["id"];
           },
           {
             foreignKeyName: "post_profile_id_fkey";
             columns: ["profile_id"];
+            isOneToOne: false;
             referencedRelation: "profile";
             referencedColumns: ["id"];
           },
@@ -253,14 +308,7 @@ export interface Database {
           id?: string;
           username?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: "profile_id_fkey";
-            columns: ["id"];
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       vote: {
         Row: {
@@ -288,18 +336,21 @@ export interface Database {
           {
             foreignKeyName: "vote_challenge_id_fkey";
             columns: ["challenge_id"];
+            isOneToOne: false;
             referencedRelation: "challenge";
             referencedColumns: ["id"];
           },
           {
             foreignKeyName: "vote_post_id_fkey";
             columns: ["post_id"];
-            referencedRelation: "encrypted_post";
+            isOneToOne: false;
+            referencedRelation: "post";
             referencedColumns: ["id"];
           },
           {
             foreignKeyName: "vote_user_id_fkey";
             columns: ["user_id"];
+            isOneToOne: false;
             referencedRelation: "profile";
             referencedColumns: ["id"];
           },
@@ -317,6 +368,32 @@ export interface Database {
       generate_unique_invite_code: {
         Args: Record<PropertyKey, never>;
         Returns: string;
+      };
+      get_group_by_invite_code: {
+        Args: {
+          p_invite_code: string;
+        };
+        Returns: {
+          created_at: string;
+          creator_id: string | null;
+          id: number;
+          img_url: string | null;
+          invite_code: string | null;
+          last_activity: string | null;
+          name: string;
+        }[];
+      };
+      get_group_ranking: {
+        Args: {
+          group_id_param: number;
+        };
+        Returns: {
+          rank: number;
+          profile_id: string;
+          username: string;
+          avatar_url: string;
+          winned_challenges: number;
+        }[];
       };
       get_group_user_count: {
         Args: {
@@ -341,4 +418,101 @@ export interface Database {
       [_ in never]: never;
     };
   };
-}
+};
+
+type PublicSchema = Database[Extract<keyof Database, "public">];
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I;
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I;
+      }
+      ? I
+      : never
+    : never;
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U;
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U;
+      }
+      ? U
+      : never
+    : never;
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never;
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database;
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never;

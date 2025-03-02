@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ViewProps } from "react-native";
+import { View, Pressable, ViewProps } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { Ellipsis, ChevronLeft } from "lucide-react-native";

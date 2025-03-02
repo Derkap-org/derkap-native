@@ -23,7 +23,11 @@ export type TGroupDB = Database["public"]["Tables"]["group"]["Row"] & {
     profile: TProfileDB | null;
   }[];
   challengeStatus?: "posting" | "voting" | "ended";
-  hasNewStatus?: boolean;
+  new_activity?: boolean;
+};
+
+export type TProfileInGroup = TProfileDB & {
+  alreadyInGroup: boolean;
 };
 
 export type TGroupsStatus = {
@@ -54,6 +58,7 @@ export type TPostDB = {
     id: string;
     username: string;
   };
+  caption: string;
 };
 
 // VOTES
@@ -63,3 +68,11 @@ export type UserVote = {
   voted: boolean;
   postId?: number;
 } | null;
+
+export type GroupRanking =
+  Database["public"]["Functions"]["get_group_ranking"]["Returns"];
+
+// COMMENTS
+export type TCommentDB = Database["public"]["Tables"]["comment"]["Row"] & {
+  creator: TProfileDB | null;
+};

@@ -4,14 +4,15 @@ import Capture from "@/components/Capture";
 import Button from "@/components/Button";
 import { TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
 
-import { View, Text, ViewProps } from "react-native";
-import CarouselMedia from "@/components/group/CarouselMedia";
+import { View, Text, ViewProps, ActivityIndicator } from "react-native";
+import CarouselMedia from "@/components/challenge/CarouselMedia";
 
 interface PostNotTakenProps extends ViewProps {
   posts: TPostDB[] | undefined;
-  fetchAllGroupData: () => Promise<void>;
+  refreshChallengeData: () => Promise<void>;
   challenge: TChallengeDB;
   group: TGroupDB;
+  isLoading: boolean;
 }
 
 const PostNotTaken = ({
@@ -19,17 +20,26 @@ const PostNotTaken = ({
   posts,
   challenge,
   group,
-  fetchAllGroupData,
+  refreshChallengeData,
+  isLoading,
   ...props
 }: PostNotTakenProps) => {
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
+
+  if (isLoading) {
+    return (
+      <View className="flex flex-col gap-y-1">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View {...props} className={cn("", className)}>
       {isCapturing ? (
         <Capture
           setIsCapturing={setIsCapturing}
-          fetchAllGroupData={fetchAllGroupData}
+          refreshChallengeData={refreshChallengeData}
           challenge={challenge}
         />
       ) : (

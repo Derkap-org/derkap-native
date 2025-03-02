@@ -3,13 +3,12 @@ import React, { useRef, useState } from "react";
 import Button from "@/components/Button";
 import { useSupabase } from "@/context/auth-context";
 import ProfileHeader from "@/components/group/ProfileHeader";
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
 import * as ImagePicker from "expo-image-picker";
 import { Pencil } from "lucide-react-native";
 import { updateAvatarProfile } from "@/functions/profile-action";
 import Toast from "react-native-toast-message";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 
 export default function Group() {
   const [profileImage, setNewProfileImage] = useState<string | null>(null);
@@ -42,7 +41,7 @@ export default function Group() {
     }
   };
 
-  const modalRef = useRef<SwipeModalPublicMethods>(null);
+  const modalRef = useRef<ActionSheetRef>(null);
   const showModal = () => modalRef.current?.show();
 
   return (
@@ -107,23 +106,14 @@ export default function Group() {
           </View>
         </View>
       </View>
-      <SwipeModal
-        ref={modalRef}
-        showBar
-        maxHeight={400}
-        bg="white"
-        style={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-        wrapInGestureHandlerRootView
-      >
-        <View className="flex flex-col px-10 pt-10 bg-white pb-18 gap-y-4">
-          <Button
-            withLoader={true}
-            className="flex items-center justify-center w-full gap-2 bg-red-500"
-            onClick={signOut}
-            text={"Se déconnecter"}
-          />
-        </View>
-      </SwipeModal>
+      <Modal actionSheetRef={modalRef}>
+        <Button
+          withLoader={true}
+          className="flex items-center justify-center w-full gap-2 bg-red-500"
+          onClick={signOut}
+          text={"Se déconnecter"}
+        />
+      </Modal>
     </>
   );
 }

@@ -29,12 +29,7 @@ export const addVote = async ({
 }) => {
   console.log("addVote", post_id, challenge_id);
   const { user } = (await supabase.auth.getUser()).data;
-  if (!user) {
-    return {
-      data: null,
-      error: "User not found",
-    };
-  }
+  if (!user) throw new Error("Utilisateur non trouvé");
 
   const { error } = await supabase.from("vote").upsert(
     {

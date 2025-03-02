@@ -7,6 +7,9 @@ import "../global.css";
 import { SupabaseProvider } from "@/context/auth-context";
 import { SafeAreaView } from "react-native";
 import Toast from "react-native-toast-message";
+import VersionCheck from "@/components/VersionCheck";
+
+import MaintenanceCheck from "@/components/MaintenanceCheck";
 global.Buffer = require("buffer").Buffer;
 SplashScreen.preventAutoHideAsync();
 
@@ -25,7 +28,11 @@ export default function RootLayout() {
   return (
     <SupabaseProvider>
       <SafeAreaView className="flex-1 bg-[#f1d7f3]">
-        <Slot />
+        <MaintenanceCheck>
+          <VersionCheck>
+            <Slot />
+          </VersionCheck>
+        </MaintenanceCheck>
       </SafeAreaView>
       <Toast topOffset={70} />
     </SupabaseProvider>

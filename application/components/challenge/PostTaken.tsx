@@ -3,13 +3,12 @@ import { TPostDB, TGroupDB, TChallengeDB } from "@/types/types";
 import { useRef } from "react";
 import { View, Text } from "react-native";
 import Button from "../Button";
-import CarouselMedia from "@/components/group/CarouselMedia";
+import CarouselMedia from "@/components/challenge/CarouselMedia";
 import { BlurView } from "expo-blur";
 import { useSupabase } from "@/context/auth-context";
 import { setChallengeToVoting } from "@/functions/challenge-action";
-import SwipeModal, {
-  SwipeModalPublicMethods,
-} from "@birdwingo/react-native-swipe-modal";
+import { Modal } from "@/components/Modal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 import React from "react";
 import Toast from "react-native-toast-message";
 
@@ -17,7 +16,7 @@ interface PostTakenProps {
   posts: TPostDB[] | undefined;
   group: TGroupDB | undefined;
   challenge: TChallengeDB;
-  fetchAllGroupData: () => Promise<void>;
+  refreshChallengeData: () => Promise<void>;
   className?: string;
 }
 
@@ -26,12 +25,12 @@ const PostTaken = ({
   posts,
   challenge,
   group,
-  fetchAllGroupData,
+  refreshChallengeData,
   ...props
 }: PostTakenProps) => {
   const { profile } = useSupabase();
 
-  const modalGoVoteRef = useRef<SwipeModalPublicMethods>(null);
+  const modalGoVoteRef = useRef<ActionSheetRef>(null);
 
   const showModalGoVote = () => modalGoVoteRef.current?.show();
 
@@ -46,7 +45,7 @@ const PostTaken = ({
       });
     } finally {
       modalGoVoteRef.current?.hide();
-      await fetchAllGroupData();
+      await refreshChallengeData();
     }
   };
 
@@ -105,12 +104,12 @@ const PostTaken = ({
           </View>
         </View>
 
-        <View className="flex flex-col w-full gap-4">
+        <View className="flex flex-col w-full gap-1">
           <Text className="text-xl font-grotesque">Toujours en retard...</Text>
-          <View className="flex flex-col w-full gap-2">
+          <View className="flex flex-row flex-wrap w-full gap-2">
             {getWhoNotPost().map((member, index) => (
               <Text key={index} className="">
-                @{member.profile?.username}
+                {index !== 0 && ", "}@{member.profile?.username}
               </Text>
             ))}
           </View>
@@ -119,43 +118,31 @@ const PostTaken = ({
         {challenge?.creator_id === profile.id && (
           <Button
             text="Passer aux votes"
-            className="w-full font-grotesque"
+            className="w-full font-grotesque mb-40"
             onClick={() => {
               showModalGoVote();
             }}
           />
         )}
       </View>
-      <SwipeModal
-        ref={modalGoVoteRef}
-        showBar
-        maxHeight={400}
-        bg="white"
-        style={{
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-        }}
-        wrapInGestureHandlerRootView
-      >
-        <View className="flex flex-col items-center justify-between px-10 bg-white gap-y-4">
-          <Text className="text-2xl font-bold">Passer aux votes</Text>
-          <Text className="text-xs">
-            En tant que créateur du défi, tu peux décider de passer aux votes,
-            sans attendre que tous les participants aient posté leur Derkap.
-            {"\n"}
-            <Text className="font-bold">
-              Attention, une fois les votes lancés, les participants ne pourront
-              plus poster leur Derkap.
-            </Text>
+      <Modal actionSheetRef={modalGoVoteRef}>
+        <Text className="text-2xl font-bold">Passer aux votes</Text>
+        <Text className="">
+          En tant que créateur du défi, tu peux décider de passer aux votes,
+          sans attendre que tous les participants aient posté leur Derkap.
+          {"\n"}
+          <Text className="font-bold">
+            Attention, une fois les votes lancés, les participants ne pourront
+            plus poster leur Derkap.
           </Text>
-          <Button
-            className="w-full bg-purple-500 font-grotesque"
-            text="Confirmer"
-            onClick={handleGoVote}
-            withLoader={true}
-          />
-        </View>
-      </SwipeModal>
+        </Text>
+        <Button
+          className="w-full bg-purple-500 font-grotesque"
+          text="Confirmer"
+          onClick={handleGoVote}
+          withLoader={true}
+        />
+      </Modal>
     </>
   );
 };
