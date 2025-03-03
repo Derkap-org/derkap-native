@@ -7,6 +7,7 @@ import {
   ViewProps,
   Dimensions,
   TextInput,
+  Keyboard,
 } from "react-native";
 import { XIcon, RefreshCcw, Timer, ChevronLeft } from "lucide-react-native";
 import { StyleSheet } from "react-native";
@@ -68,6 +69,7 @@ export default function Capture({
   const validatePhoto = async () => {
     try {
       setIsValidatingFile(true);
+      Keyboard.dismiss();
       if (!capturedPhoto) throw new Error("Aucune photo à valider");
 
       if (!challenge) {
