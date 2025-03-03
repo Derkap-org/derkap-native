@@ -105,6 +105,7 @@ export const ChallengeScreen = ({
 
   return (
     <ScrollView
+      keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}

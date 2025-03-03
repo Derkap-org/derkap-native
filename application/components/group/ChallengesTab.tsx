@@ -39,7 +39,7 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
   const handleCreateChallenge = async () => {
     try {
       if (!group?.id) return;
-
+      Keyboard.dismiss();
       await createChallenge({
         challenge: {
           description: newChallengeDescription,
@@ -146,6 +146,7 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
+        keyboardShouldPersistTaps="always"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

@@ -6,6 +6,7 @@ import {
   ViewProps,
   ActivityIndicator,
   ScrollView,
+  Keyboard,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { TPostDB, UserVote, TVoteDB, TCommentDB } from "@/types/types";
@@ -78,6 +79,7 @@ export default function CarouselMedia({
 
   const handleCreateComment = async () => {
     if (!newComment) return;
+    Keyboard.dismiss();
     try {
       setPostingComment(true);
       await createComment({
@@ -218,7 +220,7 @@ export default function CarouselMedia({
           <Text className="text-2xl font-bold font-grotesque text-center py-4">
             Commentaires
           </Text>
-          <ScrollView className="flex-1 flex-col gap-y-2 px-10">
+          <ScrollView className="flex-1 flex-col gap-y-2">
             {comments[activePostId]?.length > 0 ? (
               comments[activePostId]?.map((comment) => (
                 <Comment

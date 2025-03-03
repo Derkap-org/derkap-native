@@ -23,7 +23,10 @@ export default function ChallengeSteps({
 }: ChallengeStepsProps) {
   return (
     <>
-      <ScrollView className="flex flex-col px-4 my-2 min-h-full">
+      <ScrollView
+        keyboardShouldPersistTaps="always"
+        className="flex flex-col px-4 my-2 min-h-full"
+      >
         {challenge?.status === "posting" && (
           <ChallengeInProgress
             isLoading={isLoading}
