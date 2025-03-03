@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { Alert } from "react-native";
 
+export const MAX_GROUP_NAME_LENGTH = 20;
+
 export const getGroups = async ({ user_id }: { user_id?: string }) => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
@@ -150,6 +152,12 @@ export const joinGroup = async ({ invite_code }: { invite_code: string }) => {
 };
 
 export const createGroup = async ({ name }: { name: string }) => {
+  if (name.length > MAX_GROUP_NAME_LENGTH) {
+    return {
+      data: null,
+      error: `Le nom du groupe ne doit pas dépasser ${MAX_GROUP_NAME_LENGTH} caractères`,
+    };
+  }
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
     return {
@@ -223,6 +231,12 @@ export const updateGroupName = async ({
   group_id: number;
   name: string;
 }) => {
+  if (name.length > MAX_GROUP_NAME_LENGTH) {
+    return {
+      data: null,
+      error: `Le nom du groupe ne doit pas dépasser ${MAX_GROUP_NAME_LENGTH} caractères`,
+    };
+  }
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
     throw new Error("Utilisateur non trouvé");

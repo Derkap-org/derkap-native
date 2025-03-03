@@ -11,13 +11,14 @@ import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
 
-import { TChallengeDB, TGroupDB, TProfileInGroup } from "@/types/types";
+import { TGroupDB, TProfileInGroup } from "@/types/types";
 import {
   addMemberToGroup,
   getGroup,
   leaveGroup,
   updateDbGroupImg,
   updateGroupName,
+  MAX_GROUP_NAME_LENGTH,
 } from "@/functions/group-action";
 import { useRouter } from "expo-router";
 import { Modal } from "@/components/Modal";
@@ -145,9 +146,15 @@ export default function Group() {
   };
 
   const handleUpdateGroupName = async () => {
+    if (newGroupName.length > MAX_GROUP_NAME_LENGTH) {
+      Toast.show({
+        type: "error",
+        text1: `Le nom du groupe ne doit pas dépasser ${MAX_GROUP_NAME_LENGTH} caractères`,
+      });
+      return;
+    }
     try {
       if (!newGroupName.length || newGroupName === currentGroup?.name) {
-        return;
       }
       await updateGroupName({
         group_id: currentGroup?.id,
