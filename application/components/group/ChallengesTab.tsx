@@ -147,7 +147,11 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={"#000"}
+          />
         }
         className="flex flex-col px-4 min-h-full"
         onScroll={({ nativeEvent }) => {

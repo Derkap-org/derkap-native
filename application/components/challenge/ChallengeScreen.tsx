@@ -106,7 +106,11 @@ export const ChallengeScreen = ({
   return (
     <ScrollView
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={"#000"}
+        />
       }
       className="flex flex-col min-h-full"
     >

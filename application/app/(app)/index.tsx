@@ -138,6 +138,7 @@ const Home = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
+                tintColor={"#000"}
               />
             }
             className="w-full"
