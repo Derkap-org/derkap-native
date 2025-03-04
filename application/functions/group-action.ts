@@ -363,3 +363,36 @@ export async function updateDbGroupImg(group_id: number, file_url: string) {
 
   return group_img_url;
 }
+
+export const removeFromGroup = async ({
+  group_id,
+  user_id,
+}: {
+  group_id: number;
+  user_id: string;
+}) => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+  if (!group_id || !user_id) {
+    throw new Error("Id requis");
+  }
+
+  if (user.id === user_id) {
+    throw new Error("Vous ne pouvez pas vous supprimer de votre groupe");
+  }
+  console.log(`Retirer ${user_id} du groupe ${group_id}`);
+  const { data, error } = await supabase
+    .from("group_profile")
+    .delete()
+    .eq("group_id", group_id)
+    .eq("profile_id", user_id);
+
+  console.log(data);
+
+  if (error) {
+    console.log(error);
+    throw new Error(error.message);
+  }
+};
