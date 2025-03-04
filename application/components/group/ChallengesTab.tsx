@@ -20,16 +20,21 @@ import { cn } from "@/lib/utils";
 
 interface ChallengesTabProps {
   group: TGroupDB | undefined;
+  selectedChallenge: TChallengeDB | null;
+  setSelectedChallenge: (challenge: TChallengeDB | null) => void;
 }
 
-export const ChallengesTab = ({ group }: ChallengesTabProps) => {
+export const ChallengesTab = ({
+  group,
+  selectedChallenge,
+  setSelectedChallenge,
+}: ChallengesTabProps) => {
   const [isFetchingChallenges, setIsFetchingChallenges] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [challenges, setChallenges] = useState<TChallengeDB[] | undefined>(
     undefined,
   );
-  const [selectedChallenge, setSelectedChallenge] =
-    useState<TChallengeDB | null>(null);
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -39,7 +44,7 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
   const handleCreateChallenge = async () => {
     try {
       if (!group?.id) return;
-
+      Keyboard.dismiss();
       await createChallenge({
         challenge: {
           description: newChallengeDescription,
@@ -137,7 +142,6 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
       <ChallengeScreen
         refreshChallenge={fetchChallenges}
         group={group}
-        handleBack={() => setSelectedChallenge(null)}
         challenge={selectedChallenge}
       />
     );
@@ -146,8 +150,13 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
+        keyboardShouldPersistTaps="always"
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={"#000"}
+          />
         }
         className="flex flex-col px-4 min-h-full"
         onScroll={({ nativeEvent }) => {

@@ -9,7 +9,7 @@ import {
   TGroupDB,
 } from "@/types/types";
 import { useState, useEffect, useRef } from "react";
-import { View, Text, ViewProps } from "react-native";
+import { View, Text, ViewProps, ScrollView } from "react-native";
 import { useSupabase } from "@/context/auth-context";
 import { addVote } from "@/functions/vote-action";
 import Toast from "react-native-toast-message";

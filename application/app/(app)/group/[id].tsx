@@ -11,13 +11,15 @@ import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
 
-import { TChallengeDB, TGroupDB, TProfileInGroup } from "@/types/types";
+import { TGroupDB, TProfileInGroup, TChallengeDB } from "@/types/types";
 import {
   addMemberToGroup,
   getGroup,
   leaveGroup,
   updateDbGroupImg,
   updateGroupName,
+  MAX_GROUP_NAME_LENGTH,
+  removeFromGroup,
 } from "@/functions/group-action";
 import { useRouter } from "expo-router";
 import { Modal } from "@/components/Modal";
@@ -49,6 +51,9 @@ export default function Group() {
   const [searchedUsers, setSearchedUsers] = useState<TProfileInGroup[]>([]);
   const [queryUser, setQueryUser] = useState("");
   const [debouncedQuery] = useDebounce(queryUser, 400);
+  const [selectedChallenge, setSelectedChallenge] =
+    useState<TChallengeDB | null>(null);
+  const [memberIdToRemove, setMemberIdToRemove] = useState<string | null>(null);
 
   const { fetchGroups, updateGroupImg } = useGroupStore();
 
@@ -72,13 +77,38 @@ export default function Group() {
   };
 
   const modalGroupSettingsRef = useRef<ActionSheetRef>(null);
-
   const modalAddMemberRef = useRef<ActionSheetRef>(null);
+  const modalRemoveMemberRef = useRef<ActionSheetRef>(null);
 
   const showGroupSettingsModal = () => modalGroupSettingsRef.current?.show();
 
   const showAddMemberModal = () => {
     modalAddMemberRef.current?.show();
+  };
+
+  const showRemoveMemberModal = () => {
+    modalRemoveMemberRef.current?.show();
+  };
+
+  const getMemberName = (user_id: string) => {
+    return currentGroup?.members?.find(
+      (member) => member.profile.id === user_id,
+    )?.profile.username;
+  };
+
+  const handleRemoveMember = async (user_id: string) => {
+    try {
+      await removeFromGroup({ group_id: currentGroup?.id, user_id });
+      setMemberIdToRemove(null);
+      modalRemoveMemberRef.current?.hide();
+      fetchCurrentGroup();
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la suppression du membre",
+        text2: error.message || "Veuillez réessayer",
+      });
+    }
   };
 
   const handleAddMember = async (user_id: string) => {
@@ -145,9 +175,15 @@ export default function Group() {
   };
 
   const handleUpdateGroupName = async () => {
+    if (newGroupName.length > MAX_GROUP_NAME_LENGTH) {
+      Toast.show({
+        type: "error",
+        text1: `Le nom du groupe ne doit pas dépasser ${MAX_GROUP_NAME_LENGTH} caractères`,
+      });
+      return;
+    }
     try {
       if (!newGroupName.length || newGroupName === currentGroup?.name) {
-        return;
       }
       await updateGroupName({
         group_id: currentGroup?.id,
@@ -258,11 +294,10 @@ export default function Group() {
       <View className="mb-28">
         <GroupHeader
           group={currentGroup}
-          // challenge={currentChallenge}
           showModal={showGroupSettingsModal}
+          selectedChallenge={selectedChallenge}
+          setSelectedChallenge={setSelectedChallenge}
         />
-
-        {/* <View className="p-4 gap-y-4"> */}
 
         <View className="flex flex-row justify-between px-4 my-2">
           <Pressable
@@ -298,7 +333,13 @@ export default function Group() {
             </Text>
           </Pressable>
         </View>
-        {selectedTab === "challenges" && <ChallengesTab group={currentGroup} />}
+        {selectedTab === "challenges" && (
+          <ChallengesTab
+            group={currentGroup}
+            selectedChallenge={selectedChallenge}
+            setSelectedChallenge={setSelectedChallenge}
+          />
+        )}
         {selectedTab === "ranking" && <GroupRankingTab groupId={Number(id)} />}
       </View>
 
@@ -387,9 +428,15 @@ export default function Group() {
                 </Text>
                 <View className="flex flex-col w-full gap-y-4">
                   {currentGroup?.members?.map((member, i) => (
-                    <Fragment key={i}>
+                    <Pressable
+                      onLongPress={() => {
+                        setMemberIdToRemove(member.profile.id);
+                        showRemoveMemberModal();
+                      }}
+                      key={i}
+                    >
                       <ProfileLine member={member.profile} />
-                    </Fragment>
+                    </Pressable>
                   ))}
                 </View>
               </View>
@@ -420,6 +467,22 @@ export default function Group() {
               />
             </View>
           ))}
+        </Modal>
+        <Modal actionSheetRef={modalRemoveMemberRef}>
+          <View className="flex flex-col items-center justify-center w-full gap-2">
+            <Text className="">
+              Êtes-vous sûr de vouloir retirer{" "}
+              <Text className="font-bold">
+                {getMemberName(memberIdToRemove)}
+              </Text>{" "}
+              du groupe ?
+            </Text>
+            <Button
+              text={`Retirer`}
+              isCancel={!memberIdToRemove}
+              onClick={() => handleRemoveMember(memberIdToRemove)}
+            />
+          </View>
         </Modal>
       </Modal>
     </>

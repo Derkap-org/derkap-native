@@ -18,7 +18,7 @@ import useGroupStore from "@/store/useGroupStore";
 import { useFocusEffect } from "@react-navigation/native";
 import { Modal } from "@/components/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
-
+import { MAX_GROUP_NAME_LENGTH } from "@/functions/group-action";
 import Toast from "react-native-toast-message";
 
 const Home = () => {
@@ -41,6 +41,13 @@ const Home = () => {
   const hideModal = () => actionSheetRef.current?.hide();
 
   const handleCreateGroup = async () => {
+    if (groupName.length > MAX_GROUP_NAME_LENGTH) {
+      Toast.show({
+        type: "error",
+        text1: `Le nom du groupe ne doit pas dépasser ${MAX_GROUP_NAME_LENGTH} caractères`,
+      });
+      return;
+    }
     const { succes } = await createGroup(groupName);
     if (succes) {
       hideModal();
@@ -138,6 +145,7 @@ const Home = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
+                tintColor={"#000"}
               />
             }
             className="w-full"
@@ -259,6 +267,7 @@ const Home = () => {
             value={groupName}
             placeholder="Entre le nom de groupe ici"
             placeholderTextColor="#888"
+            maxLength={20}
           />
           <Button
             withLoader={true}
