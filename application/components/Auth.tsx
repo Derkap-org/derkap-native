@@ -57,8 +57,16 @@ export default function Auth() {
       });
 
       setLoading(false);
-      if (error) throw error;
-      else {
+      if (error) {
+        if (error.code === "email_not_confirmed") {
+          router.push({
+            pathname: "/confirm-email",
+            params: { email: email, reason: "email_not_confirmed" },
+          });
+        } else {
+          throw error;
+        }
+      } else {
         router.push("/");
       }
     } catch (error) {

@@ -215,7 +215,7 @@ const Home = () => {
 
                     {/* Photos des membres */}
                     <View className="flex-row">
-                      {group.members?.slice(0, 5).map((member, index) => {
+                      {group.members?.map((member, index) => {
                         if (!member.profile) return;
                         return (
                           <View
@@ -243,13 +243,13 @@ const Home = () => {
                       })}
 
                       {/* Nombre de membres supplémentaires */}
-                      {(group.members?.length || 0) > 5 && (
+                      {/* {(group.members?.length || 0) > 5 && (
                         <View className="items-center justify-center w-10 h-10 -ml-3 bg-gray-300 border-2 border-white rounded-full">
                           <Text className="text-sm text-white">
                             +{(group.members?.length || 0) - 5}
                           </Text>
                         </View>
-                      )}
+                      )} */}
                     </View>
                   </View>
                 </View>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useSupabase } from "@/context/auth-context";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
@@ -12,11 +12,12 @@ import { ChevronLeft } from "lucide-react-native";
 import Toast from "react-native-toast-message";
 export default function ConfirmEmail() {
   const { session } = useSupabase();
-  const { email: emailLocal } = useLocalSearchParams();
+  const { email: emailLocal, reason } = useLocalSearchParams();
 
   const [isLoading, setLoading] = useState(false);
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [email, setEmail] = useState((emailLocal as string) ?? "");
+  const [timer, setTimer] = useState(60);
 
   async function signInOtp() {
     try {
@@ -48,6 +49,39 @@ export default function ConfirmEmail() {
     }
   }
 
+  async function resendOtp() {
+    try {
+      const { error } = await supabase.auth.resend({
+        email,
+        type: "signup",
+      });
+      if (error) throw new Error(error?.message || "Une erreur est survenue");
+      setTimer(60);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la ré-envoi du code",
+        text2: error?.message || "Une erreur est survenue",
+      });
+    }
+  }
+
+  const handleTimer = () => {
+    if (timer > 0) {
+      setTimeout(() => setTimer(timer - 1), 1000);
+    }
+  };
+
+  useEffect(() => {
+    handleTimer();
+  }, [timer]);
+
+  useEffect(() => {
+    if (reason === "email_not_confirmed") {
+      resendOtp();
+    }
+  }, [reason]);
+
   if (!session) {
     return (
       <View className="h-full p-4">
@@ -67,6 +101,18 @@ export default function ConfirmEmail() {
               text="Confirmer"
               isCancel={isLoading}
               onClick={signInOtp}
+              className="bg-gray-500 w-fit"
+            />
+            <Button
+              withLoader
+              disabled={isLoading || timer > 0}
+              text={
+                timer > 0
+                  ? `Renvoyer le code dans ${timer}`
+                  : "Renvoyer le code"
+              }
+              isCancel={isLoading || timer > 0}
+              onClick={resendOtp}
               className="bg-gray-500 w-fit"
             />
           </View>
