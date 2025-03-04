@@ -11,14 +11,12 @@ import { useEffect, useState } from "react";
 interface ChallengeScreenProps {
   challenge: TChallengeDB;
   group: TGroupDB;
-  handleBack: () => void;
   refreshChallenge: () => Promise<void>;
 }
 
 export const ChallengeScreen = ({
   challenge,
   group,
-  handleBack,
   refreshChallenge,
 }: ChallengeScreenProps) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -116,12 +114,6 @@ export const ChallengeScreen = ({
       className="flex flex-col min-h-full"
     >
       <View className="relative my-2 px-4">
-        <Pressable
-          className="absolute -top-2 right-3 z-10 p-1 rounded-full bg-red-500"
-          onPress={() => handleBack()}
-        >
-          <X color={"white"} size={20} />
-        </Pressable>
         <ChallengeBox challenge={challenge} />
       </View>
       <ChallengeSteps

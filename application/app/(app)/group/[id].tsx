@@ -11,7 +11,7 @@ import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useLocalSearchParams } from "expo-router";
 import GroupHeader from "@/components/group/GroupHeader";
 
-import { TGroupDB, TProfileInGroup } from "@/types/types";
+import { TGroupDB, TProfileInGroup, TChallengeDB } from "@/types/types";
 import {
   addMemberToGroup,
   getGroup,
@@ -50,6 +50,8 @@ export default function Group() {
   const [searchedUsers, setSearchedUsers] = useState<TProfileInGroup[]>([]);
   const [queryUser, setQueryUser] = useState("");
   const [debouncedQuery] = useDebounce(queryUser, 400);
+  const [selectedChallenge, setSelectedChallenge] =
+    useState<TChallengeDB | null>(null);
 
   const { fetchGroups, updateGroupImg } = useGroupStore();
 
@@ -265,8 +267,9 @@ export default function Group() {
       <View className="mb-28">
         <GroupHeader
           group={currentGroup}
-          // challenge={currentChallenge}
           showModal={showGroupSettingsModal}
+          selectedChallenge={selectedChallenge}
+          setSelectedChallenge={setSelectedChallenge}
         />
 
         {/* <View className="p-4 gap-y-4"> */}
@@ -305,7 +308,13 @@ export default function Group() {
             </Text>
           </Pressable>
         </View>
-        {selectedTab === "challenges" && <ChallengesTab group={currentGroup} />}
+        {selectedTab === "challenges" && (
+          <ChallengesTab
+            group={currentGroup}
+            selectedChallenge={selectedChallenge}
+            setSelectedChallenge={setSelectedChallenge}
+          />
+        )}
         {selectedTab === "ranking" && <GroupRankingTab groupId={Number(id)} />}
       </View>
 

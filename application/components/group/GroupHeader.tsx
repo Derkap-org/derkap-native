@@ -3,24 +3,32 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { ChevronLeft, Ellipsis } from "lucide-react-native";
 
-import { TGroupDB } from "@/types/types";
+import { TGroupDB, TChallengeDB } from "@/types/types";
 import useGroupStore from "@/store/useGroupStore";
 interface GroupHeaderProps extends ViewProps {
   group?: TGroupDB;
   showModal: () => void;
+  selectedChallenge: TChallengeDB | null;
+  setSelectedChallenge: (challenge: TChallengeDB | null) => void;
 }
 
 export default function GroupHeader({
   showModal,
   group,
+  selectedChallenge,
+  setSelectedChallenge,
   ...props
 }: GroupHeaderProps) {
   const router = useRouter();
   const { fetchGroups } = useGroupStore();
 
   const handleBack = () => {
-    fetchGroups();
-    router.back();
+    if (selectedChallenge) {
+      setSelectedChallenge(null);
+    } else {
+      fetchGroups();
+      router.back();
+    }
   };
 
   return (

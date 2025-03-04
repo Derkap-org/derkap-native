@@ -20,16 +20,21 @@ import { cn } from "@/lib/utils";
 
 interface ChallengesTabProps {
   group: TGroupDB | undefined;
+  selectedChallenge: TChallengeDB | null;
+  setSelectedChallenge: (challenge: TChallengeDB | null) => void;
 }
 
-export const ChallengesTab = ({ group }: ChallengesTabProps) => {
+export const ChallengesTab = ({
+  group,
+  selectedChallenge,
+  setSelectedChallenge,
+}: ChallengesTabProps) => {
   const [isFetchingChallenges, setIsFetchingChallenges] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [challenges, setChallenges] = useState<TChallengeDB[] | undefined>(
     undefined,
   );
-  const [selectedChallenge, setSelectedChallenge] =
-    useState<TChallengeDB | null>(null);
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -137,7 +142,6 @@ export const ChallengesTab = ({ group }: ChallengesTabProps) => {
       <ChallengeScreen
         refreshChallenge={fetchChallenges}
         group={group}
-        handleBack={() => setSelectedChallenge(null)}
         challenge={selectedChallenge}
       />
     );
