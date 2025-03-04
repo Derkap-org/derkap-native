@@ -245,8 +245,10 @@ export default function CarouselMedia({
               placeholder="Ajouter un commentaire"
             />
             <Button
-              className="w-4/12 p-0 bg-custom-primary rounded-xl"
-              isCancel={postingComment}
+              className="w-4/12 p-0 rounded-xl"
+              isCancel={
+                postingComment || !newComment || newComment.length === 0
+              }
               text="Envoyer"
               onClick={handleCreateComment}
               withLoader={true}
