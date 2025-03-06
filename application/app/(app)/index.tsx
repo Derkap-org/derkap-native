@@ -131,14 +131,22 @@ const Home = () => {
           </Pressable>
         </View>
         {groups.length === 0 ? (
-          <View className="flex flex-col items-center justify-center flex-1">
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={"#000"}
+              />
+            }
+          >
             <View className="flex flex-col items-center justify-center gap-2">
               <Text className="text-xs">Pas de groupe pour le moment...</Text>
               <Text className="text-4xl text-center font-grotesque">
                 Crée en un dès maintenant !
               </Text>
             </View>
-          </View>
+          </ScrollView>
         ) : (
           <ScrollView
             refreshControl={
