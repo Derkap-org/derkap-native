@@ -182,10 +182,11 @@ export default function CarouselMedia({
                     {post.creator?.username}
                     {post.caption && ` : ${post.caption}`}
                   </Text>
-
-                  <Text className="font-grotesque text-white">
-                    {getVoteCount({ postId: post.id })} 🏆
-                  </Text>
+                  {challengeStatus === "ended" && (
+                    <Text className="font-grotesque text-white">
+                      {getVoteCount({ postId: post.id })} 🏆
+                    </Text>
+                  )}
                 </View>
               )}
             </View>
