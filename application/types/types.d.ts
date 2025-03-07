@@ -17,6 +17,14 @@ export type TChallengeDB =
     })
   | null;
 
+export type TFriendRequestDB =
+  Database["public"]["Tables"]["friends_request"]["Row"] & {
+    profile: TProfileDB | null;
+  };
+
+export type TUserWithFriendshipStatus =
+  Database["public"]["Functions"]["search_users_friendship_status"]["Returns"];
+
 // GROUPS
 export type TGroupDB = Database["public"]["Tables"]["group"]["Row"] & {
   members: {

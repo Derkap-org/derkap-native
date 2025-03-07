@@ -51,16 +51,16 @@ export default function Button({
         },
       ]}
       className={cn(
-        "py-2 px-4 rounded-xl text-sm disabled:opacity-50",
+        "py-2 px-4 rounded-xl text-sm disabled:opacity-50 ",
         className,
       )}
     >
       <Text
         className={cn(
-          textClassName,
           "p-2 text-xl text-center text-white font-grotesque relative",
           { "text-gray-400": isCancel },
           { invisible: showLoader },
+          textClassName,
         )}
       >
         {text}

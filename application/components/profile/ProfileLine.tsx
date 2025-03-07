@@ -1,14 +1,22 @@
 import { cn } from "@/lib/utils";
-import { TProfileDB, TProfileInGroup } from "@/types/types";
+import {
+  TProfileDB,
+  TProfileInGroup,
+  TUserWithFriendshipStatus,
+} from "@/types/types";
 import React from "react";
 import { View, Image, Text } from "react-native";
 
 export default function ProfileLine({
   member,
   className,
+  classNameText,
+  avatarReloaded = true,
 }: {
-  member: TProfileDB | TProfileInGroup;
+  member: TProfileDB | TProfileInGroup | TUserWithFriendshipStatus[0];
   className?: string;
+  classNameText?: string;
+  avatarReloaded?: boolean;
 }) {
   return (
     <View
@@ -21,7 +29,9 @@ export default function ProfileLine({
       {member.avatar_url ? (
         <Image
           source={{
-            uri: `${member.avatar_url}?t=${new Date().getTime()}`,
+            uri: avatarReloaded
+              ? `${member.avatar_url}?t=${new Date().getTime()}`
+              : `${member.avatar_url}`,
           }}
           className="w-10 h-10 rounded-full"
         />
@@ -32,7 +42,9 @@ export default function ProfileLine({
           </Text>
         </View>
       )}
-      <Text className="text-sm text-gray-500">{member.username}</Text>
+      <Text className={cn("text-sm text-gray-500", classNameText)}>
+        {member.username}
+      </Text>
     </View>
   );
 }
