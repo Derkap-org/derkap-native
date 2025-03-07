@@ -62,12 +62,21 @@ export async function updateAvatarProfile(file_url: string) {
 
 export const getProfileByUsername = async (username: string) => {
   const { data, error } = await supabase
-    .from("profile")
-    .select("*")
+    .from("friends")
+    .select("avatar_url, friend_id, username, email, created_at")
+
     .ilike("username", `%${username}%`);
   if (error) {
     console.error("Error fetching profile", error);
     throw error;
   }
-  return { data };
+
+  const transformedData = data?.map((friend) => {
+    const { friend_id, ...rest } = friend;
+    return {
+      ...rest,
+      id: friend_id,
+    };
+  });
+  return { data: transformedData };
 };

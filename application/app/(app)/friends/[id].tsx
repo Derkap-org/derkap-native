@@ -12,14 +12,16 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Button from "@/components/Button";
-import { getProfileByUsername } from "@/functions/profile-action";
-import { TProfileDB, TUserWithFriendshipStatus } from "@/types/types";
+import { TFriendRequestDB, TUserWithFriendshipStatus } from "@/types/types";
 import { useDebounce } from "use-debounce";
 import ProfileLine from "@/components/profile/ProfileLine";
 
 import useFriendStore from "@/store/useFriendStore";
 import { getUserAndCheckFriendship } from "@/functions/friends-action";
+import useSearchStore from "@/store/useSearchStore";
+import { Modal } from "@/components/Modal";
+import Button from "@/components/Button";
+import { ActionSheetRef } from "react-native-actions-sheet";
 
 export default function Friends() {
   const router = useRouter();
@@ -31,11 +33,10 @@ export default function Friends() {
   const [selectedTab, setSelectedTab] = useState<"friends" | "requests">(
     "friends",
   );
-  const [searchedUsers, setSearchedUsers] = useState<TUserWithFriendshipStatus>(
-    [],
-  );
 
-  const { fetchRequests, fetchFriends } = useFriendStore();
+  const { searchedUsers, setSearchedUsers } = useSearchStore();
+
+  const { fetchRequests, fetchFriends, rejectRequest } = useFriendStore();
   const inputRef = useRef<TextInput>(null);
 
   const handleBack = () => {
@@ -168,88 +169,152 @@ const TabList = ({
 };
 
 const FriendsList = () => {
-  const { friends, loadingFriendId, handleRequest } = useFriendStore();
+  const {
+    friends,
+    // loadingRequestIdByUserId,
+    rejectRequest,
+    modalRequestSelected,
+    isModalOpen,
+    showModalConfirmDeletion,
+    hideModalConfirmDeletion,
+  } = useFriendStore();
+  const modalRef = useRef<ActionSheetRef>(null);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      modalRef.current?.show();
+    } else {
+      modalRef.current?.hide();
+    }
+  }, [isModalOpen]);
+
   return (
-    <View className="flex items-center justify-center w-full ">
-      <View className="flex flex-col items-center w-full px-6 ">
-        <Text className="text-2xl font-bold">Amis</Text>
-        <View className="flex flex-col w-full mt-2 gap-y-4">
-          {friends?.map((friend) => (
-            <View
-              className="flex flex-row items-center justify-between w-full gap-2 pt-4"
-              key={friend.id}
-            >
-              <ProfileLine
-                member={friend.profile}
-                className="w-fit"
-                classNameText="text-md"
-              />
-              <View className="flex flex-row gap-2">
-                {loadingFriendId === friend.id ? (
-                  <ActivityIndicator size="small" color="#000" />
-                ) : (
-                  <>
-                    <Pressable
-                      className="p-2 bg-red-500 rounded-full active:opacity-70"
-                      onPress={() => handleRequest(friend.id, "rejected")}
-                    >
-                      <Ionicons name="close" size={20} color="white" />
-                    </Pressable>
-                  </>
-                )}
-              </View>
-            </View>
-          ))}
+    <>
+      <View className="flex items-center justify-center w-full ">
+        <View className="flex flex-col items-center w-full px-6 ">
+          <Text className="text-2xl font-bold">Amis</Text>
+          <View className="flex flex-col w-full mt-2 gap-y-4">
+            {friends?.length === 0 ? (
+              <Text className="mt-4 text-center text-gray-500">
+                Vous n'avez pas encore d'amis
+              </Text>
+            ) : (
+              friends?.map((request) => (
+                <View
+                  className="flex flex-row items-center justify-between w-full gap-2 pt-4"
+                  key={request.id}
+                >
+                  <ProfileLine
+                    member={request.profile}
+                    className="w-fit"
+                    classNameText="text-md"
+                  />
+                  <View className="flex flex-row gap-2">
+                    {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
+                      <ActivityIndicator size="small" color="#000" />
+                    ) : ( */}
+                    <>
+                      <Button
+                        color="danger"
+                        className="p-2 rounded-full active:opacity-70"
+                        onClick={() => showModalConfirmDeletion(request)}
+                      >
+                        <Ionicons name="close" size={20} color="white" />
+                      </Button>
+                    </>
+                    {/* )} */}
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
         </View>
       </View>
-    </View>
+      <Modal actionSheetRef={modalRef} onClose={hideModalConfirmDeletion}>
+        <Text className="text-2xl font-bold">Supprimer cet ami</Text>
+        <Text className="">
+          Es-tu sûr de vouloir supprimer cet ami ? Cette action est
+          irréversible.
+        </Text>
+        <Button
+          className="w-full bg-purple-500 font-grotesque"
+          text="Supprimer"
+          onClick={async () => {
+            if (modalRequestSelected) {
+              await rejectRequest({
+                request_id: modalRequestSelected.id,
+                user_id: modalRequestSelected.profile.id,
+              });
+              hideModalConfirmDeletion();
+            }
+          }}
+          withLoader={true}
+        />
+      </Modal>
+    </>
   );
 };
 
 const RequestsList = () => {
-  const { requests, loadingRequestId, handleRequest } = useFriendStore();
+  const { requests, rejectRequest, acceptRequest } = useFriendStore();
 
   return (
     <View className="flex items-center justify-center w-full ">
       <View className="flex flex-col items-center w-full px-6 ">
         <Text className="text-2xl font-bold">Demande d'amis</Text>
         <View className="flex flex-col w-full mt-2 gap-y-4">
-          {requests?.map((request) => (
-            <View
-              className="flex flex-row items-center justify-between w-full gap-2 pt-4"
-              key={request.id}
-            >
-              <ProfileLine
-                member={request.profile}
-                className="w-fit"
-                classNameText="text-md"
-              />
-              <View className="flex flex-row gap-2">
-                {loadingRequestId === request.id ? (
-                  <ActivityIndicator size="small" color="#000" />
-                ) : (
+          {requests?.length === 0 ? (
+            <Text className="mt-4 text-center text-gray-500">
+              Aucune demande d'amis
+            </Text>
+          ) : (
+            requests?.map((request) => (
+              <View
+                className="flex flex-row items-center justify-between w-full gap-2 pt-4"
+                key={request.id}
+              >
+                <ProfileLine
+                  member={request.profile}
+                  className="w-fit"
+                  classNameText="text-md"
+                />
+                <View className="flex flex-row gap-2">
+                  {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
+                    <ActivityIndicator size="small" color="#000" />
+                  ) : ( */}
                   <>
-                    <Pressable
+                    <Button
+                      withLoader={true}
                       className="p-2 rounded-full bg-custom-primary active:opacity-70"
-                      onPress={() => {
-                        handleRequest(request.id, "accepted");
+                      onClick={async () => {
+                        await acceptRequest({
+                          request_id: request.id,
+                          user_id: request.profile.id,
+                        });
                       }}
                     >
                       <Ionicons name="checkmark" size={20} color="white" />
-                    </Pressable>
-                    <Pressable
-                      className="p-2 bg-red-500 rounded-full active:opacity-70"
-                      onPress={() => {
-                        handleRequest(request.id, "rejected");
+                    </Button>
+
+                    <Button
+                      withLoader={true}
+                      color="danger"
+                      className="p-2 rounded-full active:opacity-70"
+                      onClick={async () => {
+                        await rejectRequest({
+                          request_id: request.id,
+                          user_id: request.profile.id,
+                        });
                       }}
                     >
                       <Ionicons name="close" size={20} color="white" />
-                    </Pressable>
+                    </Button>
                   </>
-                )}
+                  {/* )} */}
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
       </View>
     </View>
@@ -263,7 +328,7 @@ const QueryUserList = ({
   searchedUsers: TUserWithFriendshipStatus;
   isLoading: boolean;
 }) => {
-  const { addFriend } = useFriendStore();
+  const { addRequest, acceptRequest, rejectRequest } = useFriendStore();
   return (
     <>
       {isLoading ? (
@@ -287,30 +352,60 @@ const QueryUserList = ({
                 key={user.id}
               >
                 <ProfileLine member={user} className="w-fit" />
-                <Pressable
-                  className="p-2 rounded-full bg-custom-primary active:opacity-70"
-                  onPress={() => {
-                    addFriend(user.id);
-                  }}
-                >
-                  <Text className="text-white">
-                    {user.friendship_status === "not_friend"
-                      ? "Ajouter"
-                      : user.friendship_status === "pending_your_acceptance"
-                        ? "Accepter"
-                        : user.friendship_status === "friend"
-                          ? "Supprimer"
-                          : user.friendship_status ===
-                              "pending_their_acceptance"
-                            ? "Annuler"
-                            : user.friendship_status}
-                  </Text>
-                  {/* {user.friendship_status === "pending" ? (
-                    <Ionicons name="add" size={20} color="white" />
+                {
+                  // loadingRequestIdByUserId.includes(user.id) ? (
+                  //   <ActivityIndicator size="small" color="#000" />
+                  // )
+                  user.friendship_status === "not_friend" ? (
+                    <Button
+                      withLoader={true}
+                      text="Ajouter"
+                      className="p-2 rounded-full bg-custom-primary active:opacity-70"
+                      onClick={async () => {
+                        await addRequest({
+                          user_id: user.id,
+                        });
+                      }}
+                    />
+                  ) : user.friendship_status === "pending_your_acceptance" ? (
+                    <Button
+                      withLoader={true}
+                      text="Accepter"
+                      className="p-2 rounded-full bg-custom-primary active:opacity-70"
+                      onClick={async () => {
+                        await acceptRequest({
+                          request_id: user.friend_request_id,
+                          user_id: user.id,
+                        });
+                      }}
+                    />
+                  ) : user.friendship_status === "friend" ? (
+                    <Button
+                      isCancel={true}
+                      color="danger"
+                      className="p-2 rounded-full active:opacity-70"
+                      onClick={() => {}}
+                      text="Ajouter"
+                    />
+                  ) : user.friendship_status === "pending_their_acceptance" ? (
+                    <Button
+                      withLoader={true}
+                      color="gray"
+                      className="p-2 rounded-full active:opacity-70"
+                      onClick={async () => {
+                        await rejectRequest({
+                          request_id: user.friend_request_id,
+                          user_id: user.id,
+                        });
+                      }}
+                      text="Annuler"
+                    />
                   ) : (
-                    <Ionicons name="close" size={20} color="white" />
-                  )} */}
-                </Pressable>
+                    <Text className="px-2 py-1 text-white">
+                      {user.friendship_status}
+                    </Text>
+                  )
+                }
               </View>
             ))}
           </View>

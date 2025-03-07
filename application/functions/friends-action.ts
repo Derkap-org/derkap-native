@@ -51,18 +51,41 @@ export const insertFriendRequest = async (id: string) => {
     throw new Error("User not found");
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("friends_request")
-    .insert({ sender_id: user.id, receiver_id: id, status: "pending" });
+    .insert({ sender_id: user.id, receiver_id: id, status: "pending" })
+    .select("id")
+    .single();
 
   if (error) {
+    console.log(error);
     throw error;
   }
+  return { id: data?.id };
+};
+
+export const deleteFriendRequest = async (request_id: string) => {
+  console.log("Deleting friend request", request_id);
+  const { user } = (await supabase.auth.getUser()).data;
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const { error } = await supabase
+    .from("friends_request")
+    .delete()
+    .eq("id", request_id);
+
+  console.log(error);
+  console.log("Friend request deleted");
+
+  return { error };
 };
 
 export const updateFriendRequest = async (
   id: string,
-  status: "accepted" | "rejected",
+  status: "accepted" | "pending",
 ) => {
   const { user } = (await supabase.auth.getUser()).data;
 
@@ -73,7 +96,9 @@ export const updateFriendRequest = async (
   const { data, error } = await supabase
     .from("friends_request")
     .update({ status })
-    .eq("id", id);
+    .eq("id", id)
+    .select("*, profile!friends_request_sender_id_fkey(*)")
+    .single();
 
   if (error) {
     throw error;

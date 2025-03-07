@@ -304,7 +304,7 @@ export default function Group() {
 
       <Modal fullScreen={true} actionSheetRef={modalGroupSettingsRef}>
         <ScrollView className="min-h-full">
-          <View className="flex-col h-full items-center justify-between flex-1 gap-y-4 mt-2">
+          <View className="flex-col items-center justify-between flex-1 h-full mt-2 gap-y-4">
             <View className="relative flex items-center justify-center w-24 h-24 border-2 rounded-full bg-custom-white border-custom-primary">
               <Pressable
                 onPress={pickImage}
@@ -366,7 +366,7 @@ export default function Group() {
               />
             </View>
 
-            <View className="flex flex-grow flex-col items-center justify-center w-full gap-2 mt-10">
+            <View className="flex flex-col items-center justify-center flex-grow w-full gap-2 mt-10">
               <Text className="text-xl font-bold ">Membres du groupe</Text>
               <View className="flex flex-col w-full gap-y-4">
                 {currentGroup?.members.length <= 10 && (
@@ -405,6 +405,16 @@ export default function Group() {
             placeholder="Cherche quelqu'un"
             placeholderTextColor="#888"
           />
+          {/* If no results, show a message */}
+          {searchedUsers.length === 0 && debouncedQuery && (
+            <Text className="text-sm text-gray-500">Aucun résultat trouvé</Text>
+          )}
+
+          {searchedUsers.length > 0 && (
+            <Text className="text-sm text-gray-500">
+              {searchedUsers.length} résultats trouvés
+            </Text>
+          )}
           {searchedUsers.map((user) => (
             <View
               className="flex flex-row items-center justify-between w-full gap-2"

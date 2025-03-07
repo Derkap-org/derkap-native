@@ -537,6 +537,7 @@ export type Database = {
           avatar_url: string
           email: string
           friendship_status: Database["public"]["Enums"]["friendship_status_type"]
+          friend_request_id: string
         }[]
       }
     }

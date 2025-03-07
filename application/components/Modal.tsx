@@ -6,10 +6,12 @@ export const Modal = ({
   children,
   actionSheetRef,
   fullScreen = false,
+  onClose,
 }: {
   children: React.ReactNode;
   actionSheetRef: React.RefObject<ActionSheetRef>;
   fullScreen?: boolean;
+  onClose?: () => void;
 }) => {
   const insets = useSafeAreaInsets();
   return (
@@ -18,6 +20,7 @@ export const Modal = ({
       safeAreaInsets={insets}
       gestureEnabled
       ref={actionSheetRef}
+      onClose={onClose}
       containerStyle={
         fullScreen
           ? {

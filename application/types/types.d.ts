@@ -1,5 +1,8 @@
 import { Database } from "./supabase";
 
+export type TFriendshipStatus =
+  Database["public"]["Enums"]["friendship_status"];
+
 // USERS
 export type TProfileDB = Database["public"]["Tables"]["profile"]["Row"];
 

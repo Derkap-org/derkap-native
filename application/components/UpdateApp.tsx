@@ -1,29 +1,10 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  Linking,
-  Platform,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, Image } from "react-native";
 import React from "react";
-import Button from "./Button";
 
 export default function UpdateApp() {
-  //   const handleUpdate = () => {
-  //     console.log("handleUpdate");
-  //     //     // TODO: Replace these URLs with your actual App Store and Play Store URLs
-  //     //     const storeUrl =
-  //     //       Platform.OS === "ios"
-  //     //         ? "https://apps.apple.com/app/YOUR_APP_ID" // Replace with your App Store URL
-  //     //         : "https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME"; // Replace with your Play Store URL
-  //     //     Linking.openURL(storeUrl);
-  //   };
-
   return (
-    <View className="flex-1 items-center justify-center p-4">
-      <View className="bg-white flex flex-col font-grotesque gap-y-4 items-center rounded-xl p-4 w-full">
+    <View className="items-center justify-center flex-1 p-4">
+      <View className="flex flex-col items-center w-full p-4 bg-white font-grotesque gap-y-4 rounded-xl">
         <Image
           source={require("@/assets/images/icon.png")}
           className="w-20 h-20 rounded-xl"

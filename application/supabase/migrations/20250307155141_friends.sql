@@ -69,7 +69,7 @@ create or replace view "public"."friends" as  SELECT fr.created_at,
 
 
 CREATE OR REPLACE FUNCTION public.search_users_friendship_status(p_search_username text, p_current_user_id uuid)
- RETURNS TABLE(id uuid, username text, avatar_url text, email text, friendship_status friendship_status_type)
+ RETURNS TABLE(id uuid, username text, avatar_url text, email text, friendship_status friendship_status_type, friend_request_id uuid)
  LANGUAGE plpgsql
 AS $function$
 begin
@@ -85,7 +85,8 @@ begin
       case 
         when fr.sender_id = p_current_user_id then fr.receiver_id
         else fr.sender_id
-      end as other_user_id
+      end as other_user_id,
+      fr.id as request_id
     from friends_request fr
     where (fr.sender_id = p_current_user_id or fr.receiver_id = p_current_user_id)
   )
@@ -94,7 +95,8 @@ begin
     p.username,
     p.avatar_url,
     p.email,
-    coalesce(fs.status, 'not_friend'::friendship_status_type) as friendship_status
+    coalesce(fs.status, 'not_friend'::friendship_status_type) as friendship_status,
+    fs.request_id as friend_request_id
   from profile p
   left join friendship_status fs on p.id = fs.other_user_id
   where 
@@ -158,6 +160,22 @@ grant trigger on table "public"."friends_request" to "service_role";
 grant truncate on table "public"."friends_request" to "service_role";
 
 grant update on table "public"."friends_request" to "service_role";
+
+create policy "Receivers can delete request"
+on "public"."friends_request"
+as permissive
+for delete
+to public
+using ((receiver_id = auth.uid()));
+
+
+create policy "Senders can delete request"
+on "public"."friends_request"
+as permissive
+for delete
+to public
+using ((sender_id = auth.uid()));
+
 
 create policy "Users can create friend requests"
 on "public"."friends_request"
