@@ -300,6 +300,14 @@ export default function Capture({
             </Pressable>
 
             <View className="flex flex-row items-center gap-x-4">
+              {/* Timer Button */}
+              <Pressable
+                onPress={handleChangeDelay}
+                className="flex flex-row items-center"
+              >
+                <Text className="text-white text-2xl">{captureDelay}s</Text>
+                <Timer size={28} color="white" />
+              </Pressable>
               {/* Flash Button */}
               <Pressable
                 onPress={toggleFlash}
@@ -310,15 +318,6 @@ export default function Capture({
                 ) : (
                   <Zap size={28} color="white" />
                 )}
-              </Pressable>
-
-              {/* Timer Button */}
-              <Pressable
-                onPress={handleChangeDelay}
-                className="flex flex-row items-center"
-              >
-                <Text className="text-white text-2xl">{captureDelay}s</Text>
-                <Timer size={28} color="white" />
               </Pressable>
             </View>
           </View>
