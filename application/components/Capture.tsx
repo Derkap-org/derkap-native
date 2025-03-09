@@ -1,5 +1,5 @@
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Text,
   Pressable,
@@ -21,6 +21,23 @@ import { compressImage } from "@/functions/image-action";
 import { Modal } from "./Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import React from "react";
+import {
+  PinchGestureHandler,
+  PanGestureHandler,
+  State,
+  GestureHandlerRootView,
+  PinchGestureHandlerGestureEvent,
+  PanGestureHandlerGestureEvent,
+  TapGestureHandler,
+} from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+
 interface CameraProps extends ViewProps {
   challenge: TChallengeDB;
   setIsCapturing: (isCapturing: boolean) => void;
@@ -43,11 +60,58 @@ export default function Capture({
   const cameraRef = useRef<CameraView>(null);
   const actionSheetRef = useRef<ActionSheetRef>(null);
 
+  // Reference for double tap gesture handler
+  const doubleTapRef = useRef(null);
+
+  // Zoom state
+  const scale = useSharedValue(1);
+  const zoomLevel = useSharedValue(0);
+  // Regular state for camera zoom (0-1)
+  const [cameraZoom, setCameraZoom] = useState(0);
+  const MAX_ZOOM = 0.25; // Reduced maximum zoom level (0.25 = 25% zoom)
+  const lastScale = useSharedValue(1);
+
+  useEffect(() => {
+    console.log("zoom", cameraZoom);
+    console.log("zoomLevel", zoomLevel.value);
+    console.log("scale", scale.value);
+    console.log("lastScale", lastScale.value);
+  }, [zoomLevel, cameraZoom, scale, lastScale]);
+
   const showModal = () => actionSheetRef.current?.show();
   const hideModal = () => actionSheetRef.current?.hide();
 
   const screenWidth = Dimensions.get("window").width;
   const cameraHeight = (screenWidth * 5) / 4;
+
+  // Pinch gesture handler for zoom
+  const pinchHandler = useAnimatedGestureHandler<
+    PinchGestureHandlerGestureEvent,
+    { startScale: number }
+  >({
+    onStart: (_, ctx) => {
+      ctx.startScale = scale.value;
+    },
+    onActive: (event, ctx) => {
+      // Calculate new scale based on pinch gesture with greatly reduced sensitivity (1/4)
+      const newScale = Math.max(
+        1,
+        Math.min(ctx.startScale * (1 + (event.scale - 1) * 0.05), 1 + MAX_ZOOM),
+      );
+      scale.value = newScale;
+
+      // Convert scale to zoom (0-1 range)
+      zoomLevel.value = (newScale - 1) / MAX_ZOOM;
+      lastScale.value = newScale;
+
+      // Update the regular state for camera zoom
+      runOnJS(setCameraZoom)(zoomLevel.value);
+    },
+    onEnd: () => {
+      // Optional: Add a small animation when releasing the pinch
+      scale.value = withTiming(lastScale.value, { duration: 100 });
+    },
+  });
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -111,6 +175,11 @@ export default function Capture({
 
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
+    // Reset zoom values when camera facing changes
+    scale.value = 1;
+    zoomLevel.value = 0;
+    lastScale.value = 1;
+    setCameraZoom(0);
   }
 
   const handleChangeDelay = () => {
@@ -196,6 +265,15 @@ export default function Capture({
                 <ChevronLeft size={40} color="white" />
               )}
             </Pressable>
+
+            {/* Timer Button */}
+            <Pressable
+              onPress={handleChangeDelay}
+              className="flex flex-row items-center"
+            >
+              <Text className="text-white text-2xl">{captureDelay}s</Text>
+              <Timer size={32} color="white" />
+            </Pressable>
           </View>
 
           {/* Countdown */}
@@ -205,7 +283,7 @@ export default function Capture({
             </View>
           )}
 
-          <View
+          <GestureHandlerRootView
             style={{ height: cameraHeight }}
             className="rounded-2xl overflow-hidden"
           >
@@ -213,27 +291,36 @@ export default function Capture({
             {capturedPhoto ? (
               <Image source={{ uri: capturedPhoto }} className="flex-1" />
             ) : (
-              <CameraView
-                mirror={true}
-                style={[styles.camera]}
-                ref={cameraRef}
-                facing={facing}
-              />
+              <TapGestureHandler
+                ref={doubleTapRef}
+                numberOfTaps={2}
+                onActivated={toggleCameraFacing}
+              >
+                <Animated.View style={{ flex: 1 }}>
+                  <Animated.View style={{ flex: 1 }}>
+                    <PinchGestureHandler
+                      onGestureEvent={pinchHandler}
+                      enabled={!capturedPhoto}
+                    >
+                      <Animated.View style={{ flex: 1 }}>
+                        <CameraView
+                          mirror={true}
+                          style={[styles.camera]}
+                          ref={cameraRef}
+                          facing={facing}
+                          zoom={cameraZoom}
+                        />
+                      </Animated.View>
+                    </PinchGestureHandler>
+                  </Animated.View>
+                </Animated.View>
+              </TapGestureHandler>
             )}
-          </View>
+          </GestureHandlerRootView>
 
           {/* Bottom controls */}
           {!capturedPhoto && (
             <View className="absolute bottom-2 left-0 right-0 z-10 p-4 flex-row items-center justify-around">
-              {/* Timer Button */}
-              <Pressable
-                onPress={handleChangeDelay}
-                className="flex flex-row items-center"
-              >
-                <Timer size={32} color="white" />
-                <Text className="text-white text-2xl">{captureDelay}s</Text>
-              </Pressable>
-
               {/* Capture Button */}
               <Pressable
                 className="h-20 w-20 rounded-full bg-white border-2 border-gray-300 items-center justify-center"
@@ -243,11 +330,6 @@ export default function Capture({
                 }}
               >
                 <View className="h-14 w-14 rounded-full bg-gray-100" />
-              </Pressable>
-
-              {/* Toggle Camera Button */}
-              <Pressable className="items-center" onPress={toggleCameraFacing}>
-                <RefreshCcw size={32} color="white" />
               </Pressable>
             </View>
           )}
