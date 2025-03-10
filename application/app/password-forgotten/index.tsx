@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 
-import Auth from "@/components/Auth";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabase } from "@/context/auth-context";
 import { Link, Redirect, router } from "expo-router";
 import { View, Text, TextInput, Alert } from "react-native";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
-import * as Linking from "expo-linking";
 
 export default function PasswordForgotten() {
   const { session } = useSupabase();
@@ -17,7 +14,8 @@ export default function PasswordForgotten() {
   async function resetPassword() {
     setLoading(true);
 
-    const redirectUrl = Linking.createURL("update-password");
+    // const redirectUrl = Linking.createURL("update-password");
+    const redirectUrl = "derkap://update-password";
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,

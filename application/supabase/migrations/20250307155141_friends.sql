@@ -201,12 +201,12 @@ to authenticated
 using (((sender_id = auth.uid()) OR (receiver_id = auth.uid())));
 
 
-create policy "Allow member of group to leave - delete row"
-on "public"."group_profile"
-as permissive
-for delete
-to public
-using ((( SELECT auth.uid() AS uid) = profile_id));
+-- create or replace policy "Allow member of group to leave - delete row"
+-- on "public"."group_profile"
+-- as permissive
+-- for delete
+-- to public
+-- using ((( SELECT auth.uid() AS uid) = profile_id));
 
 
 CREATE TRIGGER update_friends_request_updated_at BEFORE UPDATE ON public.friends_request FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
