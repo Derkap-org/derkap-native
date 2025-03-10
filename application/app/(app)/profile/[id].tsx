@@ -9,6 +9,7 @@ import { updateAvatarProfile } from "@/functions/profile-action";
 import Toast from "react-native-toast-message";
 import { Modal } from "@/components/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
+import Avatar from "@/components/Avatar";
 
 export default function Group() {
   const [profileImage, setNewProfileImage] = useState<string | null>(null);
@@ -50,52 +51,14 @@ export default function Group() {
         <ProfileHeader showModal={showModal} />
         <View className="flex flex-col items-center w-full gap-4">
           <View className="flex flex-col items-center justify-center gap-2">
-            {/* {profile.avatar_url || profileImage ? (
-              <View className="relative bg-red-400">
-                <Button
-                  onClick={pickImage}
-                  className="absolute bottom-0 right-0"
-                  text={<Pencil size={32} />}
-                ></Button>
-                <Image
-                  src={
-                    profileImage ||
-                    `${profile.avatar_url}?t=${user.user_metadata.avatarTimestamp}`
-                  }
-                  alt={profile.username ?? ""}
-                  width={70}
-                  height={70}
-                  className="object-cover w-24 h-24 border-2 rounded-full border-custom-primary bg-custom-white"
-                />
-              </View>
-            ) : ( */}
-            <View className="relative flex items-center justify-center w-24 h-24 border-2 rounded-full bg-custom-white border-custom-primary">
-              <Pressable
-                onPress={pickImage}
-                className="absolute z-10 p-2 rounded-full -right-2 -top-2 bg-custom-primary"
-              >
-                <Pencil size={20} color={"white"} />
-              </Pressable>
-              {profile?.avatar_url || profileImage ? (
-                <Image
-                  src={
-                    profileImage ||
-                    `${profile?.avatar_url}?t=${user.user_metadata.avatarTimestamp}`
-                  }
-                  alt={profile?.username ?? ""}
-                  width={70}
-                  height={70}
-                  className="object-cover w-24 h-24 border-2 rounded-full border-custom-primary bg-custom-white"
-                />
-              ) : (
-                <Text className="uppercase">
-                  {profile?.username
-                    .split(" ")
-                    .map((word) => word.charAt(0))
-                    .join("")}
-                </Text>
-              )}
-            </View>
+            <Avatar
+              profile={profile}
+              classNameContainer="border-2 border-custom-primary"
+              index={0}
+              user={user}
+              pickImage={pickImage}
+              classNameImage="w-24 h-24"
+            />
             {/* )} */}
             <Text
               // style={{ fontFamily: "Grotesque" }}

@@ -6,6 +6,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Keyboard,
 } from "react-native";
 import React, { useState, useEffect, useRef, Fragment } from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -37,8 +38,9 @@ import { useDebounce } from "use-debounce";
 import { ChallengesTab } from "@/components/group/ChallengesTab";
 import * as ImagePicker from "expo-image-picker";
 import { updateLastActivitySeen } from "@/lib/last-activity-storage";
-
+import useFriendStore from "@/store/useFriendStore";
 export default function Group() {
+  const { friends } = useFriendStore();
   const [selectedTab, setSelectedTab] = useState<"challenges" | "ranking">(
     "challenges",
   );
@@ -62,6 +64,12 @@ export default function Group() {
       updateLastActivitySeen(currentGroup);
     }
   }, [currentGroup]);
+
+  const isUserAlreadyInGroup = (user_id: string) => {
+    return currentGroup?.members?.some(
+      (member) => member.profile?.id === user_id,
+    );
+  };
 
   const fetchCurrentGroup = async () => {
     try {
@@ -92,7 +100,7 @@ export default function Group() {
 
   const getMemberName = (user_id: string) => {
     return currentGroup?.members?.find(
-      (member) => member.profile.id === user_id,
+      (member) => member.profile?.id === user_id,
     )?.profile.username;
   };
 
@@ -112,59 +120,40 @@ export default function Group() {
   };
 
   const handleAddMember = async (user_id: string) => {
-    if (!currentGroup?.id) {
-      console.error("No group id");
-      return;
-    }
-
-    if (currentGroup?.members?.length >= 10) {
-      Toast.show({
-        type: "error",
-        text1: "Le groupe est complet",
-      });
-      return;
-    }
-
-    if (
-      currentGroup?.members?.some((member) => member.profile.id === user_id)
-    ) {
-      Toast.show({
-        type: "error",
-        text1: "Le membre est déjà dans le groupe",
-      });
-      return;
-    }
-
     try {
+      Keyboard.dismiss();
+      if (!currentGroup?.id) {
+        console.error("No group id");
+        return;
+      }
+
+      if (currentGroup?.members?.length >= 10) {
+        Toast.show({
+          type: "error",
+          text1: "Le groupe est complet",
+        });
+        return;
+      }
+
+      if (
+        currentGroup?.members?.some((member) => member.profile?.id === user_id)
+      ) {
+        Toast.show({
+          type: "error",
+          text1: "Le membre est déjà dans le groupe",
+        });
+        return;
+      }
+
       const result = await addMemberToGroup({
         group_id: currentGroup.id,
         user_id,
       });
 
       if (result?.error) {
-        Toast.show({
-          type: "error",
-          text1: result.error || "Erreur lors de l'ajout du membre",
-        });
-      } else {
-        const newGroup = {
-          ...currentGroup,
-          members: [
-            ...currentGroup.members,
-            {
-              profile: searchedUsers.find((user) => user.id === user_id),
-            },
-          ],
-        };
-        setCurrentGroup(newGroup);
-        const newSearchUsers = searchedUsers.map((user) => {
-          if (user.id === user_id) {
-            return { ...user, alreadyInGroup: true };
-          }
-          return user;
-        });
-        setSearchedUsers(newSearchUsers);
+        throw new Error(result.error);
       }
+      fetchCurrentGroup();
     } catch (err) {
       Toast.show({
         type: "error",
@@ -345,7 +334,7 @@ export default function Group() {
 
       <Modal fullScreen={true} actionSheetRef={modalGroupSettingsRef}>
         <ScrollView className="min-h-full">
-          <View className="flex-col h-full items-center justify-between flex-1 gap-y-4 mt-2">
+          <View className="flex-col items-center justify-between flex-1 h-full mt-2 gap-y-4">
             <View className="relative flex items-center justify-center w-24 h-24 border-2 rounded-full bg-custom-white border-custom-primary">
               <Pressable
                 onPress={pickImage}
@@ -407,7 +396,7 @@ export default function Group() {
               />
             </View>
 
-            <View className="flex flex-grow flex-col items-center justify-center w-full gap-2 mt-10">
+            <View className="flex flex-col items-center justify-center flex-grow w-full gap-2 mt-10">
               <Text className="text-xl font-bold ">Membres du groupe</Text>
               <View className="flex flex-col w-full gap-y-4">
                 {currentGroup?.members.length <= 10 && (
@@ -452,21 +441,58 @@ export default function Group() {
             placeholder="Cherche quelqu'un"
             placeholderTextColor="#888"
           />
-          {searchedUsers.map((user) => (
-            <View
-              className="flex flex-row items-center justify-between w-full gap-2"
-              key={user.id}
-            >
-              <ProfileLine member={user} className="w-fit" />
-              <Button
-                className="text-xs"
-                isCancel={!!user?.alreadyInGroup}
-                withLoader={true}
-                onClick={() => handleAddMember(user.id)}
-                text={user?.alreadyInGroup ? "Ajouté" : "Ajouter"}
-              />
-            </View>
-          ))}
+          {/* If no results, show a message */}
+          {((searchedUsers.length === 0 && debouncedQuery) ||
+            (friends.length === 0 && debouncedQuery)) && (
+            <Text className="text-sm text-gray-500">Aucun ami trouvé</Text>
+          )}
+
+          {((searchedUsers.length > 0 && debouncedQuery) ||
+            (friends.length > 0 && !debouncedQuery)) && (
+            <Text className="text-sm text-gray-500">
+              {searchedUsers.length || friends.length} amis trouvés
+            </Text>
+          )}
+          {debouncedQuery &&
+            searchedUsers.map((user) => (
+              <View
+                className="flex flex-row items-center justify-between w-full gap-2"
+                key={user.id}
+              >
+                <ProfileLine member={user} className="w-fit" />
+                <Button
+                  className="text-xs"
+                  isCancel={!!user?.alreadyInGroup}
+                  withLoader={true}
+                  onClick={() => handleAddMember(user.id)}
+                  text={user?.alreadyInGroup ? "Ajouté" : "Ajouter"}
+                />
+              </View>
+            ))}
+
+          {!debouncedQuery && (
+            <React.Fragment>
+              {friends?.map((user) => (
+                <View
+                  className="flex flex-row items-center justify-between w-full gap-2"
+                  key={user.profile.id}
+                >
+                  <ProfileLine member={user.profile} className="w-fit" />
+                  <Button
+                    className="text-xs"
+                    isCancel={isUserAlreadyInGroup(user.profile.id)}
+                    withLoader={true}
+                    onClick={() => handleAddMember(user.profile.id)}
+                    text={
+                      isUserAlreadyInGroup(user.profile.id)
+                        ? "Ajouté"
+                        : "Ajouter"
+                    }
+                  />
+                </View>
+              ))}
+            </React.Fragment>
+          )}
         </Modal>
         <Modal actionSheetRef={modalRemoveMemberRef}>
           <View className="flex flex-col items-center justify-center w-full gap-2">

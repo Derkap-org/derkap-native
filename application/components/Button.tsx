@@ -4,15 +4,18 @@ import {
   PressableProps,
   Text,
   ActivityIndicator,
+  View,
 } from "react-native";
 import { cn } from "@/lib/utils";
 
 interface ButtonProps extends PressableProps {
-  text: React.ReactNode;
+  text?: React.ReactNode;
   isCancel?: boolean;
   textClassName?: string;
   onClick: () => Promise<any> | any;
   withLoader?: boolean;
+  color?: "primary" | "danger" | "gray";
+  children?: React.ReactNode;
 }
 
 export default function Button({
@@ -20,7 +23,9 @@ export default function Button({
   isCancel,
   className,
   textClassName,
+  color = "primary",
   withLoader = false,
+  children,
   ...props
 }: ButtonProps) {
   const [pressed, setPressed] = useState(false);
@@ -46,25 +51,39 @@ export default function Button({
       disabled={isCancel || props.disabled}
       style={[
         {
-          backgroundColor: isCancel ? "#d1d5db" : "#9747ff",
+          backgroundColor: isCancel
+            ? "#d1d5db"
+            : color === "primary"
+              ? "#9747ff"
+              : color === "gray"
+                ? "#d1d5db"
+                : color === "danger"
+                  ? "#ff4747"
+                  : "transparent",
+
           opacity: pressed ? 0.7 : 1,
         },
       ]}
       className={cn(
-        "py-2 px-4 rounded-xl text-sm disabled:opacity-50",
+        "py-2 px-4 rounded-xl text-sm disabled:opacity-50 ",
         className,
       )}
     >
-      <Text
-        className={cn(
-          textClassName,
-          "p-2 text-xl text-center text-white font-grotesque relative",
-          { "text-gray-400": isCancel },
-          { invisible: showLoader },
-        )}
-      >
-        {text}
-      </Text>
+      {text && (
+        <Text
+          className={cn(
+            "p-2 text-xl text-center text-white font-grotesque relative",
+            { "text-gray-400": isCancel },
+            { invisible: showLoader },
+            textClassName,
+          )}
+        >
+          {text}
+        </Text>
+      )}
+      {children && (
+        <View className={cn({ "opacity-0": showLoader })}>{children}</View>
+      )}
       {showLoader && (
         <ActivityIndicator className="absolute inset-0" color="white" />
       )}

@@ -27,7 +27,6 @@ export const Comment = ({ comment, refreshComments }: CommentProps) => {
 
   const handleDeleteComment = async () => {
     try {
-      console.log("deleteComment", comment.id);
       await deleteComment({ comment_id: comment.id });
       hideModal();
       refreshComments();

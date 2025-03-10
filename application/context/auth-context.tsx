@@ -30,7 +30,6 @@ export const SupabaseProvider = ({
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
       const url = event.url;
-      console.log("Received URL:", url);
 
       try {
         if (url.includes("type=recovery")) {
