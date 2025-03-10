@@ -48,8 +48,13 @@ export default function Avatar({
           className={cn("w-10 h-10 rounded-full", classNameImage)}
         />
       ) : (
-        <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-          <Text className="text-sm text-white">
+        <View
+          className={cn(
+            "items-center justify-center w-10 h-10 bg-gray-300 rounded-full",
+            classNameImage,
+          )}
+        >
+          <Text className="text-white">
             {profile?.username?.charAt(0) || "?"}
           </Text>
         </View>

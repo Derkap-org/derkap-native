@@ -33,7 +33,6 @@ export default function Button({
 
   const handleClick = async () => {
     try {
-      console.log("WITH LOADER: " + withLoader);
       if (withLoader) setShowLoader(true);
       await props.onClick();
     } catch (e) {
@@ -82,7 +81,9 @@ export default function Button({
           {text}
         </Text>
       )}
-      <View className={cn({ "opacity-0": showLoader })}>{children}</View>
+      {children && (
+        <View className={cn({ "opacity-0": showLoader })}>{children}</View>
+      )}
       {showLoader && (
         <ActivityIndicator className="absolute inset-0" color="white" />
       )}
