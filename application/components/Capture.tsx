@@ -1,5 +1,10 @@
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import { useState, useRef } from "react";
+import {
+  CameraView,
+  CameraType,
+  useCameraPermissions,
+  FlashMode,
+} from "expo-camera";
+import { useState, useRef, useEffect } from "react";
 import {
   Text,
   Pressable,
@@ -7,8 +12,16 @@ import {
   ViewProps,
   Dimensions,
   TextInput,
+  Keyboard,
 } from "react-native";
-import { XIcon, RefreshCcw, Timer, ChevronLeft } from "lucide-react-native";
+import {
+  XIcon,
+  RefreshCcw,
+  Timer,
+  ChevronLeft,
+  Zap,
+  ZapOff,
+} from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
@@ -20,6 +33,25 @@ import { compressImage } from "@/functions/image-action";
 import { Modal } from "./Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import React from "react";
+import {
+  PinchGestureHandler,
+  PanGestureHandler,
+  State,
+  GestureHandlerRootView,
+  PinchGestureHandlerGestureEvent,
+  PanGestureHandlerGestureEvent,
+  TapGestureHandler,
+  Gesture,
+  GestureDetector,
+} from "react-native-gesture-handler";
+import Animated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated";
+
 interface CameraProps extends ViewProps {
   challenge: TChallengeDB;
   setIsCapturing: (isCapturing: boolean) => void;
@@ -39,14 +71,72 @@ export default function Capture({
   const [countdown, setCountdown] = useState<number | null>(null); // State to manage countdown
   const [isValidatingFile, setIsValidatingFile] = useState<boolean>(false);
   const [caption, setCaption] = useState<string>("");
+  const [flash, setFlash] = useState<"on" | "off">("off");
   const cameraRef = useRef<CameraView>(null);
   const actionSheetRef = useRef<ActionSheetRef>(null);
+
+  // Reference for double tap gesture handler
+  const doubleTapRef = useRef(null);
+
+  // Zoom state
+  const scale = useSharedValue(1);
+  const zoomLevel = useSharedValue(0);
+  // Regular state for camera zoom (0-1)
+  const [cameraZoom, setCameraZoom] = useState(0);
+  const MAX_ZOOM = 0.25; // Reduced maximum zoom level (0.25 = 25% zoom)
+  const lastScale = useSharedValue(1);
+
+  // useEffect(() => {
+  //   console.log("zoom", cameraZoom);
+  //   console.log("zoomLevel", zoomLevel.value);
+  //   console.log("scale", scale.value);
+  //   console.log("lastScale", lastScale.value);
+  // }, [zoomLevel, cameraZoom, scale, lastScale]);
 
   const showModal = () => actionSheetRef.current?.show();
   const hideModal = () => actionSheetRef.current?.hide();
 
   const screenWidth = Dimensions.get("window").width;
   const cameraHeight = (screenWidth * 5) / 4;
+
+  // Create pinch gesture using the new Gesture API
+  const pinchGesture = Gesture.Pinch()
+    .onStart(() => {
+      // Store the current scale as starting point
+      lastScale.value = scale.value;
+    })
+    .onUpdate((event) => {
+      // Calculate new scale based on pinch gesture with greatly reduced sensitivity (1/4)
+      const newScale = Math.max(
+        1,
+        Math.min(
+          lastScale.value * (1 + (event.scale - 1) * 0.05),
+          1 + MAX_ZOOM,
+        ),
+      );
+      scale.value = newScale;
+
+      // Convert scale to zoom (0-1 range)
+      zoomLevel.value = (newScale - 1) / MAX_ZOOM;
+
+      // Update the regular state for camera zoom
+      runOnJS(setCameraZoom)(zoomLevel.value);
+    })
+    .onEnd(() => {
+      // Optional: Add a small animation when releasing the pinch
+      scale.value = withTiming(scale.value, { duration: 100 });
+      lastScale.value = scale.value;
+    });
+
+  // Double tap gesture for toggling camera facing
+  const doubleTapGesture = Gesture.Tap()
+    .numberOfTaps(2)
+    .onEnd(() => {
+      runOnJS(toggleCameraFacing)();
+    });
+
+  // Combine gestures
+  const combinedGestures = Gesture.Exclusive(pinchGesture, doubleTapGesture);
 
   if (!permission) {
     // Camera permissions are still loading.
@@ -68,6 +158,7 @@ export default function Capture({
   const validatePhoto = async () => {
     try {
       setIsValidatingFile(true);
+      Keyboard.dismiss();
       if (!capturedPhoto) throw new Error("Aucune photo à valider");
 
       if (!challenge) {
@@ -109,6 +200,11 @@ export default function Capture({
 
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
+    // Reset zoom values when camera facing changes
+    scale.value = 1;
+    zoomLevel.value = 0;
+    lastScale.value = 1;
+    setCameraZoom(0);
   }
 
   const handleChangeDelay = () => {
@@ -142,6 +238,14 @@ export default function Capture({
         return prev - 1; // Decrement countdown
       });
     }, 1000);
+  };
+
+  const toggleFlash = () => {
+    setFlash(flash === "off" ? "on" : "off");
+    scale.value = 1;
+    zoomLevel.value = 0;
+    lastScale.value = 1;
+    setCameraZoom(0);
   };
 
   const capture = async () => {
@@ -194,6 +298,28 @@ export default function Capture({
                 <ChevronLeft size={40} color="white" />
               )}
             </Pressable>
+
+            <View className="flex flex-row items-center gap-x-4">
+              {/* Timer Button */}
+              <Pressable
+                onPress={handleChangeDelay}
+                className="flex flex-row items-center"
+              >
+                <Text className="text-white text-2xl">{captureDelay}s</Text>
+                <Timer size={28} color="white" />
+              </Pressable>
+              {/* Flash Button */}
+              <Pressable
+                onPress={toggleFlash}
+                className="flex flex-row items-center"
+              >
+                {flash === "off" ? (
+                  <ZapOff size={28} color="white" />
+                ) : (
+                  <Zap size={28} color="white" />
+                )}
+              </Pressable>
+            </View>
           </View>
 
           {/* Countdown */}
@@ -203,7 +329,7 @@ export default function Capture({
             </View>
           )}
 
-          <View
+          <GestureHandlerRootView
             style={{ height: cameraHeight }}
             className="rounded-2xl overflow-hidden"
           >
@@ -211,27 +337,24 @@ export default function Capture({
             {capturedPhoto ? (
               <Image source={{ uri: capturedPhoto }} className="flex-1" />
             ) : (
-              <CameraView
-                mirror={true}
-                style={[styles.camera]}
-                ref={cameraRef}
-                facing={facing}
-              />
+              <GestureDetector gesture={combinedGestures}>
+                <Animated.View style={{ flex: 1 }}>
+                  <CameraView
+                    mirror={true}
+                    style={[styles.camera]}
+                    ref={cameraRef}
+                    facing={facing}
+                    zoom={cameraZoom}
+                    flash={flash}
+                  />
+                </Animated.View>
+              </GestureDetector>
             )}
-          </View>
+          </GestureHandlerRootView>
 
           {/* Bottom controls */}
           {!capturedPhoto && (
             <View className="absolute bottom-2 left-0 right-0 z-10 p-4 flex-row items-center justify-around">
-              {/* Timer Button */}
-              <Pressable
-                onPress={handleChangeDelay}
-                className="flex flex-row items-center"
-              >
-                <Timer size={32} color="white" />
-                <Text className="text-white text-2xl">{captureDelay}s</Text>
-              </Pressable>
-
               {/* Capture Button */}
               <Pressable
                 className="h-20 w-20 rounded-full bg-white border-2 border-gray-300 items-center justify-center"
@@ -241,11 +364,6 @@ export default function Capture({
                 }}
               >
                 <View className="h-14 w-14 rounded-full bg-gray-100" />
-              </Pressable>
-
-              {/* Toggle Camera Button */}
-              <Pressable className="items-center" onPress={toggleCameraFacing}>
-                <RefreshCcw size={32} color="white" />
               </Pressable>
             </View>
           )}

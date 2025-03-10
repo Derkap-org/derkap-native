@@ -6,6 +6,7 @@ import {
   ViewProps,
   ActivityIndicator,
   ScrollView,
+  Keyboard,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { TPostDB, UserVote, TVoteDB, TCommentDB } from "@/types/types";
@@ -78,6 +79,7 @@ export default function CarouselMedia({
 
   const handleCreateComment = async () => {
     if (!newComment) return;
+    Keyboard.dismiss();
     try {
       setPostingComment(true);
       await createComment({
@@ -180,10 +182,11 @@ export default function CarouselMedia({
                     {post.creator?.username}
                     {post.caption && ` : ${post.caption}`}
                   </Text>
-
-                  <Text className="font-grotesque text-white">
-                    {getVoteCount({ postId: post.id })} 🏆
-                  </Text>
+                  {challengeStatus === "ended" && (
+                    <Text className="font-grotesque text-white">
+                      {getVoteCount({ postId: post.id })} 🏆
+                    </Text>
+                  )}
                 </View>
               )}
             </View>
@@ -218,7 +221,7 @@ export default function CarouselMedia({
           <Text className="text-2xl font-bold font-grotesque text-center py-4">
             Commentaires
           </Text>
-          <ScrollView className="flex-1 flex-col gap-y-2 px-10">
+          <ScrollView className="flex-1 flex-col gap-y-2">
             {comments[activePostId]?.length > 0 ? (
               comments[activePostId]?.map((comment) => (
                 <Comment
@@ -243,8 +246,10 @@ export default function CarouselMedia({
               placeholder="Ajouter un commentaire"
             />
             <Button
-              className="w-4/12 p-0 bg-custom-primary rounded-xl"
-              isCancel={postingComment}
+              className="w-4/12 p-0 rounded-xl"
+              isCancel={
+                postingComment || !newComment || newComment.length === 0
+              }
               text="Envoyer"
               onClick={handleCreateComment}
               withLoader={true}

@@ -44,14 +44,12 @@ const PostNotTaken = ({
         />
       ) : (
         <View className="w-full flex flex-col items-center gap-2 relative rounded-xl">
-          {posts && posts.length > 0 ? (
+          {posts && posts.length > 0 && (
             <CarouselMedia
               posts={posts}
               challengeStatus={challenge.status}
               groupLength={group.members.length}
             />
-          ) : (
-            <View className="aspect-image w-full h-[34rem] rounded-xl bg-gray-400"></View>
           )}
           <View className="flex flex-col gap-4">
             <Text className="text-xl font-grotesque text-center">

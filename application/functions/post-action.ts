@@ -135,88 +135,49 @@ const addPhotosToPosts = async ({
   group_id: number;
   data: Omit<TPostDB, "base64img">[];
 }) => {
-  const postsWithPhotos: TPostDB[] = [];
+  const postsWithPhotosPromises = data.map(
+    async (post: Omit<TPostDB, "base64img">) => {
+      const filePath = post.file_path;
+      const key = `photo_${group_id}_${challenge_id}_${post.profile_id}`;
 
-  for (const post of data) {
-    const filePath = post.file_path;
+      const cached_photo = await AsyncStorage.getItem(key);
+      if (cached_photo) {
+        return {
+          ...post,
+          base64img: cached_photo,
+        };
+      }
 
-    const key = `photo_${group_id}_${challenge_id}_${post.profile_id}`;
-    const cached_photo = await AsyncStorage.getItem(key);
-    if (cached_photo) {
-      postsWithPhotos.push({
-        ...post,
-        base64img: cached_photo,
+      const bucketName = process.env.EXPO_PUBLIC_ENCRYPTED_POSTS_BUCKET_NAME;
+      const { data: file, error: errorDownload } = await supabase.storage
+        .from(bucketName)
+        .download(filePath);
+      if (errorDownload) {
+        throw new Error(errorDownload.message);
+      }
+
+      const encryptionKey = await getEncryptionKey({
+        challenge_id,
+        group_id,
       });
-      continue;
-    }
 
-    const bucketName = process.env.EXPO_PUBLIC_ENCRYPTED_POSTS_BUCKET_NAME;
-    const { data: file, error: errorDownload } = await supabase.storage
-      .from(bucketName)
-      .download(filePath);
-    if (errorDownload) {
-      throw new Error(errorDownload.message);
-    }
+      const decryptedPost = await decryptPhoto({
+        encryptedBlob: file,
+        encryptionKey,
+      });
 
-    const encryptionKey = await getEncryptionKey({
-      challenge_id,
-      group_id,
-    });
+      const photo = `data:image/jpeg;base64,${decryptedPost}`;
 
-    const decryptedPost = await decryptPhoto({
-      encryptedBlob: file,
-      encryptionKey,
-    });
+      await AsyncStorage.setItem(key, photo);
 
-    const photo = `data:image/jpeg;base64,${decryptedPost}`;
+      return {
+        ...post,
+        base64img: photo,
+      };
+    },
+  );
 
-    postsWithPhotos.push({
-      ...post,
-      base64img: photo,
-    });
+  const postsWithPhotos = await Promise.all(postsWithPhotosPromises);
 
-    await AsyncStorage.setItem(key, photo);
-  }
-
-  // const posts = await Promise.all(
-  //   data.map(async (post) => {
-  //     const filePath = post.file_path;
-  //     const bucketName = process.env.EXPO_PUBLIC_ENCRYPTED_POSTS_BUCKET_NAME;
-  //     const { data: file, error: errorDownload } = await supabase.storage
-  //       .from(bucketName)
-  //       .download(filePath);
-
-  //     if (errorDownload) {
-  //       throw new Error(errorDownload.message);
-  //     }
-
-  //     return {
-  //       ...post,
-  //       file,
-  //     };
-  //   }),
-  // );
-
-  // // decrypt posts
-
-  // const encryptionKey = await getEncryptionKey({
-  //   challenge_id,
-  //   group_id,
-  // });
-
-  // const decryptedPosts = await Promise.all(
-  //   posts.map(async (post) => {
-  //     const decryptedPost = await decryptPhoto({
-  //       encryptedBlob: post.file,
-  //       encryptionKey,
-  //     });
-  //     return {
-  //       ...post,
-  //       base64img: `data:image/jpeg;base64,${decryptedPost}`,
-  //     };
-  //   }),
-  // );
-
-  // return decryptedPosts;
   return postsWithPhotos;
 };

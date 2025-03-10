@@ -18,7 +18,7 @@ import useGroupStore from "@/store/useGroupStore";
 import { useFocusEffect } from "@react-navigation/native";
 import { Modal } from "@/components/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
-
+import { MAX_GROUP_NAME_LENGTH } from "@/functions/group-action";
 import Toast from "react-native-toast-message";
 import Avatar from "@/components/Avatar";
 
@@ -42,6 +42,13 @@ const Home = () => {
   const hideModal = () => actionSheetRef.current?.hide();
 
   const handleCreateGroup = async () => {
+    if (groupName.length > MAX_GROUP_NAME_LENGTH) {
+      Toast.show({
+        type: "error",
+        text1: `Le nom du groupe ne doit pas dépasser ${MAX_GROUP_NAME_LENGTH} caractères`,
+      });
+      return;
+    }
     const { succes } = await createGroup(groupName);
     if (succes) {
       hideModal();
@@ -136,20 +143,29 @@ const Home = () => {
           </Pressable>
         </View>
         {groups.length === 0 ? (
-          <View className="flex flex-col items-center justify-center flex-1">
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={"#000"}
+              />
+            }
+          >
             <View className="flex flex-col items-center justify-center gap-2">
               <Text className="text-xs">Pas de groupe pour le moment...</Text>
               <Text className="text-4xl text-center font-grotesque">
                 Crée en un dès maintenant !
               </Text>
             </View>
-          </View>
+          </ScrollView>
         ) : (
           <ScrollView
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
+                tintColor={"#000"}
               />
             }
             className="w-full"
@@ -219,7 +235,7 @@ const Home = () => {
 
                     {/* Photos des membres */}
                     <View className="flex-row">
-                      {group.members?.slice(0, 5).map((member, index) => {
+                      {group.members?.map((member, index) => {
                         if (!member.profile) return;
                         return (
                           <Avatar
@@ -233,13 +249,13 @@ const Home = () => {
                       })}
 
                       {/* Nombre de membres supplémentaires */}
-                      {(group.members?.length || 0) > 5 && (
+                      {/* {(group.members?.length || 0) > 5 && (
                         <View className="items-center justify-center w-10 h-10 -ml-3 bg-gray-300 border-2 border-white rounded-full">
                           <Text className="text-sm text-white">
                             +{(group.members?.length || 0) - 5}
                           </Text>
                         </View>
-                      )}
+                      )} */}
                     </View>
                   </View>
                 </View>
@@ -257,6 +273,7 @@ const Home = () => {
             value={groupName}
             placeholder="Entre le nom de groupe ici"
             placeholderTextColor="#888"
+            maxLength={20}
           />
           <Button
             withLoader={true}

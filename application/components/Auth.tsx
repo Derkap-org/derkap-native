@@ -48,6 +48,12 @@ export default function Auth() {
 
   const showCGUModal = () => modalCGURef.current?.show();
 
+  const isUsernameValid = (username: string) => {
+    const isLengthValid = username.length > 2 && username.length < 16;
+    const isAlphanumeric = /^[a-zA-Z0-9]+$/.test(username);
+    return isLengthValid && isAlphanumeric;
+  };
+
   async function signInWithEmail() {
     try {
       setLoading(true);
@@ -57,8 +63,16 @@ export default function Auth() {
       });
 
       setLoading(false);
-      if (error) throw error;
-      else {
+      if (error) {
+        if (error.code === "email_not_confirmed") {
+          router.push({
+            pathname: "/confirm-email",
+            params: { email: email, reason: "email_not_confirmed" },
+          });
+        } else {
+          throw error;
+        }
+      } else {
         router.push("/");
       }
     } catch (error) {
@@ -77,6 +91,12 @@ export default function Auth() {
       if (!cguChecked) {
         throw new Error("Veuillez accepter les CGU pour continuer.");
       }
+      console.log("username", username);
+      if (!isUsernameValid(username)) {
+        throw new Error("Le pseudo doit contenir entre 3 et 16 caractères.");
+      }
+
+      console.log("username", username);
 
       setLoading(true);
 
