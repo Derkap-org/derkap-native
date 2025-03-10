@@ -10,6 +10,7 @@ import {
   Pressable,
   ActivityIndicator,
   ScrollView,
+  Keyboard,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TFriendRequestDB, TUserWithFriendshipStatus } from "@/types/types";
@@ -36,7 +37,7 @@ export default function Friends() {
 
   const { searchedUsers, setSearchedUsers } = useSearchStore();
 
-  const { fetchRequests, fetchFriends, rejectRequest } = useFriendStore();
+  const { fetchRequests, fetchFriends } = useFriendStore();
   const inputRef = useRef<TextInput>(null);
 
   const handleBack = () => {
@@ -171,7 +172,6 @@ const TabList = ({
 const FriendsList = () => {
   const {
     friends,
-    // loadingRequestIdByUserId,
     rejectRequest,
     modalRequestSelected,
     isModalOpen,
@@ -192,7 +192,6 @@ const FriendsList = () => {
     <>
       <View className="flex items-center justify-center w-full ">
         <View className="flex flex-col items-center w-full px-6 ">
-          <Text className="text-2xl font-bold">Amis</Text>
           <View className="flex flex-col w-full mt-2 gap-y-4">
             {friends?.length === 0 ? (
               <Text className="mt-4 text-center text-gray-500">
@@ -261,7 +260,6 @@ const RequestsList = () => {
   return (
     <View className="flex items-center justify-center w-full ">
       <View className="flex flex-col items-center w-full px-6 ">
-        <Text className="text-2xl font-bold">Demande d'amis</Text>
         <View className="flex flex-col w-full mt-2 gap-y-4">
           {requests?.length === 0 ? (
             <Text className="mt-4 text-center text-gray-500">
@@ -337,6 +335,7 @@ const QueryUserList = ({
         </View>
       ) : (
         <ScrollView
+          keyboardShouldPersistTaps="always"
           contentContainerStyle={{
             flexDirection: "column",
             alignItems: "center",
@@ -362,6 +361,7 @@ const QueryUserList = ({
                       text="Ajouter"
                       className="p-2 rounded-full bg-custom-primary active:opacity-70"
                       onClick={async () => {
+                        Keyboard.dismiss();
                         await addRequest({
                           user_id: user.id,
                         });
@@ -385,7 +385,7 @@ const QueryUserList = ({
                       color="danger"
                       className="p-2 rounded-full active:opacity-70"
                       onClick={() => {}}
-                      text="Ajouter"
+                      text="Amis"
                     />
                   ) : user.friendship_status === "pending_their_acceptance" ? (
                     <Button

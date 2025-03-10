@@ -74,8 +74,6 @@ const useFriendStore = create<FriendState>((set, get) => ({
     request_id: string;
     user_id: string;
   }) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     const { data } = await updateFriendRequest(request_id, "accepted");
     const prevRequests = get().requests;
     const newRequests = prevRequests.filter(
@@ -112,8 +110,6 @@ const useFriendStore = create<FriendState>((set, get) => ({
     request_id: string;
     user_id: string;
   }) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     const prevRequests = get().requests;
     const prevFriends = get().friends;
 
@@ -148,8 +144,6 @@ const useFriendStore = create<FriendState>((set, get) => ({
     });
   },
   addRequest: async ({ user_id }: { user_id: string }) => {
-    // wait 1 second before inserting the request
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     const { id } = await insertFriendRequest(user_id);
     // if the user is in the searchedUsers array
     const searchedUsers = useSearchStore.getState().searchedUsers;

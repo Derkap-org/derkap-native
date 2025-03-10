@@ -7,7 +7,7 @@ import {
   Pressable,
   RefreshControl,
 } from "react-native";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "expo-router";
 import { Plus, User, Users } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
@@ -21,11 +21,11 @@ import { ActionSheetRef } from "react-native-actions-sheet";
 import { MAX_GROUP_NAME_LENGTH } from "@/functions/group-action";
 import Toast from "react-native-toast-message";
 import Avatar from "@/components/Avatar";
-
+import useFriendStore from "@/store/useFriendStore";
 const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [groupName, setGroupName] = useState("");
-
+  const { fetchFriends } = useFriendStore();
   const { user, profile } = useSupabase();
 
   const { groups, fetchGroups, createGroup } = useGroupStore();
@@ -35,6 +35,10 @@ const Home = () => {
       fetchGroups();
     }, []),
   );
+
+  useEffect(() => {
+    fetchFriends();
+  }, []);
 
   const actionSheetRef = useRef<ActionSheetRef>(null);
 
