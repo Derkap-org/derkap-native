@@ -7,9 +7,9 @@ import {
   Pressable,
   RefreshControl,
 } from "react-native";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Link } from "expo-router";
-import { Plus, User } from "lucide-react-native";
+import { Plus, User, Users } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
 import Button from "@/components/Button";
 import StatusLabel from "@/components/group/StatusLabel";
@@ -20,12 +20,13 @@ import { Modal } from "@/components/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import { MAX_GROUP_NAME_LENGTH } from "@/functions/group-action";
 import Toast from "react-native-toast-message";
-
+import Avatar from "@/components/Avatar";
+import useFriendStore from "@/store/useFriendStore";
 const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [groupName, setGroupName] = useState("");
-
-  const { user } = useSupabase();
+  const { fetchFriends } = useFriendStore();
+  const { user, profile } = useSupabase();
 
   const { groups, fetchGroups, createGroup } = useGroupStore();
 
@@ -34,6 +35,10 @@ const Home = () => {
       fetchGroups();
     }, []),
   );
+
+  useEffect(() => {
+    fetchFriends();
+  }, []);
 
   const actionSheetRef = useRef<ActionSheetRef>(null);
 
@@ -112,6 +117,11 @@ const Home = () => {
     <>
       <View className="relative flex flex-col items-center justify-start flex-1 gap-4 p-4">
         <View className="flex-row justify-between w-full px-4">
+          <Link href={{ pathname: "/friends/[id]", params: { id: user.id } }}>
+            <View className="flex-row items-center gap-x-2">
+              <Users size={30} color="black" />
+            </View>
+          </Link>
           <Text className="text-2xl font-bold">Mes groupes</Text>
           <Link
             href={{
@@ -119,7 +129,13 @@ const Home = () => {
               params: { id: user.id },
             }}
           >
-            <User size={30} color="black" />
+            <Avatar
+              profile={profile}
+              index={0}
+              user={user}
+              classNameImage="w-12 h-12"
+              classNameContainer="border-2 border-custom-primary"
+            />
           </Link>
         </View>
         <View className="flex-row items-center justify-between w-full py-4">
@@ -131,14 +147,22 @@ const Home = () => {
           </Pressable>
         </View>
         {groups.length === 0 ? (
-          <View className="flex flex-col items-center justify-center flex-1">
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={"#000"}
+              />
+            }
+          >
             <View className="flex flex-col items-center justify-center gap-2">
               <Text className="text-xs">Pas de groupe pour le moment...</Text>
               <Text className="text-4xl text-center font-grotesque">
                 Crée en un dès maintenant !
               </Text>
             </View>
-          </View>
+          </ScrollView>
         ) : (
           <ScrollView
             refreshControl={
@@ -215,41 +239,27 @@ const Home = () => {
 
                     {/* Photos des membres */}
                     <View className="flex-row">
-                      {group.members?.slice(0, 5).map((member, index) => {
+                      {group.members?.map((member, index) => {
                         if (!member.profile) return;
                         return (
-                          <View
+                          <Avatar
                             key={member.profile.id}
-                            className={`border-2 border-white rounded-full overflow-hidden ${
-                              index !== 0 ? "-ml-3" : ""
-                            }`}
-                          >
-                            {member.profile?.avatar_url ? (
-                              <Image
-                                source={{
-                                  uri: `${member.profile?.avatar_url}?t=${user.user_metadata.avatarTimestamp}`,
-                                }}
-                                className="w-10 h-10 rounded-full"
-                              />
-                            ) : (
-                              <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-                                <Text className="text-sm text-white">
-                                  {member.profile?.username?.charAt(0) || "?"}
-                                </Text>
-                              </View>
-                            )}
-                          </View>
+                            profile={member.profile}
+                            index={index}
+                            user={user}
+                            classNameImage="w-10 h-10"
+                          />
                         );
                       })}
 
                       {/* Nombre de membres supplémentaires */}
-                      {(group.members?.length || 0) > 5 && (
+                      {/* {(group.members?.length || 0) > 5 && (
                         <View className="items-center justify-center w-10 h-10 -ml-3 bg-gray-300 border-2 border-white rounded-full">
                           <Text className="text-sm text-white">
                             +{(group.members?.length || 0) - 5}
                           </Text>
                         </View>
-                      )}
+                      )} */}
                     </View>
                   </View>
                 </View>

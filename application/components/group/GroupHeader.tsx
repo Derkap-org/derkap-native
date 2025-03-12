@@ -5,6 +5,7 @@ import { ChevronLeft, Ellipsis } from "lucide-react-native";
 
 import { TGroupDB, TChallengeDB } from "@/types/types";
 import useGroupStore from "@/store/useGroupStore";
+import BackButton from "../BackButton";
 interface GroupHeaderProps extends ViewProps {
   group?: TGroupDB;
   showModal: () => void;

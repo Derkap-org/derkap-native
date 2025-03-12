@@ -151,7 +151,7 @@ export default function RootLayout() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center ">
+      <View className="items-center justify-center flex-1 ">
         <View className="bg-[#8C4BF5] p-1 rounded-xl animate-pulse">
           <Image
             source={require("../../assets/images/icon.png")}
