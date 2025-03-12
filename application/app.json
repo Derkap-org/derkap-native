@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "derkap",
-    "deepLinking": true,
     "userInterfaceStyle": "automatic",
     "locales": {
       "fr": "./locales/fr.json"

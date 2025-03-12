@@ -55,13 +55,11 @@ const useFriendStore = create<FriendState>((set, get) => ({
   hideModalConfirmDeletion: () =>
     set({ modalRequestSelected: null, isModalOpen: false }),
   fetchFriends: async () => {
-    if (get().friends.length > 0) return;
     set({ isLoadingFriends: true });
     const { data } = await getFriends();
     set({ friends: data, isLoadingFriends: false });
   },
   fetchRequests: async () => {
-    if (get().requests.length > 0) return;
     set({ isLoadingRequests: true });
     const { data } = await getRequests();
     set({ requests: data, isLoadingRequests: false });

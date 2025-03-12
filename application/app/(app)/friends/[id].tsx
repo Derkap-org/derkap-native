@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Keyboard,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TFriendRequestDB, TUserWithFriendshipStatus } from "@/types/types";
@@ -82,7 +83,7 @@ export default function Friends() {
   }, [debouncedQuery]);
 
   return (
-    <View>
+    <View className="">
       <View className="flex-row items-center p-4">
         <View className="flex flex-row items-center w-1/3">
           <BackButton handleBack={handleBack} />
@@ -177,6 +178,7 @@ const FriendsList = () => {
     isModalOpen,
     showModalConfirmDeletion,
     hideModalConfirmDeletion,
+    fetchFriends,
   } = useFriendStore();
   const modalRef = useRef<ActionSheetRef>(null);
 
@@ -188,47 +190,70 @@ const FriendsList = () => {
     }
   }, [isModalOpen]);
 
+  const [refreshingFriends, setRefreshingFriends] = useState(false);
+
+  const handleRefreshFriends = async () => {
+    try {
+      setRefreshingFriends(true);
+      await fetchFriends();
+      setRefreshingFriends(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRefreshingFriends(false);
+    }
+  };
+
   return (
     <>
-      <View className="flex items-center justify-center w-full ">
-        <View className="flex flex-col items-center w-full px-6 ">
-          <View className="flex flex-col w-full mt-2 gap-y-4">
-            {friends?.length === 0 ? (
-              <Text className="mt-4 text-center text-gray-500">
-                Vous n'avez pas encore d'amis
-              </Text>
-            ) : (
-              friends?.map((request) => (
-                <View
-                  className="flex flex-row items-center justify-between w-full gap-2 pt-4"
-                  key={request.id}
-                >
-                  <ProfileLine
-                    member={request.profile}
-                    className="w-fit"
-                    classNameText="text-md"
-                  />
-                  <View className="flex flex-row gap-2">
-                    {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
+      <View className="flex flex-col items-center w-full px-6">
+        <ScrollView
+          className="flex flex-col w-full gap-y-4 h-full"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshingFriends}
+              onRefresh={handleRefreshFriends}
+              tintColor={"#000"}
+            />
+          }
+        >
+          {friends?.length === 0 ? (
+            <Text className="mt-4 text-center text-gray-500">
+              Vous n'avez pas encore d'amis
+            </Text>
+          ) : (
+            friends?.map((request, index) => (
+              <View
+                className="flex flex-row items-center justify-between w-full gap-2 pt-4"
+                key={index}
+              >
+                <ProfileLine
+                  member={request.profile}
+                  className="w-fit"
+                  classNameText="text-md"
+                />
+                <View className="flex flex-row gap-2">
+                  {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
                       <ActivityIndicator size="small" color="#000" />
                     ) : ( */}
-                    <>
-                      <Button
-                        color="danger"
-                        className="p-2 rounded-full active:opacity-70"
-                        onClick={() => showModalConfirmDeletion(request)}
-                      >
-                        <Ionicons name="close" size={20} color="white" />
-                      </Button>
-                    </>
-                    {/* )} */}
-                  </View>
+                  <>
+                    <Button
+                      color="danger"
+                      className="p-2 rounded-full active:opacity-70"
+                      onClick={() => showModalConfirmDeletion(request)}
+                    >
+                      <Ionicons name="close" size={20} color="white" />
+                    </Button>
+                  </>
+                  {/* )} */}
                 </View>
-              ))
-            )}
-          </View>
-        </View>
+              </View>
+            ))
+          )}
+          <View className="mb-48 h-64" />
+        </ScrollView>
       </View>
+
       <Modal actionSheetRef={modalRef} onClose={hideModalConfirmDeletion}>
         <Text className="text-2xl font-bold">Supprimer cet ami</Text>
         <Text className="">
@@ -245,6 +270,7 @@ const FriendsList = () => {
                 user_id: modalRequestSelected.profile.id,
               });
               hideModalConfirmDeletion();
+              fetchFriends();
             }
           }}
           withLoader={true}
@@ -255,66 +281,90 @@ const FriendsList = () => {
 };
 
 const RequestsList = () => {
-  const { requests, rejectRequest, acceptRequest } = useFriendStore();
+  const { requests, rejectRequest, acceptRequest, fetchRequests } =
+    useFriendStore();
+  const [refreshingRequests, setRefreshingRequests] = useState(false);
+
+  const handleRefreshRequests = async () => {
+    try {
+      setRefreshingRequests(true);
+      await fetchRequests();
+      setRefreshingRequests(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRefreshingRequests(false);
+    }
+  };
 
   return (
-    <View className="flex items-center justify-center w-full ">
-      <View className="flex flex-col items-center w-full px-6 ">
-        <View className="flex flex-col w-full mt-2 gap-y-4">
-          {requests?.length === 0 ? (
-            <Text className="mt-4 text-center text-gray-500">
-              Aucune demande d'amis
-            </Text>
-          ) : (
-            requests?.map((request) => (
-              <View
-                className="flex flex-row items-center justify-between w-full gap-2 pt-4"
-                key={request.id}
-              >
-                <ProfileLine
-                  member={request.profile}
-                  className="w-fit"
-                  classNameText="text-md"
-                />
-                <View className="flex flex-row gap-2">
-                  {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
+    <View className="flex flex-col items-center w-full px-6">
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshingRequests}
+            onRefresh={handleRefreshRequests}
+            tintColor={"#000"}
+          />
+        }
+        className="flex flex-col w-full gap-y-4 h-full"
+      >
+        {requests?.length === 0 ? (
+          <Text className="mt-4 text-center text-gray-500">
+            Aucune demande d'amis
+          </Text>
+        ) : (
+          requests?.map((request, index) => (
+            <View
+              className="flex flex-row items-center justify-between w-full gap-2 pt-4"
+              key={index}
+            >
+              <ProfileLine
+                member={request.profile}
+                className="w-fit"
+                classNameText="text-md"
+              />
+              <View className="flex flex-row gap-2">
+                {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
                     <ActivityIndicator size="small" color="#000" />
                   ) : ( */}
-                  <>
-                    <Button
-                      withLoader={true}
-                      className="p-2 rounded-full bg-custom-primary active:opacity-70"
-                      onClick={async () => {
-                        await acceptRequest({
-                          request_id: request.id,
-                          user_id: request.profile.id,
-                        });
-                      }}
-                    >
-                      <Ionicons name="checkmark" size={20} color="white" />
-                    </Button>
+                <>
+                  <Button
+                    withLoader={true}
+                    className="p-2 rounded-full bg-custom-primary active:opacity-70"
+                    onClick={async () => {
+                      await acceptRequest({
+                        request_id: request.id,
+                        user_id: request.profile.id,
+                      });
+                      fetchRequests();
+                    }}
+                  >
+                    <Ionicons name="checkmark" size={20} color="white" />
+                  </Button>
 
-                    <Button
-                      withLoader={true}
-                      color="danger"
-                      className="p-2 rounded-full active:opacity-70"
-                      onClick={async () => {
-                        await rejectRequest({
-                          request_id: request.id,
-                          user_id: request.profile.id,
-                        });
-                      }}
-                    >
-                      <Ionicons name="close" size={20} color="white" />
-                    </Button>
-                  </>
-                  {/* )} */}
-                </View>
+                  <Button
+                    withLoader={true}
+                    color="danger"
+                    className="p-2 rounded-full active:opacity-70"
+                    onClick={async () => {
+                      await rejectRequest({
+                        request_id: request.id,
+                        user_id: request.profile.id,
+                      });
+                      fetchRequests();
+                    }}
+                  >
+                    <Ionicons name="close" size={20} color="white" />
+                  </Button>
+                </>
+                {/* )} */}
               </View>
-            ))
-          )}
-        </View>
-      </View>
+            </View>
+          ))
+        )}
+        <View className="mb-48 h-64" />
+      </ScrollView>
     </View>
   );
 };

@@ -40,7 +40,7 @@ import * as ImagePicker from "expo-image-picker";
 import { updateLastActivitySeen } from "@/lib/last-activity-storage";
 import useFriendStore from "@/store/useFriendStore";
 export default function Group() {
-  const { friends } = useFriendStore();
+  const { friends, fetchFriends } = useFriendStore();
   const [selectedTab, setSelectedTab] = useState<"challenges" | "ranking">(
     "challenges",
   );
@@ -91,7 +91,12 @@ export default function Group() {
   const showGroupSettingsModal = () => modalGroupSettingsRef.current?.show();
 
   const showAddMemberModal = () => {
-    modalAddMemberRef.current?.show();
+    try {
+      fetchFriends();
+      modalAddMemberRef.current?.show();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const showRemoveMemberModal = () => {
