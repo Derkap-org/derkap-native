@@ -293,18 +293,18 @@ export default function Group() {
           setSelectedChallenge={setSelectedChallenge}
         />
 
-        <View className="flex flex-row justify-between px-4 my-2">
+        <View className="flex flex-row justify-between px-4 my-1">
           <Pressable
             className={cn(
-              "w-1/2 flex justify-center items-center rounded-xl py-4",
-              selectedTab === "challenges" && "bg-custom-primary/50",
+              "w-1/2 flex justify-center items-center rounded-xl py-2",
+              selectedTab === "challenges" && "bg-custom-primary",
             )}
             onPress={() => setSelectedTab("challenges")}
           >
             <Text
               className={cn(
                 "text-gray-500",
-                selectedTab === "challenges" && "text-black font-bold",
+                selectedTab === "challenges" && "text-white font-bold",
               )}
             >
               Défis
@@ -312,7 +312,7 @@ export default function Group() {
           </Pressable>
           <Pressable
             className={cn(
-              "w-1/2 flex justify-center items-center rounded-xl py-4",
+              "w-1/2 flex justify-center items-center rounded-xl py-2",
               selectedTab === "ranking" && "bg-custom-primary/50",
             )}
             onPress={() => setSelectedTab("ranking")}
@@ -320,7 +320,7 @@ export default function Group() {
             <Text
               className={cn(
                 "text-gray-500",
-                selectedTab === "ranking" && "text-black font-bold",
+                selectedTab === "ranking" && "text-white font-bold",
               )}
             >
               Classement
@@ -340,7 +340,7 @@ export default function Group() {
       <Modal fullScreen={true} actionSheetRef={modalGroupSettingsRef}>
         <ScrollView className="min-h-full">
           <View className="flex-col items-center justify-between flex-1 h-full mt-2 gap-y-4">
-            <View className="relative flex items-center justify-center w-24 h-24 border-2 rounded-full bg-custom-white border-custom-primary">
+            <View className="relative flex items-center justify-center w-24 h-24 rounded-full bg-black">
               <Pressable
                 onPress={pickImage}
                 className="absolute z-10 p-2 rounded-full -right-2 -top-2 bg-custom-primary"
@@ -356,10 +356,10 @@ export default function Group() {
                   alt={currentGroup?.name ?? ""}
                   width={70}
                   height={70}
-                  className="object-cover w-24 h-24 border-2 rounded-full border-custom-primary bg-custom-white"
+                  className="object-cover w-24 h-24 rounded-full"
                 />
               ) : (
-                <Text className="text-2xl uppercase">
+                <Text className="text-2xl uppercase text-gray-300">
                   {currentGroup?.name
                     .split(" ")
                     .map((word) => word.charAt(0))
@@ -368,18 +368,17 @@ export default function Group() {
               )}
             </View>
 
-            <Text className="text-2xl font-bold font-grotesque">
+            <Text className="text-2xl font-bold font-grotesque text-white">
               Gérer le groupe
             </Text>
 
             <View className="flex flex-col items-center justify-center w-full gap-2">
-              <Text className="text-xl ">Nom du groupe</Text>
+              <Text className="text-xl text-white">Nom du groupe</Text>
               <TextInput
-                className="w-full p-2 border border-gray-300 rounded-xl"
+                className="w-full p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
                 onChangeText={setNewGroupName}
                 value={newGroupName}
                 placeholder={currentGroup?.name}
-                placeholderTextColor="#888"
               />
               <Button
                 withLoader={true}
@@ -395,29 +394,29 @@ export default function Group() {
             <View className="flex flex-col items-center justify-center w-full gap-2">
               <Button
                 withLoader={true}
-                className="w-full bg-red-500"
+                className="w-full"
+                color="danger"
                 onClick={handleConfirmLeaveGroup}
                 text={"Quitter le groupe"}
               />
             </View>
 
             <View className="flex flex-col items-center justify-center flex-grow w-full gap-2 mt-10">
-              <Text className="text-xl font-bold ">Membres du groupe</Text>
+              <Text className="text-xl font-bold text-white">
+                Membres du groupe
+              </Text>
               <View className="flex flex-col w-full gap-y-4">
                 {currentGroup?.members.length <= 10 && (
-                  <View className="flex-row items-center justify-between w-full pb-4 mt-4 border-b-[1px] border-custom-primary">
-                    <Pressable
-                      className="flex flex-row items-center gap-x-2"
-                      onPress={showAddMemberModal}
-                    >
-                      <View className="p-2 rounded-full bg-custom-primary w-fit">
-                        <Plus color={"white"} size={22} />
-                      </View>
-                      <Text>Ajouter un membre</Text>
-                    </Pressable>
+                  <View className="flex-row items-center justify-between w-full pb-4 mt-4 border-b-[1px] border-gray-300">
+                    <Button
+                      withLoader={true}
+                      className="w-full"
+                      onClick={showAddMemberModal}
+                      text={"Ajouter un membre"}
+                    />
                   </View>
                 )}
-                <Text className="font-bold ">
+                <Text className="font-bold text-white">
                   {currentGroup?.members?.length}/10 membres
                 </Text>
                 <View className="flex flex-col w-full gap-y-4">
@@ -438,9 +437,9 @@ export default function Group() {
           </View>
         </ScrollView>
         <Modal actionSheetRef={modalAddMemberRef} fullScreen={true}>
-          <Text className="text-2xl font-bold">Ajoute tes amis</Text>
+          <Text className="text-2xl font-bold text-white">Ajoute tes amis</Text>
           <TextInput
-            className="w-full p-2 border border-gray-300 rounded-xl"
+            className="w-full p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
             onChangeText={setQueryUser}
             // value={queryUser}
             placeholder="Cherche quelqu'un"
@@ -501,15 +500,15 @@ export default function Group() {
         </Modal>
         <Modal actionSheetRef={modalRemoveMemberRef}>
           <View className="flex flex-col items-center justify-center w-full gap-2">
-            <Text className="">
-              Êtes-vous sûr de vouloir retirer{" "}
+            <Text className="text-white">
+              T'es bien sûr de vouloir retirer{" "}
               <Text className="font-bold">
                 {getMemberName(memberIdToRemove)}
               </Text>{" "}
               du groupe ?
             </Text>
             <Button
-              text={`Retirer`}
+              text={`Oui, le retirer`}
               isCancel={!memberIdToRemove}
               onClick={() => handleRemoveMember(memberIdToRemove)}
             />

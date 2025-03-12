@@ -26,15 +26,15 @@ export const Modal = ({
           ? {
               height: "90%",
               maxHeight: "90%",
+              backgroundColor: "#0E0E10",
             }
           : {
               maxHeight: "90%",
+              backgroundColor: "#0E0E10",
             }
       }
     >
-      <View className="flex flex-col px-6 py-4 bg-white gap-y-4">
-        {children}
-      </View>
+      <View className="flex flex-col px-6 py-4 gap-y-4">{children}</View>
     </ActionSheet>
   );
 };

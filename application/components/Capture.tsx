@@ -1,10 +1,5 @@
-import {
-  CameraView,
-  CameraType,
-  useCameraPermissions,
-  FlashMode,
-} from "expo-camera";
-import { useState, useRef, useEffect } from "react";
+import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { useState, useRef } from "react";
 import {
   Text,
   Pressable,
@@ -14,14 +9,7 @@ import {
   TextInput,
   Keyboard,
 } from "react-native";
-import {
-  XIcon,
-  RefreshCcw,
-  Timer,
-  ChevronLeft,
-  Zap,
-  ZapOff,
-} from "lucide-react-native";
+import { XIcon, Timer, ChevronLeft, Zap, ZapOff } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
@@ -34,19 +22,11 @@ import { Modal } from "./Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import React from "react";
 import {
-  PinchGestureHandler,
-  PanGestureHandler,
-  State,
   GestureHandlerRootView,
-  PinchGestureHandlerGestureEvent,
-  PanGestureHandlerGestureEvent,
-  TapGestureHandler,
   Gesture,
   GestureDetector,
 } from "react-native-gesture-handler";
 import Animated, {
-  useAnimatedGestureHandler,
-  useAnimatedStyle,
   useSharedValue,
   withTiming,
   runOnJS,
@@ -54,12 +34,10 @@ import Animated, {
 
 interface CameraProps extends ViewProps {
   challenge: TChallengeDB;
-  setIsCapturing: (isCapturing: boolean) => void;
   refreshChallengeData: () => Promise<void>;
 }
 
 export default function Capture({
-  setIsCapturing,
   challenge,
   refreshChallengeData,
   ...props
@@ -184,8 +162,6 @@ export default function Capture({
         encrypted_post: encryptedPhoto,
         caption,
       });
-
-      setIsCapturing(false);
     } catch (error) {
       Toast.show({
         type: "error",
@@ -279,48 +255,58 @@ export default function Capture({
   return (
     <>
       <View className="flex flex-col h-full w-full gap-y-2">
-        <View style={{ height: cameraHeight }} className="rounded-2xl">
+        <View style={{ height: cameraHeight }} className="">
           {/* Top bar with reset button */}
+
           <View className="absolute top-2 left-0 right-0 z-10 p-4 flex-row items-start justify-between">
             <Pressable
               className=""
               onPress={() => {
                 if (capturedPhoto) {
                   setCapturedPhoto(null);
-                } else {
-                  setIsCapturing(false);
                 }
               }}
             >
-              {capturedPhoto ? (
-                <XIcon size={40} color="white" />
-              ) : (
-                <ChevronLeft size={40} color="white" />
-              )}
+              {capturedPhoto && <XIcon size={40} color="white" />}
             </Pressable>
 
-            <View className="flex flex-row items-center gap-x-4">
-              {/* Timer Button */}
+            {!capturedPhoto && (
+              <View className="flex flex-row items-center gap-x-4">
+                {/* Timer Button */}
+                <Pressable
+                  onPress={handleChangeDelay}
+                  className="flex flex-row items-center"
+                >
+                  <Text className="text-white text-2xl">{captureDelay}s</Text>
+                  <Timer size={28} color="white" />
+                </Pressable>
+                {/* Flash Button */}
+                <Pressable
+                  onPress={toggleFlash}
+                  className="flex flex-row items-center"
+                >
+                  {flash === "off" ? (
+                    <ZapOff size={28} color="white" />
+                  ) : (
+                    <Zap size={28} color="white" />
+                  )}
+                </Pressable>
+              </View>
+            )}
+          </View>
+
+          {capturedPhoto && (
+            <View className="absolute bottom-0 left-0 right-0 z-10 p-4 flex-row items-start justify-between">
               <Pressable
-                onPress={handleChangeDelay}
-                className="flex flex-row items-center"
+                className="w-full p-4 bg-zinc-800/90 rounded-xl"
+                onPress={showModal}
               >
-                <Text className="text-white text-2xl">{captureDelay}s</Text>
-                <Timer size={28} color="white" />
-              </Pressable>
-              {/* Flash Button */}
-              <Pressable
-                onPress={toggleFlash}
-                className="flex flex-row items-center"
-              >
-                {flash === "off" ? (
-                  <ZapOff size={28} color="white" />
-                ) : (
-                  <Zap size={28} color="white" />
-                )}
+                <Text className="text-zinc-400 text-center">
+                  Une légende pour ton oeuvre d'art ?
+                </Text>
               </Pressable>
             </View>
-          </View>
+          )}
 
           {/* Countdown */}
           {countdown !== null && (
@@ -369,15 +355,7 @@ export default function Capture({
           )}
         </View>
         {capturedPhoto && (
-          <View className="flex flex-col gap-y-2 items-center justify-center w-full">
-            <Pressable
-              className="w-full p-4 bg-white rounded-xl"
-              onPress={showModal}
-            >
-              <Text className="text-gray-500">
-                Une légende pour ton oeuvre d'art ?
-              </Text>
-            </Pressable>
+          <View className="px-2">
             <Button
               isCancel={isValidatingFile}
               withLoader={true}
@@ -393,7 +371,7 @@ export default function Capture({
           <TextInput
             value={caption}
             onChangeText={setCaption}
-            className="w-full p-4 bg-gray-100 rounded-xl"
+            className="w-full p-4 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
             autoFocus={true}
             placeholder="Une légende pour ton oeuvre d'art ?"
           />

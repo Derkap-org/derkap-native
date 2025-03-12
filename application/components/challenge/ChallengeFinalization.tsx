@@ -9,11 +9,11 @@ import {
   TGroupDB,
 } from "@/types/types";
 import { useState, useEffect, useRef } from "react";
-import { View, Text, ViewProps, ScrollView } from "react-native";
+import { View, Text, ViewProps } from "react-native";
 import { useSupabase } from "@/context/auth-context";
 import { addVote } from "@/functions/vote-action";
 import Toast from "react-native-toast-message";
-
+import PostsList from "@/components/challenge/PostsList";
 import { Modal } from "@/components/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import { setChallengeToEnd } from "@/functions/challenge-action";
@@ -40,7 +40,6 @@ const ChallengeFinalization = ({
   const [selectedPost, setSelectedPost] = useState<TPostDB | null>(null);
   const [userVote, setUserVote] = useState<UserVote>(); // null
 
-  // const [api, setApi] = useState<CarouselApi>();
   const [currentPost, setCurrentPost] = useState(0);
 
   const modalEndVoteRef = useRef<ActionSheetRef>(null);
@@ -117,7 +116,17 @@ const ChallengeFinalization = ({
         {...props}
         className={cn("w-full flex flex-col items-center gap-2", className)}
       >
-        <CarouselMedia
+        <View className="w-full flex flex-row items-center justify-center gap-6">
+          <Text className="text-white text-center text-2xl font-grotesque">
+            {votes.length} votes sur {group.members.length}
+          </Text>
+
+          {challenge?.creator_id === profile.id && (
+            <Button text="Clore les votes" onClick={showModalEndVote} />
+          )}
+        </View>
+
+        <PostsList
           posts={posts}
           challengeStatus={challenge?.status}
           finalizationData={{
@@ -181,8 +190,10 @@ const ChallengeFinalization = ({
         {challenge?.status === "ended" && <View className="mb-48"></View>}
       </View>
       <Modal actionSheetRef={modalEndVoteRef}>
-        <Text className="text-2xl font-bold">Fermer les votes</Text>
-        <Text className="">
+        <Text className="text-2xl font-bold text-center text-white font-grotesque">
+          Fermer les votes
+        </Text>
+        <Text className="text-white">
           En tant que créateur du défi, tu peux décider de fermer les votes,
           sans attendre que tous les participants aient voté.
           {"\n"}

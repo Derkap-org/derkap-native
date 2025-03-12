@@ -8,6 +8,7 @@ import { SupabaseProvider } from "@/context/auth-context";
 import { SafeAreaView } from "react-native";
 import Toast from "react-native-toast-message";
 import VersionCheck from "@/components/VersionCheck";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import MaintenanceCheck from "@/components/MaintenanceCheck";
 global.Buffer = require("buffer").Buffer;
@@ -27,13 +28,15 @@ export default function RootLayout() {
 
   return (
     <SupabaseProvider>
-      <SafeAreaView className="flex-1 bg-[#f1d7f3]">
-        <MaintenanceCheck>
-          <VersionCheck>
-            <Slot />
-          </VersionCheck>
-        </MaintenanceCheck>
-      </SafeAreaView>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaView className="flex-1 bg-[#0E0E10]">
+          <MaintenanceCheck>
+            <VersionCheck>
+              <Slot />
+            </VersionCheck>
+          </MaintenanceCheck>
+        </SafeAreaView>
+      </GestureHandlerRootView>
       <Toast topOffset={70} />
     </SupabaseProvider>
   );

@@ -40,68 +40,68 @@ export default function CarouselMedia({
   ...props
 }: CarouselMediaProps) {
   const [comments, setComments] = useState<Record<number, TCommentDB[]>>({}); // { post_id: [comment1, comment2, ...] }
-  const [sortedPosts, setSortedPosts] = useState<TPostDB[]>();
+  // const [sortedPosts, setSortedPosts] = useState<TPostDB[]>();
   const width = Dimensions.get("window").width;
-  const [newComment, setNewComment] = useState("");
-  const { setCurrentPostIndex, userVote, votes } = finalizationData || {};
-  const [postingComment, setPostingComment] = useState(false);
-  const [activePostId, setActivePostId] = useState<number>(0);
-  const modalCommentRef = useRef<ActionSheetRef>(null);
+  // const [newComment, setNewComment] = useState("");
+  // const { setCurrentPostIndex, userVote, votes } = finalizationData || {};
+  // const [postingComment, setPostingComment] = useState(false);
+  // const [activePostId, setActivePostId] = useState<number>(0);
+  // const modalCommentRef = useRef<ActionSheetRef>(null);
 
-  const fetchAllComments = async () => {
-    if (!sortedPosts) return;
-    for (const post of sortedPosts) {
-      await fetchComments({ post_id: post.id });
-    }
-  };
+  // const fetchAllComments = async () => {
+  //   if (!sortedPosts) return;
+  //   for (const post of sortedPosts) {
+  //     await fetchComments({ post_id: post.id });
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchAllComments();
-  }, [sortedPosts]);
+  // useEffect(() => {
+  //   fetchAllComments();
+  // }, [sortedPosts]);
 
-  useEffect(() => {
-    if (sortedPosts?.length) {
-      setActivePostId(sortedPosts[0].id);
-    }
-  }, [sortedPosts]);
+  // useEffect(() => {
+  //   if (sortedPosts?.length) {
+  //     setActivePostId(sortedPosts[0].id);
+  //   }
+  // }, [sortedPosts]);
 
-  const fetchComments = async ({ post_id }: { post_id: number }) => {
-    try {
-      const comments = await getCommentsFromDB({ post_id });
-      setComments((prev) => ({ ...prev, [post_id]: comments }));
-    } catch (error) {
-      Toast.show({
-        text1: "Erreur lors de la récupération des commentaires",
-        type: "error",
-      });
-    }
-  };
+  // const fetchComments = async ({ post_id }: { post_id: number }) => {
+  //   try {
+  //     const comments = await getCommentsFromDB({ post_id });
+  //     setComments((prev) => ({ ...prev, [post_id]: comments }));
+  //   } catch (error) {
+  //     Toast.show({
+  //       text1: "Erreur lors de la récupération des commentaires",
+  //       type: "error",
+  //     });
+  //   }
+  // };
 
-  const handleCreateComment = async () => {
-    if (!newComment) return;
-    Keyboard.dismiss();
-    try {
-      setPostingComment(true);
-      await createComment({
-        post_id: activePostId,
-        content: newComment,
-      });
-      setNewComment("");
-      await fetchComments({ post_id: activePostId });
-    } catch (error) {
-      Toast.show({
-        text1: "Erreur lors de la création du commentaire",
-        type: "error",
-      });
-    } finally {
-      setPostingComment(false);
-    }
-  };
+  // const handleCreateComment = async () => {
+  //   if (!newComment) return;
+  //   Keyboard.dismiss();
+  //   try {
+  //     setPostingComment(true);
+  //     await createComment({
+  //       post_id: activePostId,
+  //       content: newComment,
+  //     });
+  //     setNewComment("");
+  //     await fetchComments({ post_id: activePostId });
+  //   } catch (error) {
+  //     Toast.show({
+  //       text1: "Erreur lors de la création du commentaire",
+  //       type: "error",
+  //     });
+  //   } finally {
+  //     setPostingComment(false);
+  //   }
+  // };
 
-  const openModalComment = async () => {
-    await fetchComments({ post_id: activePostId });
-    modalCommentRef.current?.show();
-  };
+  // const openModalComment = async () => {
+  //   await fetchComments({ post_id: activePostId });
+  //   modalCommentRef.current?.show();
+  // };
 
   const handleSnapToItem = (index: number) => {
     if (setCurrentPostIndex) {
@@ -109,41 +109,41 @@ export default function CarouselMedia({
     }
   };
 
-  const getVoteCount = ({ postId }: { postId: number }) => {
-    if (!votes) return 0;
-    return votes.filter((vote) => vote.post_id === postId).length;
-  };
+  // const getVoteCount = ({ postId }: { postId: number }) => {
+  //   if (!votes) return 0;
+  //   return votes.filter((vote) => vote.post_id === postId).length;
+  // };
 
-  useEffect(() => {
-    if (!posts) return;
-    if (challengeStatus !== "ended") {
-      setSortedPosts(posts);
-      return;
-    }
-    const sorted = [...posts].sort((a, b) => {
-      const votesA = getVoteCount({ postId: a.id });
-      const votesB = getVoteCount({ postId: b.id });
-      return votesB - votesA;
-    });
-    setSortedPosts(sorted);
-  }, [challengeStatus, posts, votes]);
+  // useEffect(() => {
+  //   if (!posts) return;
+  //   if (challengeStatus !== "ended") {
+  //     setSortedPosts(posts);
+  //     return;
+  //   }
+  //   const sorted = [...posts].sort((a, b) => {
+  //     const votesA = getVoteCount({ postId: a.id });
+  //     const votesB = getVoteCount({ postId: b.id });
+  //     return votesB - votesA;
+  //   });
+  //   setSortedPosts(sorted);
+  // }, [challengeStatus, posts, votes]);
 
-  const isPostHasMoreVotes = (postId: number) => {
-    if (!sortedPosts) return false;
-    const highestVotes = Math.max(
-      ...sortedPosts.map((post) => getVoteCount({ postId: post.id })),
-    );
-    return getVoteCount({ postId: postId }) === highestVotes;
-  };
+  // const isPostHasMoreVotes = (postId: number) => {
+  //   if (!sortedPosts) return false;
+  //   const highestVotes = Math.max(
+  //     ...sortedPosts.map((post) => getVoteCount({ postId: post.id })),
+  //   );
+  //   return getVoteCount({ postId: postId }) === highestVotes;
+  // };
 
-  if (!sortedPosts)
-    return (
-      <View className="flex h-[34rem] w-full">
-        <View className="bg-black/50 flex items-center justify-center w-full h-full rounded-2xl ">
-          <ActivityIndicator size="large" color="#fff" />
-        </View>
-      </View>
-    );
+  // if (!sortedPosts)
+  //   return (
+  //     <View className="flex h-[34rem] w-full">
+  //       <View className="bg-black/50 flex items-center justify-center w-full h-full rounded-2xl ">
+  //         <ActivityIndicator size="large" color="#fff" />
+  //       </View>
+  //     </View>
+  //   );
 
   return (
     <View className="w-full relative rounded-2xl">

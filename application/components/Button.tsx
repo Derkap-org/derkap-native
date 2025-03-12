@@ -52,11 +52,11 @@ export default function Button({
       style={[
         {
           backgroundColor: isCancel
-            ? "#d1d5db"
+            ? "#9ca3af"
             : color === "primary"
               ? "#9747ff"
               : color === "gray"
-                ? "#d1d5db"
+                ? "#9ca3af"
                 : color === "danger"
                   ? "#ff4747"
                   : "transparent",
@@ -73,7 +73,7 @@ export default function Button({
         <Text
           className={cn(
             "p-2 text-xl text-center text-white font-grotesque relative",
-            { "text-gray-400": isCancel },
+            { "text-gray-500": isCancel },
             { invisible: showLoader },
             textClassName,
           )}

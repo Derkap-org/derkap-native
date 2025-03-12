@@ -89,26 +89,29 @@ export default function Friends() {
           <BackButton handleBack={handleBack} />
         </View>
         <View className="flex flex-row items-center justify-center w-1/3">
-          <Text className="text-2xl font-bold">Amis</Text>
+          <Text className="text-2xl font-bold text-white">Amis</Text>
         </View>
       </View>
       <View className="flex flex-row items-center justify-center p-4">
-        <View className="relative flex-row items-center w-full p-2 overflow-hidden bg-white border border-gray-300 rounded-xl">
-          <Ionicons name="search-outline" size={20} color="#888" />
+        <View className="relative flex-row items-center w-full p-2 overflow-hidden bg-zinc-800 rounded-xl">
+          <Ionicons name="search-outline" size={20} color="#a1a1aa" />
           <TextInput
             ref={inputRef}
             onFocus={handleFocus}
-            className="w-full pr-24 ml-2 "
+            className="w-full pr-24 ml-2 text-white placeholder:text-zinc-400"
             onChangeText={handleQueryUser}
             value={queryUser}
             placeholder="Cherche quelqu'un"
-            placeholderTextColor="#888"
           />
-          {isFocused && (
-            <Pressable onPress={handleBlur} className="absolute right-0 mx-2 ">
-              <Text className="text-gray-500">Annuler</Text>
-            </Pressable>
-          )}
+          {isFocused ||
+            (queryUser.length > 0 && (
+              <Pressable
+                onPress={handleBlur}
+                className="absolute right-0 mx-2 "
+              >
+                <Text className="text-gray-500">Annuler</Text>
+              </Pressable>
+            ))}
         </View>
       </View>
       {debouncedQuery.length > 0 ? (
@@ -119,6 +122,26 @@ export default function Friends() {
     </View>
   );
 }
+
+/*
+<Pressable
+            className={cn(
+              "w-1/2 flex justify-center items-center rounded-xl py-2",
+              selectedTab === "challenges" && "bg-custom-primary",
+            )}
+            onPress={() => setSelectedTab("challenges")}
+          >
+            <Text
+              className={cn(
+                "text-gray-500",
+                selectedTab === "challenges" && "text-white font-bold",
+              )}
+            >
+              Défis
+            </Text>
+          </Pressable>
+
+*/
 
 const TabList = ({
   selectedTab,
@@ -132,15 +155,15 @@ const TabList = ({
       <View className="flex flex-row justify-between px-4 my-2">
         <Pressable
           className={cn(
-            "w-1/2 flex justify-center items-center rounded-xl py-4",
-            selectedTab === "friends" && "bg-custom-primary/50",
+            "w-1/2 flex justify-center items-center rounded-xl py-2",
+            selectedTab === "friends" && "bg-custom-primary",
           )}
           onPress={() => setSelectedTab("friends")}
         >
           <Text
             className={cn(
               "text-gray-500",
-              selectedTab === "friends" && "text-black font-bold",
+              selectedTab === "friends" && "text-white font-bold",
             )}
           >
             Liste d'amis
@@ -148,15 +171,15 @@ const TabList = ({
         </Pressable>
         <Pressable
           className={cn(
-            "w-1/2 flex justify-center items-center rounded-xl py-4",
-            selectedTab === "requests" && "bg-custom-primary/50",
+            "w-1/2 flex justify-center items-center rounded-xl py-2",
+            selectedTab === "requests" && "bg-custom-primary",
           )}
           onPress={() => setSelectedTab("requests")}
         >
           <Text
             className={cn(
               "text-gray-500",
-              selectedTab === "requests" && "text-black font-bold",
+              selectedTab === "requests" && "text-white font-bold",
             )}
           >
             Demandes d'amis
@@ -213,7 +236,7 @@ const FriendsList = () => {
             <RefreshControl
               refreshing={refreshingFriends}
               onRefresh={handleRefreshFriends}
-              tintColor={"#000"}
+              tintColor={"#fff"}
             />
           }
         >
@@ -233,9 +256,6 @@ const FriendsList = () => {
                   classNameText="text-md"
                 />
                 <View className="flex flex-row gap-2">
-                  {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
-                      <ActivityIndicator size="small" color="#000" />
-                    ) : ( */}
                   <>
                     <Button
                       color="danger"
@@ -255,8 +275,10 @@ const FriendsList = () => {
       </View>
 
       <Modal actionSheetRef={modalRef} onClose={hideModalConfirmDeletion}>
-        <Text className="text-2xl font-bold">Supprimer cet ami</Text>
-        <Text className="">
+        <Text className="text-2xl font-bold text-white text-center font-grotesque">
+          Supprimer cet ami
+        </Text>
+        <Text className="text-white">
           Es-tu sûr de vouloir supprimer cet ami ? Cette action est
           irréversible.
         </Text>
@@ -304,7 +326,7 @@ const RequestsList = () => {
           <RefreshControl
             refreshing={refreshingRequests}
             onRefresh={handleRefreshRequests}
-            tintColor={"#000"}
+            tintColor={"#fff"}
           />
         }
         className="flex flex-col w-full gap-y-4 h-full"
