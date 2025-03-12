@@ -2,9 +2,6 @@ create type "public"."friend_request_status" as enum ('pending', 'accepted', 're
 
 create type "public"."friendship_status_type" as enum ('friend', 'pending_their_acceptance', 'pending_your_acceptance', 'not_friend');
 
-
-
-
 create table "public"."friends_request" (
     "id" uuid not null default uuid_generate_v4(),
     "created_at" timestamp with time zone default now(),
@@ -199,14 +196,6 @@ as permissive
 for select
 to authenticated
 using (((sender_id = auth.uid()) OR (receiver_id = auth.uid())));
-
-
--- create or replace policy "Allow member of group to leave - delete row"
--- on "public"."group_profile"
--- as permissive
--- for delete
--- to public
--- using ((( SELECT auth.uid() AS uid) = profile_id));
 
 
 CREATE TRIGGER update_friends_request_updated_at BEFORE UPDATE ON public.friends_request FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
