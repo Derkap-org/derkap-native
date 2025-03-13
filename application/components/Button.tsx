@@ -14,7 +14,7 @@ interface ButtonProps extends PressableProps {
   textClassName?: string;
   onClick: () => Promise<any> | any;
   withLoader?: boolean;
-  color?: "primary" | "danger" | "gray";
+  color?: "primary" | "danger" | "gray" | "green";
   children?: React.ReactNode;
 }
 
@@ -59,13 +59,18 @@ export default function Button({
                 ? "#9ca3af"
                 : color === "danger"
                   ? "#ff4747"
-                  : "transparent",
+                  : color === "green"
+                    ? "#16a34a"
+                    : "transparent",
 
           opacity: pressed ? 0.7 : 1,
         },
       ]}
       className={cn(
-        "py-2 px-4 rounded-xl text-sm disabled:opacity-50 ",
+        "rounded-xl text-sm disabled:opacity-50",
+        // Apply default padding only if not explicitly overridden in className
+        !className?.includes("py-") && "py-2",
+        !className?.includes("px-") && "px-4",
         className,
       )}
     >

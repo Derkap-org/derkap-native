@@ -62,7 +62,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
           onChangeText={(value) => handleChange(index, value)}
           onKeyPress={(e) => handleKeyPress(index, e)}
           keyboardType="numeric"
-          className="w-10 h-10 text-xl text-center border rounded-md"
+          className="w-10 h-10 text-xl text-center rounded-md bg-zinc-800 text-white"
         />
       ))}
     </View>

@@ -1,10 +1,7 @@
-import { cn } from "@/lib/utils";
 import { TPostDB, TGroupDB, TChallengeDB } from "@/types/types";
 import { useRef, useState, useEffect } from "react";
 import { View, Text, Image } from "react-native";
 import Button from "../Button";
-import CarouselMedia from "@/components/challenge/CarouselMedia";
-import { BlurView } from "expo-blur";
 import { useSupabase } from "@/context/auth-context";
 import { setChallengeToVoting } from "@/functions/challenge-action";
 import { Modal } from "@/components/Modal";
@@ -87,12 +84,18 @@ const PostTaken = ({
             <Text className="text-6xl text-center font-grotesque text-white">
               {posts?.length} / {group?.members?.length}
             </Text>
+            {challenge.creator.id !== profile.id && (
+              <Text className="text-xs text-center text-gray-300">
+                Seul le créateur du défi peut passer aux votes
+              </Text>
+            )}
             <Button
               text="Passer aux votes"
-              className="w-full font-grotesque"
+              className="w-full font-grotesque px-2 py-1"
               onClick={() => {
                 showModalGoVote();
               }}
+              isCancel={challenge.creator.id !== profile.id}
             />
           </View>
         </View>

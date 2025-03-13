@@ -14,6 +14,7 @@ import { useSupabase } from "@/context/auth-context";
 import Button from "@/components/Button";
 import StatusLabel from "@/components/group/StatusLabel";
 import GroupCard from "@/components/group/GroupCard";
+import ConfirmEmail from "@/app/confirm-email";
 
 import useGroupStore from "@/store/useGroupStore";
 import { useFocusEffect } from "@react-navigation/native";
@@ -105,12 +106,22 @@ const Home = () => {
           </Link>
         </View>
         <View className="flex-row items-center justify-center w-full">
-          <Pressable className="p-2" onPress={showModal}>
-            <Text className="text-gray-300">Créer un groupe</Text>
-          </Pressable>
+          {groups.length > 0 ? (
+            <Pressable className="p-2" onPress={showModal}>
+              <Text className="text-gray-300">Créer un nouveau groupe</Text>
+            </Pressable>
+          ) : (
+            <Button
+              onClick={showModal}
+              text="Créer un groupe"
+              className="w-fit"
+            />
+          )}
         </View>
         {groups.length === 0 ? (
           <ScrollView
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -130,6 +141,8 @@ const Home = () => {
           </ScrollView>
         ) : (
           <ScrollView
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}

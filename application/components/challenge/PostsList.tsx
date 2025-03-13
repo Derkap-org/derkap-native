@@ -1,8 +1,11 @@
-import { View, Text, ViewProps, ActivityIndicator } from "react-native";
+import { View, ViewProps, ActivityIndicator } from "react-native";
 import { TPostDB, TVoteDB, UserVote } from "@/types/types";
 import PostCard from "./PostCard";
 import { ScrollView } from "react-native-gesture-handler";
 import { useState, useEffect } from "react";
+
+import Toast from "react-native-toast-message";
+import { addVote } from "@/functions/vote-action";
 interface PostsListProps extends ViewProps {
   posts: TPostDB[];
   finalizationData?: {
@@ -12,6 +15,7 @@ interface PostsListProps extends ViewProps {
   };
   groupLength?: number;
   challengeStatus: "posting" | "voting" | "ended";
+  refreshChallengeData: () => Promise<void>;
 }
 
 export default function PostsList({
@@ -19,14 +23,34 @@ export default function PostsList({
   finalizationData,
   groupLength,
   challengeStatus,
+  refreshChallengeData,
   className,
   ...props
 }: PostsListProps) {
   const [sortedPosts, setSortedPosts] = useState<TPostDB[]>();
-  const { setCurrentPostIndex, userVote, votes } = finalizationData || {};
+
+  const { userVote, votes } = finalizationData || {};
   const getVoteCount = ({ postId }: { postId: number }) => {
     if (!votes) return 0;
     return votes.filter((vote) => vote.post_id === postId).length;
+  };
+
+  const handleVote = async (post: TPostDB) => {
+    try {
+      if (post.id === userVote?.postId) return;
+      await addVote({
+        post_id: post.id,
+        challenge_id: post.challenge_id,
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du vote",
+        text2: error?.message || "Une erreur est survenue",
+      });
+    } finally {
+      await refreshChallengeData();
+    }
   };
 
   useEffect(() => {
@@ -53,8 +77,22 @@ export default function PostsList({
     );
 
   return (
-    <ScrollView className="">
-      {sortedPosts?.map((post) => <PostCard key={post.id} post={post} />)}
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+      keyboardShouldPersistTaps="always"
+      className=""
+    >
+      {sortedPosts?.map((post) => (
+        <PostCard
+          key={post.id}
+          post={post}
+          handleVote={handleVote}
+          challengeStatus={challengeStatus}
+          userVote={userVote}
+          votes={votes}
+        />
+      ))}
     </ScrollView>
   );
 }

@@ -135,13 +135,14 @@ export default function Auth() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={true}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-col items-center w-full px-4 pt-10 pb-20">
-            <Text className="text-5xl text-center font-grotesque mb-10">
+            <Text className="text-5xl text-center font-grotesque mb-10 text-white">
               Bienvenue sur {"\n"} Derkap ! 👋
             </Text>
 
@@ -153,7 +154,7 @@ export default function Auth() {
                 value={email}
                 placeholder="Email"
                 autoCapitalize={"none"}
-                className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
+                className="w-full h-16 p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
               />
               {!isSignIn && (
                 <TextInput
@@ -163,11 +164,11 @@ export default function Auth() {
                   value={username}
                   placeholder="Pseudo"
                   autoCapitalize={"none"}
-                  className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
+                  className="w-full h-16 p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
                 />
               )}
 
-              <View className="flex flex-row items-center justify-between relative w-full bg-white border border-gray-300 rounded-xl pr-2">
+              <View className="flex flex-row items-center justify-between relative bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl w-full pr-2">
                 <TextInput
                   // label="Password"
                   // leftIcon={{ type: "font-awesome", name: "lock" }}
@@ -176,19 +177,19 @@ export default function Auth() {
                   secureTextEntry={!isPasswordVisible}
                   placeholder="Mot de passe"
                   autoCapitalize={"none"}
-                  className="w-10/12 h-16 p-2 placeholder:text-gray-500"
+                  className="w-10/12 h-16 p-2 placeholder:text-zinc-400 text-white"
                 />
                 {isPasswordVisible ? (
                   <Eye
                     size={24}
                     className=""
-                    color={"#000"}
+                    color={"white"}
                     onPress={() => setPasswordVisible(false)}
                   />
                 ) : (
                   <EyeOff
                     size={24}
-                    color={"#000"}
+                    color={"white"}
                     className=""
                     onPress={() => setPasswordVisible(true)}
                   />
@@ -196,26 +197,26 @@ export default function Auth() {
               </View>
 
               {!isSignIn && (
-                <View className="flex flex-row items-center justify-between relative w-full bg-white border border-gray-300 rounded-xl pr-2">
+                <View className="flex flex-row items-center justify-between relative w-full bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl pr-2">
                   <TextInput
                     onChangeText={(text) => setPasswordConfirmation(text)}
                     value={passwordConfirmation}
                     secureTextEntry={!isPasswordConfirmationVisible}
                     placeholder="Confirmer le mot de passe"
                     autoCapitalize={"none"}
-                    className="w-10/12 h-16 p-2 placeholder:text-gray-500"
+                    className="w-10/12 h-16 p-2 placeholder:text-zinc-400 text-white"
                   />
                   {isPasswordConfirmationVisible ? (
                     <Eye
                       size={24}
                       className=""
-                      color={"#000"}
+                      color={"white"}
                       onPress={() => setPasswordConfirmationVisible(false)}
                     />
                   ) : (
                     <EyeOff
                       size={24}
-                      color={"#000"}
+                      color={"white"}
                       className=""
                       onPress={() => setPasswordConfirmationVisible(true)}
                     />
@@ -226,11 +227,12 @@ export default function Auth() {
               {!isSignIn && (
                 <View className="flex flex-row items-center gap-x-2">
                   <Checkbox
+                    color={"white"}
                     value={cguChecked}
                     onValueChange={setChecked}
                     style={{ height: 16, width: 16, borderRadius: "100%" }}
                   />
-                  <Text>
+                  <Text className="text-white">
                     J'accepte les{" "}
                     <Text onPress={showCGUModal} className="underline">
                       CGU
@@ -276,7 +278,7 @@ export default function Auth() {
                     onPress={() => setIsSignIn(false)}
                     className="cursor-pointer"
                   >
-                    <Text>
+                    <Text className="text-white">
                       Pas encore de compte ?{" "}
                       <Text className="text-[#9747ff]">Inscris-toi !</Text>
                     </Text>
@@ -286,7 +288,7 @@ export default function Auth() {
                     onPress={() => setIsSignIn(true)}
                     className="cursor-pointer "
                   >
-                    <Text>
+                    <Text className="text-white">
                       Déjà un compte ?{" "}
                       <Text className="text-[#9747ff]">Connecte-toi !</Text>
                     </Text>
@@ -296,7 +298,11 @@ export default function Auth() {
             </View>
 
             <Modal fullScreen={true} actionSheetRef={modalCGURef}>
-              <ScrollView className="flex flex-col bg-white gap-y-4">
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                className="flex flex-col bg-white gap-y-4"
+              >
                 <Text className="text-2xl font-bold">
                   Conditions Générales d'Utilisation (CGU) de Derkap {"\n"}
                 </Text>

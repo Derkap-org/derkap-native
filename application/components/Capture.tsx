@@ -125,7 +125,7 @@ export default function Capture({
     // Camera permissions are not granted yet.
     return (
       <View className="flex flex-col h-full w-full gap-y-4">
-        <Text className="text-center pb-2">
+        <Text className="text-center pb-2 text-white">
           Il nous faut ta permission pour utiliser la caméra !
         </Text>
         <Button onClick={requestPermission} text="Autoriser" />
@@ -142,6 +142,8 @@ export default function Capture({
       if (!challenge) {
         throw new Error("Aucun défi sélectionné");
       }
+
+      if (caption.length > 35) return;
 
       const compressedPhoto = await compressImage(capturedPhoto);
       setCapturedPhoto(compressedPhoto.uri);
@@ -374,6 +376,7 @@ export default function Capture({
             className="w-full p-4 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
             autoFocus={true}
             placeholder="Une légende pour ton oeuvre d'art ?"
+            maxLength={35}
           />
           <Button
             isCancel={isValidatingFile}

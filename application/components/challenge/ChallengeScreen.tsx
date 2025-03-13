@@ -103,6 +103,8 @@ export const ChallengeScreen = ({
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
       keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl

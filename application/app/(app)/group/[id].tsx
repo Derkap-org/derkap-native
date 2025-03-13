@@ -244,10 +244,6 @@ export default function Group() {
 
       fetchGroups();
       router.back();
-      Toast.show({
-        type: "success",
-        text1: "Vous avez quitté le groupe",
-      });
     } catch (error) {
       Toast.show({
         type: "error",
@@ -313,7 +309,7 @@ export default function Group() {
           <Pressable
             className={cn(
               "w-1/2 flex justify-center items-center rounded-xl py-2",
-              selectedTab === "ranking" && "bg-custom-primary/50",
+              selectedTab === "ranking" && "bg-custom-primary",
             )}
             onPress={() => setSelectedTab("ranking")}
           >
@@ -338,7 +334,11 @@ export default function Group() {
       </View>
 
       <Modal fullScreen={true} actionSheetRef={modalGroupSettingsRef}>
-        <ScrollView className="min-h-full">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          className="min-h-full"
+        >
           <View className="flex-col items-center justify-between flex-1 h-full mt-2 gap-y-4">
             <View className="relative flex items-center justify-center w-24 h-24 rounded-full bg-black">
               <Pressable

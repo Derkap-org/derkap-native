@@ -44,6 +44,8 @@ export const ChallengesTab = ({
   const handleCreateChallenge = async () => {
     try {
       if (!group?.id) return;
+      if (!newChallengeDescription) return;
+      if (newChallengeDescription.length > 45) return;
       Keyboard.dismiss();
       await createChallenge({
         challenge: {
@@ -150,6 +152,8 @@ export const ChallengesTab = ({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         keyboardShouldPersistTaps="always"
         refreshControl={
           <RefreshControl
@@ -187,6 +191,7 @@ export const ChallengesTab = ({
                 onChangeText={setNewChallengeDescription}
                 value={newChallengeDescription}
                 placeholder="Crée un nouveau défi !"
+                maxLength={45}
               />
               <Button
                 withLoader={true}

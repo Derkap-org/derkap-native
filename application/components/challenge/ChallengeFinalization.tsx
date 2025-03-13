@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import Button from "@/components/Button";
-import CarouselMedia from "@/components/challenge/CarouselMedia";
 import {
   TPostDB,
   TVoteDB,
@@ -9,9 +8,8 @@ import {
   TGroupDB,
 } from "@/types/types";
 import { useState, useEffect, useRef } from "react";
-import { View, Text, ViewProps } from "react-native";
+import { View, Text, ViewProps, Image } from "react-native";
 import { useSupabase } from "@/context/auth-context";
-import { addVote } from "@/functions/vote-action";
 import Toast from "react-native-toast-message";
 import PostsList from "@/components/challenge/PostsList";
 import { Modal } from "@/components/Modal";
@@ -45,27 +43,6 @@ const ChallengeFinalization = ({
   const modalEndVoteRef = useRef<ActionSheetRef>(null);
 
   const showModalEndVote = () => modalEndVoteRef.current?.show();
-
-  const handleVote = async () => {
-    try {
-      if (!selectedPost) throw new Error("Post inconnu");
-      if (selectedPost.id === userVote?.postId) {
-        throw new Error("Tu ne peux pas voter pour le même post");
-      }
-      await addVote({
-        post_id: selectedPost.id,
-        challenge_id: selectedPost.challenge_id,
-      });
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur lors du vote",
-        text2: error?.message || "Une erreur est survenue",
-      });
-    } finally {
-      await refreshChallengeData();
-    }
-  };
 
   const handleEndVote = async () => {
     try {
@@ -116,15 +93,62 @@ const ChallengeFinalization = ({
         {...props}
         className={cn("w-full flex flex-col items-center gap-2", className)}
       >
-        <View className="w-full flex flex-row items-center justify-center gap-6">
-          <Text className="text-white text-center text-2xl font-grotesque">
-            {votes.length} votes sur {group.members.length}
-          </Text>
+        {challenge?.status === "voting" && (
+          <View className="w-full flex flex-row items-center justify-center gap-6">
+            <Text className="text-white text-center text-2xl font-grotesque">
+              {votes.length} votes sur {group.members.length}
+            </Text>
+            <View className="flex flex-col items-center gap-2">
+              {challenge?.creator_id !== profile.id && (
+                <Text className="text-sm text-gray-300 text-center">
+                  Seul le créateur du défi{"\n"}peut clore les votes
+                </Text>
+              )}
+              <Button
+                className="px-2 py-0"
+                text="Clore les votes"
+                onClick={showModalEndVote}
+                isCancel={challenge.creator_id !== profile.id}
+              />
+            </View>
+          </View>
+        )}
 
-          {challenge?.creator_id === profile.id && (
-            <Button text="Clore les votes" onClick={showModalEndVote} />
-          )}
-        </View>
+        {challenge?.status === "voting" && posts && posts.length > 0 && (
+          <View className="flex flex-col items-center justify-center w-full gap-1 mt-2">
+            <Text className="text-2xl font-grotesque text-white">
+              On attend leur votes...
+            </Text>
+            <View className="flex flex-row items-center justify-center flex-wrap w-full gap-2 px-4">
+              {getWhoNotVote().map((member, index) => (
+                <View
+                  key={index}
+                  className="flex flex-row items-center gap-x-2"
+                >
+                  <View className={`rounded-full overflow-hidden`}>
+                    {member.profile.avatar_url ? (
+                      <Image
+                        source={{
+                          uri: `${member.profile.avatar_url}?t=${new Date().getTime()}`,
+                        }}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    ) : (
+                      <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
+                        <Text className="text-sm text-gray-300">
+                          {member.profile.username?.charAt(0) || "?"}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text className="text-lg font-bold text-white">
+                    {member.profile.username}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         <PostsList
           posts={posts}
@@ -134,60 +158,13 @@ const ChallengeFinalization = ({
             userVote: userVote,
             votes: votes,
           }}
+          refreshChallengeData={refreshChallengeData}
         />
-        <View className="flex flex-row items-center gap-1">
-          {posts &&
-            posts.map((post, index) => (
-              <View
-                key={index}
-                className={cn(
-                  "rounded-full cursor-pointer transition-all duration-300",
-                  post.id === selectedPost?.id
-                    ? "bg-gray-800 w-2 h-2"
-                    : "bg-gray-400 w-1 h-1",
-                )}
-              ></View>
-            ))}
-        </View>
 
-        {challenge?.status === "voting" && posts && posts.length > 0 && (
-          <View className="flex flex-col w-full gap-y-2">
-            <Button
-              withLoader={true}
-              className="w-full font-grotesque"
-              text={
-                userVote?.voted
-                  ? `Changer mon vote pour @${selectedPost?.creator?.username}`
-                  : `Voter pour @${selectedPost?.creator?.username || ""}`
-              }
-              isCancel={!selectedPost}
-              onClick={handleVote}
-            />
-            {challenge?.creator_id === profile.id && (
-              <Button
-                text="Fermer les votes"
-                //todo: add validation msg and confirm
-                onClick={showModalEndVote}
-              />
-            )}
-            <View className="flex flex-col w-full gap-1 mb-40">
-              <Text className="text-xl font-grotesque">
-                On attend leurs votes...
-              </Text>
-              <View className="flex flex-row flex-wrap w-full gap-2">
-                {getWhoNotVote().map((member, index) => (
-                  <Text key={index} className="">
-                    {index !== 0 && ", "}@{member.profile?.username}
-                  </Text>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
         {
           //todo: find a better way to handle full scroll instead of mb-48
         }
-        {challenge?.status === "ended" && <View className="mb-48"></View>}
+        {<View className="mb-48"></View>}
       </View>
       <Modal actionSheetRef={modalEndVoteRef}>
         <Text className="text-2xl font-bold text-center text-white font-grotesque">

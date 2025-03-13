@@ -65,8 +65,8 @@ export const Comment = ({ comment, refreshComments }: CommentProps) => {
                 className="w-10 h-10 rounded-full"
               />
             ) : (
-              <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-                <Text className="text-sm text-white">
+              <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
+                <Text className="text-sm text-gray-300">
                   {comment.creator?.username?.charAt(0) || "?"}
                 </Text>
               </View>
@@ -75,14 +75,14 @@ export const Comment = ({ comment, refreshComments }: CommentProps) => {
 
           {/* Comment content container */}
           <View className="flex-1">
-            <View className="flex flex-row items-center gap-x-2">
-              <Text className="font-semibold">
+            <View className="flex flex-row items-center justify-between">
+              <Text className="font-grotesque text-white">
                 {comment.creator?.username || "Utilisateur supprimé"}
               </Text>
               <Text className="text-xs text-gray-500">{timeAgo}</Text>
             </View>
 
-            <Text className="text-sm mt-1">
+            <Text className="text-sm mt-1 text-white">
               {comment.content || "Commentaire supprimé"}
             </Text>
           </View>

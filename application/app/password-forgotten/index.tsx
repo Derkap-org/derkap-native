@@ -32,12 +32,12 @@ export default function PasswordForgotten() {
   if (!session) {
     return (
       <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
-        <Text className="px-16 text-2xl text-center font-grotesque">
+        <Text className="px-16 text-2xl text-center font-grotesque text-white">
           Mot de passe oublié ? 🤔
         </Text>
 
         <View className="flex flex-col w-96 gap-y-4">
-          <Text className="text-center">
+          <Text className="text-center text-white">
             Entre ton adresse email pour réinitialiser ton mot de passe.
           </Text>
 
@@ -46,17 +46,17 @@ export default function PasswordForgotten() {
             value={email}
             placeholder="Email"
             autoCapitalize={"none"}
-            className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
+            className="w-full h-16 p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
           />
           <Button
             withLoader
             text="Envoyer"
             isCancel={isLoading}
             onClick={resetPassword}
-            className="bg-gray-500 w-fit"
+            className="w-fit"
           />
         </View>
-        <Text className="">
+        <Text className="text-white">
           Mot de passe retrouvé ?{" "}
           <Link
             href={{

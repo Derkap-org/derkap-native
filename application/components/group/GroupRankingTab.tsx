@@ -51,6 +51,8 @@ const GroupRankingTab = ({ groupId }: { groupId: number }) => {
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
