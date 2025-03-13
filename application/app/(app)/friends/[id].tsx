@@ -12,6 +12,7 @@ import {
   ScrollView,
   Keyboard,
   RefreshControl,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TFriendRequestDB, TUserWithFriendshipStatus } from "@/types/types";
@@ -68,6 +69,22 @@ export default function Friends() {
     setIsFocused(true);
   };
 
+  // Add keyboard listeners to detect when keyboard is dismissed
+  useEffect(() => {
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        if (isFocused) {
+          setIsFocused(false);
+        }
+      },
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
+  }, [isFocused]);
+
   useEffect(() => {
     if (selectedTab === "friends") {
       fetchFriends();
@@ -79,44 +96,51 @@ export default function Friends() {
   useEffect(() => {
     if (debouncedQuery) {
       fetchUserByUsername(debouncedQuery);
+    } else if (debouncedQuery === "") {
+      setSearchedUsers([]);
+      setIsLoading(false);
     }
   }, [debouncedQuery]);
 
   return (
-    <View className="">
-      <View className="flex-row items-center p-4">
-        <View className="flex flex-row items-center w-1/3">
-          <BackButton handleBack={handleBack} />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View className="">
+        <View className="flex-row items-center p-4">
+          <View className="flex flex-row items-center w-1/3">
+            <BackButton handleBack={handleBack} />
+          </View>
+          <View className="flex flex-row items-center justify-center w-1/3">
+            <Text className="text-2xl font-bold text-white">Amis</Text>
+          </View>
         </View>
-        <View className="flex flex-row items-center justify-center w-1/3">
-          <Text className="text-2xl font-bold">Amis</Text>
+        <View className="flex flex-row items-center justify-center p-4">
+          <View className="relative flex-row items-center w-full p-2 overflow-hidden bg-zinc-800 rounded-xl">
+            <Ionicons name="search-outline" size={20} color="#a1a1aa" />
+            <TextInput
+              ref={inputRef}
+              onFocus={handleFocus}
+              className="w-full pr-24 ml-2 text-white placeholder:text-zinc-400"
+              onChangeText={handleQueryUser}
+              value={queryUser}
+              placeholder="Cherche quelqu'un"
+            />
+            {(isFocused || queryUser.length > 0) && (
+              <Pressable
+                onPress={handleBlur}
+                className="absolute right-0 mx-2 "
+              >
+                <Text className="text-gray-500">Annuler</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
+        {debouncedQuery.length > 0 || isFocused ? (
+          <QueryUserList isLoading={isLoading} searchedUsers={searchedUsers} />
+        ) : (
+          <TabList selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+        )}
       </View>
-      <View className="flex flex-row items-center justify-center p-4">
-        <View className="relative flex-row items-center w-full p-2 overflow-hidden bg-white border border-gray-300 rounded-xl">
-          <Ionicons name="search-outline" size={20} color="#888" />
-          <TextInput
-            ref={inputRef}
-            onFocus={handleFocus}
-            className="w-full pr-24 ml-2 "
-            onChangeText={handleQueryUser}
-            value={queryUser}
-            placeholder="Cherche quelqu'un"
-            placeholderTextColor="#888"
-          />
-          {isFocused && (
-            <Pressable onPress={handleBlur} className="absolute right-0 mx-2 ">
-              <Text className="text-gray-500">Annuler</Text>
-            </Pressable>
-          )}
-        </View>
-      </View>
-      {debouncedQuery.length > 0 ? (
-        <QueryUserList isLoading={isLoading} searchedUsers={searchedUsers} />
-      ) : (
-        <TabList selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
-      )}
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -128,45 +152,47 @@ const TabList = ({
   setSelectedTab: (tab: "friends" | "requests") => void;
 }) => {
   return (
-    <>
-      <View className="flex flex-row justify-between px-4 my-2">
-        <Pressable
-          className={cn(
-            "w-1/2 flex justify-center items-center rounded-xl py-4",
-            selectedTab === "friends" && "bg-custom-primary/50",
-          )}
-          onPress={() => setSelectedTab("friends")}
-        >
-          <Text
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <>
+        <View className="flex flex-row justify-between px-4 my-2">
+          <Pressable
             className={cn(
-              "text-gray-500",
-              selectedTab === "friends" && "text-black font-bold",
+              "w-1/2 flex justify-center items-center rounded-xl py-2",
+              selectedTab === "friends" && "bg-custom-primary",
             )}
+            onPress={() => setSelectedTab("friends")}
           >
-            Liste d'amis
-          </Text>
-        </Pressable>
-        <Pressable
-          className={cn(
-            "w-1/2 flex justify-center items-center rounded-xl py-4",
-            selectedTab === "requests" && "bg-custom-primary/50",
-          )}
-          onPress={() => setSelectedTab("requests")}
-        >
-          <Text
+            <Text
+              className={cn(
+                "text-gray-500",
+                selectedTab === "friends" && "text-white font-bold",
+              )}
+            >
+              Liste d'amis
+            </Text>
+          </Pressable>
+          <Pressable
             className={cn(
-              "text-gray-500",
-              selectedTab === "requests" && "text-black font-bold",
+              "w-1/2 flex justify-center items-center rounded-xl py-2",
+              selectedTab === "requests" && "bg-custom-primary",
             )}
+            onPress={() => setSelectedTab("requests")}
           >
-            Demandes d'amis
-          </Text>
-        </Pressable>
-      </View>
-      <View className="mt-2">
-        {selectedTab === "friends" ? <FriendsList /> : <RequestsList />}
-      </View>
-    </>
+            <Text
+              className={cn(
+                "text-gray-500",
+                selectedTab === "requests" && "text-white font-bold",
+              )}
+            >
+              Demandes d'amis
+            </Text>
+          </Pressable>
+        </View>
+        <View className="mt-2">
+          {selectedTab === "friends" ? <FriendsList /> : <RequestsList />}
+        </View>
+      </>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -208,12 +234,14 @@ const FriendsList = () => {
     <>
       <View className="flex flex-col items-center w-full px-6">
         <ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           className="flex flex-col w-full gap-y-4 h-full"
           refreshControl={
             <RefreshControl
               refreshing={refreshingFriends}
               onRefresh={handleRefreshFriends}
-              tintColor={"#000"}
+              tintColor={"#fff"}
             />
           }
         >
@@ -233,9 +261,6 @@ const FriendsList = () => {
                   classNameText="text-md"
                 />
                 <View className="flex flex-row gap-2">
-                  {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
-                      <ActivityIndicator size="small" color="#000" />
-                    ) : ( */}
                   <>
                     <Button
                       color="danger"
@@ -255,8 +280,10 @@ const FriendsList = () => {
       </View>
 
       <Modal actionSheetRef={modalRef} onClose={hideModalConfirmDeletion}>
-        <Text className="text-2xl font-bold">Supprimer cet ami</Text>
-        <Text className="">
+        <Text className="text-2xl font-bold text-white text-center font-grotesque">
+          Supprimer cet ami
+        </Text>
+        <Text className="text-white">
           Es-tu sûr de vouloir supprimer cet ami ? Cette action est
           irréversible.
         </Text>
@@ -300,11 +327,13 @@ const RequestsList = () => {
   return (
     <View className="flex flex-col items-center w-full px-6">
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshingRequests}
             onRefresh={handleRefreshRequests}
-            tintColor={"#000"}
+            tintColor={"#fff"}
           />
         }
         className="flex flex-col w-full gap-y-4 h-full"
@@ -325,9 +354,6 @@ const RequestsList = () => {
                 classNameText="text-md"
               />
               <View className="flex flex-row gap-2">
-                {/* {loadingRequestIdByUserId.includes(request.profile.id) ? (
-                    <ActivityIndicator size="small" color="#000" />
-                  ) : ( */}
                 <>
                   <Button
                     withLoader={true}
@@ -381,31 +407,21 @@ const QueryUserList = ({
     <>
       {isLoading ? (
         <View className="flex flex-row items-center justify-center w-full">
-          <ActivityIndicator size="small" color="#000" />
+          <ActivityIndicator size="small" color="white" />
         </View>
       ) : (
-        <ScrollView
-          keyboardShouldPersistTaps="always"
-          contentContainerStyle={{
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-            height: "100%",
-            paddingHorizontal: 10,
-          }}
-        >
-          <View className="flex flex-col w-full gap-y-4">
+        <View className="flex flex-col items-center w-full px-6">
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            onScrollBeginDrag={() => Keyboard.dismiss()}
+          >
             {searchedUsers.map((user) => (
-              <View
-                className="flex flex-row items-center justify-between w-full gap-2"
-                key={user.id}
-              >
-                <ProfileLine member={user} className="w-fit" />
-                {
-                  // loadingRequestIdByUserId.includes(user.id) ? (
-                  //   <ActivityIndicator size="small" color="#000" />
-                  // )
-                  user.friendship_status === "not_friend" ? (
+              <Pressable key={user.id} onPress={() => Keyboard.dismiss()}>
+                <View className="flex flex-row items-center justify-between w-full gap-2 my-2">
+                  <ProfileLine member={user} className="w-fit" />
+                  {user.friendship_status === "not_friend" ? (
                     <Button
                       withLoader={true}
                       text="Ajouter"
@@ -454,12 +470,13 @@ const QueryUserList = ({
                     <Text className="px-2 py-1 text-white">
                       {user.friendship_status}
                     </Text>
-                  )
-                }
-              </View>
+                  )}
+                </View>
+              </Pressable>
             ))}
-          </View>
-        </ScrollView>
+            <View className="mb-48 h-64" />
+          </ScrollView>
+        </View>
       )}
     </>
   );

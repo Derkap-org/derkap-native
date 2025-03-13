@@ -19,7 +19,7 @@ export const ChallengeScreen = ({
   group,
   refreshChallenge,
 }: ChallengeScreenProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [posts, setPosts] = useState<TPostDB[]>();
   const [votes, setVotes] = useState<TVoteDB[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -103,12 +103,14 @@ export const ChallengeScreen = ({
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
       keyboardShouldPersistTaps="always"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          tintColor={"#000"}
+          tintColor={"#fff"}
         />
       }
       className="flex flex-col min-h-full"

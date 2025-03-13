@@ -44,6 +44,8 @@ export const ChallengesTab = ({
   const handleCreateChallenge = async () => {
     try {
       if (!group?.id) return;
+      if (!newChallengeDescription) return;
+      if (newChallengeDescription.length > 45) return;
       Keyboard.dismiss();
       await createChallenge({
         challenge: {
@@ -85,7 +87,7 @@ export const ChallengesTab = ({
         text2: error.message || "Veuillez réessayer",
       });
     } finally {
-      setIsFetchingChallenges(false);
+      setIsFetchingChallenges(false); // why is
     }
   };
 
@@ -150,12 +152,14 @@ export const ChallengesTab = ({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         keyboardShouldPersistTaps="always"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={"#000"}
+            tintColor={"#fff"}
           />
         }
         className="flex flex-col px-4 min-h-full"
@@ -172,7 +176,7 @@ export const ChallengesTab = ({
         scrollEventThrottle={400}
       >
         {isFetchingChallenges && (!challenges || challenges?.length === 0) && (
-          <View className="flex flex-col gap-y-1">
+          <View className="flex flex-col gap-y-1 mt-6">
             <ActivityIndicator size="large" />
           </View>
         )}
@@ -181,13 +185,13 @@ export const ChallengesTab = ({
           challenges.length === 0 ||
           challenges[0]?.status === "ended") &&
           !isFetchingChallenges && (
-            <View className="flex flex-col gap-y-1">
+            <View className="flex flex-col gap-y-2 mt-4">
               <TextInput
-                className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
+                className="w-full h-16 p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
                 onChangeText={setNewChallengeDescription}
                 value={newChallengeDescription}
                 placeholder="Crée un nouveau défi !"
-                placeholderTextColor="#888"
+                maxLength={45}
               />
               <Button
                 withLoader={true}

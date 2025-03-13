@@ -27,7 +27,6 @@ export const addVote = async ({
   post_id: number;
   challenge_id: number;
 }) => {
-  console.log("addVote", post_id, challenge_id);
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) throw new Error("Utilisateur non trouvé");
 

@@ -31,12 +31,14 @@ export default function UpdatePassword() {
   if (session) {
     return (
       <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
-        <Text className="px-16 text-4xl text-center font-grotesque">
+        <Text className="px-16 text-4xl text-center font-grotesque text-white">
           Mettre à jour ton mot de passe 🤔
         </Text>
 
         <View className="flex flex-col w-96 gap-y-4">
-          <Text className="text-center">Entre ton nouveau mot de passe.</Text>
+          <Text className="text-center text-white">
+            Entre ton nouveau mot de passe.
+          </Text>
 
           <TextInput
             onChangeText={(text) => setPassword(text)}
@@ -44,17 +46,17 @@ export default function UpdatePassword() {
             placeholder="Mot de passe"
             secureTextEntry={true}
             autoCapitalize={"none"}
-            className="w-full h-16 p-2 bg-white border border-gray-300 rounded-xl placeholder:text-gray-500"
+            className="w-full h-16 p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
           />
           <Button
             withLoader
             text="Envoyer"
             isCancel={isLoading}
             onClick={updatePassword}
-            className="bg-gray-500 w-fit"
+            className="w-fit"
           />
         </View>
-        <Text className="">
+        <Text className="text-white">
           Mot de passe retrouvé ?{" "}
           <Link
             href={{

@@ -15,12 +15,12 @@ export default function ChallengeBox({
 }: ChallengeBoxProps) {
   return (
     <View className={cn("w-full", className)}>
-      <View className="min-h-16 bg-red max-h-fit flex flex-row items-center w-full px-4 bg-custom-white border border-custom-black rounded-xl py-2 text-custom-black shadow-element gap-x-2">
+      <View className="min-h-16 max-h-fit flex flex-row items-center w-full px-4 bg-zinc-800 rounded-xl py-2 gap-x-2">
         <View className="flex-1 flex flex-col gap-y-1 ">
-          <Text className="text-xl font-grotesque text-custom-black line-clamp-2">
+          <Text className="text-xl font-grotesque text-white line-clamp-2">
             {challenge ? challenge.description : "Pas de défi..."}
           </Text>
-          <Text className="text-xs line-clamp-1">
+          <Text className="text-xs text-gray-300 line-clamp-1">
             {challenge
               ? "Par " + challenge.creator?.username
               : "Crée en un dès maintenant !"}

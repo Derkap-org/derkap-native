@@ -35,16 +35,18 @@ export default function GroupHeader({
   return (
     <View
       {...props}
-      className="flex-row justify-between items-center p-4 bg-[#f1d7f3] border-b border-[#d4c1d6] rounded-b-xl"
+      className="flex-row justify-between items-center px-4 py-1 bg-[#212123 to see]"
     >
       <View className="w-[12.5%] flex flex-row items-center justify-start">
         <Pressable onPress={() => handleBack()}>
-          <ChevronLeft size={32} color={"black"} />
+          <ChevronLeft size={32} color={"white"} />
         </Pressable>
       </View>
 
       <View className="w-[75%] flex flex-row items-center justify-center">
-        <Text className="text-2xl font-grotesque">{group?.name}</Text>
+        <Text className="text-2xl font-grotesque text-white">
+          {group?.name}
+        </Text>
       </View>
 
       <View className="w-[12.5%] flex flex-row items-center justify-end">
@@ -53,7 +55,7 @@ export default function GroupHeader({
             showModal();
           }}
         >
-          <Ellipsis size={32} color={"black"} />
+          <Ellipsis size={32} color={"white"} />
         </Pressable>
       </View>
     </View>

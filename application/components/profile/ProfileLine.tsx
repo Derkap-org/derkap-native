@@ -36,13 +36,13 @@ export default function ProfileLine({
           className="w-10 h-10 rounded-full"
         />
       ) : (
-        <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-          <Text className="text-sm text-white">
+        <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
+          <Text className="text-sm text-gray-300">
             {member.username?.charAt(0) || "?"}
           </Text>
         </View>
       )}
-      <Text className={cn("text-sm text-gray-500", classNameText)}>
+      <Text className={cn("text-sm text-gray-300", classNameText)}>
         {member.username}
       </Text>
     </View>

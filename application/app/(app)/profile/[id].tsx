@@ -62,7 +62,7 @@ export default function Group() {
             {/* )} */}
             <Text
               // style={{ fontFamily: "Grotesque" }}
-              className="overflow-hidden text-xl tracking-wider text-center capitalize font-grotesque max-w-52 text-wrap text-ellipsis"
+              className="overflow-hidden text-xl text-white tracking-wider text-center capitalize font-grotesque max-w-52 text-wrap text-ellipsis"
             >
               {profile?.username}
             </Text>
@@ -72,7 +72,8 @@ export default function Group() {
       <Modal actionSheetRef={modalRef}>
         <Button
           withLoader={true}
-          className="flex items-center justify-center w-full gap-2 bg-red-500"
+          color="danger"
+          className="flex items-center justify-center w-full gap-2"
           onClick={signOut}
           text={"Se déconnecter"}
         />

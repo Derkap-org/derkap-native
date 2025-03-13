@@ -6,7 +6,7 @@ export default function BackButton({ handleBack }: { handleBack: () => void }) {
   return (
     <View className="flex flex-row items-center justify-start w-1/3">
       <Pressable onPress={() => handleBack()}>
-        <ChevronLeft size={32} color={"black"} />
+        <ChevronLeft size={32} color={"white"} />
       </Pressable>
     </View>
   );

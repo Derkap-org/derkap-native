@@ -1,4 +1,4 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, ScrollView, RefreshControl } from "react-native";
 import React, { useEffect, useState } from "react";
 import { GroupRanking } from "@/types/types";
 import { useSupabase } from "@/context/auth-context";
@@ -9,6 +9,7 @@ const GroupRankingTab = ({ groupId }: { groupId: number }) => {
   const { user } = useSupabase();
 
   const [groupRanking, setGroupRanking] = useState<GroupRanking>();
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchGroupRanking = async () => {
     try {
@@ -34,18 +35,35 @@ const GroupRankingTab = ({ groupId }: { groupId: number }) => {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await fetchGroupRanking();
+    } catch (error) {
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     fetchGroupRanking();
   }, [groupId]);
 
   return (
-    <View className="p-4">
-      <Text className="text-lg font-bold mb-4 text-center">
-        Classement du Groupe
-      </Text>
-
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor="white"
+        />
+      }
+      className="p-4 h-full mb-48"
+    >
       {!groupRanking || groupRanking?.length === 0 ? (
-        <Text className="text-center text-gray-500">
+        <Text className="text-center text-gray-300">
           Aucun classement disponible
         </Text>
       ) : (
@@ -65,23 +83,25 @@ const GroupRankingTab = ({ groupId }: { groupId: number }) => {
                       className="w-10 h-10 rounded-full"
                     />
                   ) : (
-                    <View className="items-center justify-center w-10 h-10 bg-gray-300 rounded-full">
-                      <Text className="text-sm text-white">
+                    <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
+                      <Text className="text-sm text-gray-300">
                         {ranking.username?.charAt(0) || "?"}
                       </Text>
                     </View>
                   )}
                 </View>
-                <Text className="text-lg font-bold">{ranking.username}</Text>
+                <Text className="text-lg font-bold text-white">
+                  {ranking.username}
+                </Text>
               </View>
-              <Text className="text-lg font-bold">
+              <Text className="text-lg font-bold text-white">
                 {ranking.winned_challenges} 🥇
               </Text>
             </View>
           ))}
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
