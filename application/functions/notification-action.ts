@@ -30,7 +30,7 @@ export const postSubscription = async ({
     .select("*");
 
   if (error) {
-    console.error("Error posting subscription", error);
+    // console.error("Error posting subscription", error);
     return {
       data: null,
       error: error.message,

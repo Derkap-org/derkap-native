@@ -7,18 +7,13 @@ import {
   ViewProps,
   Dimensions,
   TextInput,
-  Keyboard,
 } from "react-native";
-import { XIcon, Timer, ChevronLeft, Zap, ZapOff } from "lucide-react-native";
+import { XIcon, Timer, Zap, ZapOff } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
-import { uploadPostToDB } from "@/functions/post-action";
-import { TChallengeDB } from "@/types/types";
 import Toast from "react-native-toast-message";
-import { encryptPhoto, getEncryptionKey } from "@/functions/encryption-action";
-import { compressImage } from "@/functions/image-action";
-import { Modal } from "./Modal";
+import { Modal } from "../Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import React from "react";
 import {
@@ -32,26 +27,36 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 
+import { useSupabase } from "@/context/auth-context";
+
 interface CameraProps extends ViewProps {
-  challenge: TChallengeDB;
-  refreshChallengeData: () => Promise<void>;
+  setCapturedPhoto: (photo: string | null) => void;
+  capturedPhoto: string | null;
+  setCaption: (caption: string) => void;
+  caption: string;
+  passToPost: () => void;
+  canPassToPost: boolean;
 }
 
 export default function Capture({
-  challenge,
-  refreshChallengeData,
+  setCapturedPhoto,
+  capturedPhoto,
+  setCaption,
+  caption,
+  passToPost,
+  canPassToPost,
   ...props
 }: CameraProps) {
   const [facing, setFacing] = useState<CameraType>("front");
   const [permission, requestPermission] = useCameraPermissions();
-  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
+
   const [captureDelay, setCaptureDelay] = useState<0 | 3 | 5 | 10>(0);
   const [countdown, setCountdown] = useState<number | null>(null); // State to manage countdown
-  const [isValidatingFile, setIsValidatingFile] = useState<boolean>(false);
-  const [caption, setCaption] = useState<string>("");
+
   const [flash, setFlash] = useState<"on" | "off">("off");
   const cameraRef = useRef<CameraView>(null);
   const actionSheetRef = useRef<ActionSheetRef>(null);
+  const { user } = useSupabase();
 
   // Reference for double tap gesture handler
   const doubleTapRef = useRef(null);
@@ -132,49 +137,6 @@ export default function Capture({
       </View>
     );
   }
-
-  const validatePhoto = async () => {
-    try {
-      setIsValidatingFile(true);
-      Keyboard.dismiss();
-      if (!capturedPhoto) throw new Error("Aucune photo à valider");
-
-      if (!challenge) {
-        throw new Error("Aucun défi sélectionné");
-      }
-
-      if (caption.length > 35) return;
-
-      const compressedPhoto = await compressImage(capturedPhoto);
-      setCapturedPhoto(compressedPhoto.uri);
-
-      const encryptionKey = await getEncryptionKey({
-        challenge_id: challenge?.id,
-        group_id: challenge?.group_id,
-      });
-
-      const encryptedPhoto = await encryptPhoto({
-        capturedPhoto: compressedPhoto.uri,
-        encryptionKey,
-      });
-
-      await uploadPostToDB({
-        group_id: challenge.group_id,
-        challenge_id: challenge.id,
-        encrypted_post: encryptedPhoto,
-        caption,
-      });
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Erreur lors de l'envoi du Derkap",
-        text2: error.message || "Une erreur est survenue",
-      });
-    } finally {
-      setIsValidatingFile(false);
-      refreshChallengeData();
-    }
-  };
 
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -304,7 +266,7 @@ export default function Capture({
                 onPress={showModal}
               >
                 <Text className="text-zinc-400 text-center">
-                  Une légende pour ton oeuvre d'art ?
+                  {caption || "Une légende pour ton oeuvre d'art ?"}
                 </Text>
               </Pressable>
             </View>
@@ -319,7 +281,7 @@ export default function Capture({
 
           <GestureHandlerRootView
             style={{ height: cameraHeight }}
-            className="rounded-2xl overflow-hidden"
+            className=" overflow-hidden"
           >
             {/* Camera View */}
             {capturedPhoto ? (
@@ -359,10 +321,10 @@ export default function Capture({
         {capturedPhoto && (
           <View className="px-2">
             <Button
-              isCancel={isValidatingFile}
+              isCancel={!canPassToPost}
               withLoader={true}
-              onClick={validatePhoto}
-              text="Poster mon derkap de fou"
+              onClick={passToPost}
+              text="Envoyer à"
               className=" mx-auto w-full font-grotesque text-xl"
             />
           </View>
@@ -379,10 +341,10 @@ export default function Capture({
             maxLength={35}
           />
           <Button
-            isCancel={isValidatingFile}
+            isCancel={!canPassToPost}
             withLoader={true}
-            onClick={validatePhoto}
-            text="Poster mon derkap de fou"
+            onClick={passToPost}
+            text="Envoyer à"
             className=" mx-auto w-full font-grotesque text-xl"
           />
         </View>

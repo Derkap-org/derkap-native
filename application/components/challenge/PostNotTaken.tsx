@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import Capture from "@/components/Capture";
+import Capture from "@/components/new-derkap/Capture";
 import { TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
 
 import { View, ViewProps, ActivityIndicator } from "react-native";

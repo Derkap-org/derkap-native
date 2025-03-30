@@ -1,3 +1,5 @@
+// to be deleted
+
 import { supabase } from "@/lib/supabase";
 import { decryptPhoto } from "./encryption-action";
 import { getEncryptionKey } from "./encryption-action";

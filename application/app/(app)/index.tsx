@@ -1,40 +1,78 @@
 import {
   View,
   Text,
-  Image,
-  ScrollView,
-  TextInput,
   Pressable,
   RefreshControl,
+  FlatList,
+  ActivityIndicator,
 } from "react-native";
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "expo-router";
-import { Plus, User, Users } from "lucide-react-native";
+import { UserPlus, Plus } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
-import Button from "@/components/Button";
-import StatusLabel from "@/components/group/StatusLabel";
-import GroupCard from "@/components/group/GroupCard";
-import ConfirmEmail from "@/app/confirm-email";
-
-import useGroupStore from "@/store/useGroupStore";
+import DerkapCard from "@/components/derkap/DerkapCard";
 import { useFocusEffect } from "@react-navigation/native";
-import { Modal } from "@/components/Modal";
-import { ActionSheetRef } from "react-native-actions-sheet";
-import { MAX_GROUP_NAME_LENGTH } from "@/functions/group-action";
 import Toast from "react-native-toast-message";
 import Avatar from "@/components/Avatar";
 import useFriendStore from "@/store/useFriendStore";
+import { TDerkapDB } from "@/types/types";
+import { fetchDerkaps } from "@/functions/derkap-action";
+import useMyChallengesStore from "@/store/useMyChallengesStore";
+
 const Home = () => {
+  const {
+    challenges,
+    isLoading: isLoadingChallenges,
+    refreshChallenges,
+    alreadyMadeThisChallenge,
+  } = useMyChallengesStore();
   const [refreshing, setRefreshing] = useState(false);
-  const [groupName, setGroupName] = useState("");
+  const [activeFilter, setActiveFilter] = useState<"all" | "unrevealed">("all");
+
   const { fetchFriends } = useFriendStore();
   const { user, profile } = useSupabase();
 
-  const { groups, fetchGroups, createGroup } = useGroupStore();
+  const [derkaps, setDerkaps] = useState<TDerkapDB[]>([]);
+  const [derkapsPage, setDerkapsPage] = useState(1);
+  const [hasMoreDerkaps, setHasMoreDerkaps] = useState(true);
+  const [derkapsLoading, setDerkapsLoading] = useState(false);
+
+  const fetchMoreDerkaps = async () => {
+    if (hasMoreDerkaps) {
+      await fetchDerkapsTimeline({ page: derkapsPage + 1, reset: false });
+      setDerkapsPage(derkapsPage + 1);
+    }
+  };
+
+  const fetchDerkapsTimeline = async ({
+    page,
+    reset,
+  }: {
+    page: number;
+    reset: boolean;
+  }) => {
+    try {
+      if (!user) {
+        return;
+      }
+      setDerkapsLoading(true);
+      const newDerkaps = await fetchDerkaps({ page });
+      if (newDerkaps.length === 0) {
+        console.log("No more derkaps");
+        setHasMoreDerkaps(false);
+      } else {
+        setDerkaps(reset ? newDerkaps : [...derkaps, ...newDerkaps]);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDerkapsLoading(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      fetchGroups();
+      handleRefresh();
     }, []),
   );
 
@@ -42,147 +80,113 @@ const Home = () => {
     fetchFriends();
   }, []);
 
-  const actionSheetRef = useRef<ActionSheetRef>(null);
-
-  const showModal = () => actionSheetRef.current?.show();
-  const hideModal = () => actionSheetRef.current?.hide();
-
-  const handleCreateGroup = async () => {
-    if (groupName.length > MAX_GROUP_NAME_LENGTH) {
-      Toast.show({
-        type: "error",
-        text1: `Le nom du groupe ne doit pas dépasser ${MAX_GROUP_NAME_LENGTH} caractères`,
-      });
-      return;
-    }
-    const { succes } = await createGroup(groupName);
-    if (succes) {
-      hideModal();
-      setGroupName("");
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Erreur lors de la création du groupe",
-      });
-    }
-  };
-
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
-      await fetchGroups();
+      await refreshChallenges();
+      await fetchDerkapsTimeline({ page: 1, reset: true });
+      setDerkapsPage(1);
+      setHasMoreDerkaps(true);
     } catch (error) {
       Toast.show({
         type: "error",
-        text1: "Erreur lors du rafraîchissement des groupes",
+        text1: "Erreur lors du rafraîchissement des derkaps",
       });
     } finally {
       setRefreshing(false);
     }
   };
 
+  const filteredDerkaps =
+    activeFilter === "all"
+      ? derkaps
+      : derkaps.filter((derkap) => !alreadyMadeThisChallenge(derkap.challenge));
+
   return (
-    <>
-      <View className="relative flex flex-col items-center justify-start flex-1 gap-4 p-4">
-        <View className="flex-row justify-between w-full px-4">
-          <Link href={{ pathname: "/friends/[id]", params: { id: user.id } }}>
-            <View className="flex-row items-center gap-x-2">
-              <Users size={30} color="white" />
-            </View>
-          </Link>
-          <Link
-            href={{
-              pathname: "/profile/[id]",
-              params: { id: user.id },
-            }}
-          >
-            <Avatar
-              profile={profile}
-              index={0}
-              user={user}
-              classNameImage="w-12 h-12"
-              classNameContainer="border-2 border-custom-primary"
-            />
-          </Link>
-        </View>
-        <View className="flex-row items-center justify-center w-full">
-          {groups.length > 0 ? (
-            <Pressable className="p-2" onPress={showModal}>
-              <Text className="text-gray-300">Créer un nouveau groupe</Text>
-            </Pressable>
-          ) : (
-            <Button
-              onClick={showModal}
-              text="Créer un groupe"
-              className="w-fit"
+    <View className="flex-1">
+      <View className="flex-row justify-between w-full px-8 mb-4">
+        <Link href={{ pathname: "/friends/[id]", params: { id: user.id } }}>
+          <View className="flex-row items-center gap-x-2">
+            <UserPlus size={30} color="white" />
+          </View>
+        </Link>
+        <Link
+          href={{
+            pathname: "/profile/[id]",
+            params: { id: user.id },
+          }}
+        >
+          <Avatar
+            profile={profile}
+            index={0}
+            user={user}
+            classNameImage="w-12 h-12"
+            classNameContainer="border-2 border-custom-primary"
+          />
+        </Link>
+      </View>
+
+      <View className="flex-row justify-center gap-x-4 mb-4 px-4">
+        <Pressable
+          onPress={() => setActiveFilter("all")}
+          className={`py-2 px-4 rounded ${
+            activeFilter === "all" ? "bg-custom-primary" : "bg-gray-700"
+          }`}
+        >
+          <Text className="text-white">Mes amis</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setActiveFilter("unrevealed")}
+          className={`py-2 px-4 rounded ${
+            activeFilter === "unrevealed" ? "bg-custom-primary" : "bg-gray-700"
+          }`}
+        >
+          <Text className="text-white">Non révélés</Text>
+        </Pressable>
+      </View>
+
+      {filteredDerkaps.length > 0 ? (
+        <FlatList
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+          data={filteredDerkaps}
+          renderItem={({ item }) => (
+            <DerkapCard
+              alreadyMadeThisChallenge={alreadyMadeThisChallenge(
+                item.challenge,
+              )}
+              derkap={item}
             />
           )}
-        </View>
-        {groups.length === 0 ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                tintColor={"#fff"}
-              />
-            }
-          >
-            <View className="flex flex-col items-center justify-center gap-2">
-              <Text className="text-xs text-white">
-                Pas de groupe pour le moment...
-              </Text>
-              <Text className="text-4xl text-center font-grotesque text-white">
-                Crée en un dès maintenant !
-              </Text>
+          keyExtractor={(item) => item.id.toString()}
+          onEndReached={fetchMoreDerkaps}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={() => (
+            <View className="py-4 px-4">
+              {derkapsLoading ? (
+                <ActivityIndicator size="large" color="white" />
+              ) : !hasMoreDerkaps && filteredDerkaps.length > 0 ? (
+                <Text className="text-center text-white">
+                  Il n'y a plus de derkaps
+                </Text>
+              ) : null}
             </View>
-          </ScrollView>
-        ) : (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                tintColor={"#fff"}
-              />
-            }
-            className="w-full"
-            // {
-            //   //todo check if multiple group is sccroll ok
-            // }
-          >
-            {groups.map((group) => (
-              <GroupCard key={group.id} group={group} />
-            ))}
-          </ScrollView>
-        )}
-      </View>
-      <Modal actionSheetRef={actionSheetRef}>
-        <View className="flex flex-col gap-y-4">
-          <Text className="text-2xl font-bold text-white font-grotesque text-center">
-            Créer un groupe
+          )}
+        />
+      ) : (
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-center text-white">
+            Aucun derkap pour le moment
           </Text>
-          <TextInput
-            className="w-full p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
-            onChangeText={setGroupName}
-            value={groupName}
-            placeholder="Entre le nom de groupe ici"
-            maxLength={20}
-          />
-          <Button
-            withLoader={true}
-            isCancel={!groupName.length}
-            onClick={handleCreateGroup}
-            text="Créer"
-            className="w-fit"
-          />
         </View>
-      </Modal>
-    </>
+      )}
+      <Link href="/new" asChild>
+        <Pressable className="absolute bottom-6 right-6 bg-custom-primary w-20 h-20 rounded-full items-center justify-center shadow-lg">
+          <Plus size={30} color="white" />
+        </Pressable>
+      </Link>
+    </View>
   );
 };
 
