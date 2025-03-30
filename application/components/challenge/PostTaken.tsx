@@ -1,10 +1,7 @@
-import { cn } from "@/lib/utils";
 import { TPostDB, TGroupDB, TChallengeDB } from "@/types/types";
-import { useRef } from "react";
-import { View, Text } from "react-native";
+import { useRef, useState, useEffect } from "react";
+import { View, Text, Image } from "react-native";
 import Button from "../Button";
-import CarouselMedia from "@/components/challenge/CarouselMedia";
-import { BlurView } from "expo-blur";
 import { useSupabase } from "@/context/auth-context";
 import { setChallengeToVoting } from "@/functions/challenge-action";
 import { Modal } from "@/components/Modal";
@@ -28,7 +25,18 @@ const PostTaken = ({
   refreshChallengeData,
   ...props
 }: PostTakenProps) => {
+  const [myPost, setMyPost] = useState<TPostDB | null>(null);
+
   const { profile } = useSupabase();
+
+  useEffect(() => {
+    if (posts) {
+      const myPost = posts.find((post) => post.profile_id === profile.id);
+      if (myPost) {
+        setMyPost(myPost);
+      }
+    }
+  }, [posts, profile, challenge]);
 
   const modalGoVoteRef = useRef<ActionSheetRef>(null);
 
@@ -61,73 +69,73 @@ const PostTaken = ({
   return (
     <>
       <View className="flex flex-col w-full gap-4 rounded-2xl">
-        <View
-          {...props}
-          className={cn(
-            " w-full rounded-2xl flex items-center justify-center flex-col text-white gap-y-4",
-            className,
-          )}
-        >
-          <View className="relative w-full rounded-2xl">
-            {/* <CarouselComponent>
-      {posts?.map((post, index) => (
-        <CarouselItem key={index}>
-          <Image
-            src={post.img_url}
-            alt="post"
-            width={300}
-            height={300}
-            className="object-cover w-full blur-2xl aspect-image rounded-xl"
-          />
-        </CarouselItem>
-      ))}
-    </CarouselComponent> */}
-            <CarouselMedia
-              posts={posts}
-              groupLength={group.members.length}
-              challengeStatus="posting"
+        <View className="flex gap-x-2 flex-row justify-center items-center px-4">
+          <View className="w-1/2">
+            <Image
+              src={myPost?.base64img}
+              className="w-full aspect-[4/5] rounded-xl"
             />
-            <View className="absolute flex flex-col w-full h-full gap-4 overflow-hidden font-grotesque rounded-2xl">
-              <BlurView
-                intensity={80}
-                tint="light"
-                className="flex flex-col items-center justify-center w-full h-full text-center"
-              >
-                <Text className="text-xl w-fit">
-                  En attente de tous les participants !
-                </Text>
-                <Text className="text-4xl w-fit">
-                  {posts?.length} / {group?.members?.length}
-                </Text>
-              </BlurView>
-            </View>
+          </View>
+
+          <View className="w-1/2 flex gap-4 flex-col items-center justify-center">
+            <Text className="text-xl text-center font-grotesque text-white">
+              On attend encore tes potes !
+            </Text>
+            <Text className="text-6xl text-center font-grotesque text-white">
+              {posts?.length} / {group?.members?.length}
+            </Text>
+            {challenge.creator.id !== profile.id && (
+              <Text className="text-xs text-center text-gray-300">
+                Seul le créateur du défi peut passer aux votes
+              </Text>
+            )}
+            <Button
+              text="Passer aux votes"
+              className="w-full font-grotesque px-2 py-1"
+              onClick={() => {
+                showModalGoVote();
+              }}
+              isCancel={challenge.creator.id !== profile.id}
+            />
           </View>
         </View>
 
-        <View className="flex flex-col w-full gap-1">
-          <Text className="text-xl font-grotesque">Toujours en retard...</Text>
-          <View className="flex flex-row flex-wrap w-full gap-2">
+        <View className="flex flex-col items-center justify-center w-full gap-1">
+          <Text className="text-2xl font-grotesque text-white">
+            Toujours en retard...
+          </Text>
+          <View className="flex flex-row items-center justify-center flex-wrap w-full gap-2 px-4">
             {getWhoNotPost().map((member, index) => (
-              <Text key={index} className="">
-                {index !== 0 && ", "}@{member.profile?.username}
-              </Text>
+              <View key={index} className="flex flex-row items-center gap-x-2">
+                <View className={`rounded-full overflow-hidden`}>
+                  {member.profile.avatar_url ? (
+                    <Image
+                      source={{
+                        uri: `${member.profile.avatar_url}?t=${new Date().getTime()}`,
+                      }}
+                      className="w-10 h-10 rounded-full"
+                    />
+                  ) : (
+                    <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
+                      <Text className="text-sm text-gray-300">
+                        {member.profile.username?.charAt(0) || "?"}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Text className="text-lg font-bold text-white">
+                  {member.profile.username}
+                </Text>
+              </View>
             ))}
           </View>
         </View>
-
-        {challenge?.creator_id === profile.id && (
-          <Button
-            text="Passer aux votes"
-            className="w-full font-grotesque mb-40"
-            onClick={() => {
-              showModalGoVote();
-            }}
-          />
-        )}
       </View>
       <Modal actionSheetRef={modalGoVoteRef}>
-        <Text className="text-2xl font-bold">Passer aux votes</Text>
-        <Text className="">
+        <Text className="text-2xl font-bold font-grotesque text-center text-white">
+          Passer aux votes
+        </Text>
+        <Text className="text-white">
           En tant que créateur du défi, tu peux décider de passer aux votes,
           sans attendre que tous les participants aient posté leur Derkap.
           {"\n"}

@@ -24,8 +24,10 @@ export default function ChallengeSteps({
   return (
     <>
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         keyboardShouldPersistTaps="always"
-        className="flex flex-col px-4 my-2 min-h-full"
+        className="flex flex-col my-2 min-h-full"
       >
         {challenge?.status === "posting" && (
           <ChallengeInProgress

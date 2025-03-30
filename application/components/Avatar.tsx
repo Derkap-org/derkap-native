@@ -50,7 +50,7 @@ export default function Avatar({
       ) : (
         <View
           className={cn(
-            "items-center justify-center w-10 h-10 bg-gray-300 rounded-full",
+            "items-center justify-center w-10 h-10 bg-black rounded-full",
             classNameImage,
           )}
         >

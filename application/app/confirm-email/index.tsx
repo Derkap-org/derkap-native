@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 
 import { useSupabase } from "@/context/auth-context";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
-import { View, Text, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
 import * as Linking from "expo-linking";
@@ -82,42 +88,58 @@ export default function ConfirmEmail() {
     }
   }, [reason]);
 
+  // Add keyboard listener to handle keyboard dismissal
+  useEffect(() => {
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        // You can add any additional logic here if needed when keyboard is dismissed
+      },
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
   if (!session) {
     return (
-      <View className="h-full p-4">
-        <Pressable onPress={() => router.back()}>
-          <ChevronLeft size={32} color={"black"} />
-        </Pressable>
-        <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
-          <Text className="px-16 text-2xl text-center font-grotesque">
-            Entre ici le code de confirmation que tu as reçu par email.
-          </Text>
-          <OtpInput otp={otp} length={6} setOtp={setOtp} />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View className="h-full p-4">
+          <Pressable onPress={() => router.back()}>
+            <ChevronLeft size={32} color={"white"} />
+          </Pressable>
+          <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
+            <Text className="px-16 text-2xl text-center font-grotesque text-white">
+              Entre ici le code de confirmation que tu as reçu par email.
+            </Text>
+            <OtpInput otp={otp} length={6} setOtp={setOtp} />
 
-          <View className="flex flex-col w-96 gap-y-4">
-            <Button
-              withLoader
-              disabled={otp.length < 5}
-              text="Confirmer"
-              isCancel={isLoading}
-              onClick={signInOtp}
-              className="bg-gray-500 w-fit"
-            />
-            <Button
-              withLoader
-              disabled={isLoading || timer > 0}
-              text={
-                timer > 0
-                  ? `Renvoyer le code dans ${timer}`
-                  : "Renvoyer le code"
-              }
-              isCancel={isLoading || timer > 0}
-              onClick={resendOtp}
-              className="bg-gray-500 w-fit"
-            />
+            <View className="flex flex-col w-96 gap-y-4">
+              <Button
+                withLoader
+                disabled={otp.length < 5}
+                text="Confirmer"
+                isCancel={isLoading}
+                onClick={signInOtp}
+                className="w-fit"
+              />
+              <Button
+                withLoader
+                disabled={isLoading || timer > 0}
+                text={
+                  timer > 0
+                    ? `Renvoyer le code dans ${timer}`
+                    : "Renvoyer le code"
+                }
+                isCancel={isLoading || timer > 0}
+                onClick={resendOtp}
+                className="w-fit"
+              />
+            </View>
           </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     );
   }
 

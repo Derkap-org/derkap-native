@@ -80,3 +80,51 @@ export const getProfileByUsername = async (username: string) => {
   });
   return { data: transformedData };
 };
+
+export const deleteAccount = async () => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+
+  const { error } = await supabase
+    .from("delete_account")
+    .insert({ profile_id: user.id });
+
+  if (error) {
+    throw error;
+  }
+};
+
+export const isAccountDeleting = async (): Promise<boolean> => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+
+  const { data, error } = await supabase
+    .from("delete_account")
+    .select("*")
+    .eq("profile_id", user.id)
+    .single();
+
+  if (error) {
+    return false;
+  }
+  const isDeleting = !!data;
+  return isDeleting;
+};
+
+export const cancelDeleteAccount = async () => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+  const { error } = await supabase
+    .from("delete_account")
+    .delete()
+    .eq("profile_id", user.id);
+  if (error) {
+    throw error;
+  }
+};

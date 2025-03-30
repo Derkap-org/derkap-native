@@ -26,7 +26,7 @@ export default function ProfileHeader({
           showModal();
         }}
       >
-        <Ellipsis size={32} color={"black"} />
+        <Ellipsis size={32} color={"white"} />
       </Pressable>
     </View>
   );

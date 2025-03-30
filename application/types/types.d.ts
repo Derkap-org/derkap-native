@@ -28,12 +28,14 @@ export type TFriendRequestDB =
 export type TUserWithFriendshipStatus =
   Database["public"]["Functions"]["search_users_friendship_status"]["Returns"];
 
+export type TChallengeStatus = Database["public"]["Enums"]["challenge_status"];
+
 // GROUPS
 export type TGroupDB = Database["public"]["Tables"]["group"]["Row"] & {
   members: {
     profile: TProfileDB | null;
   }[];
-  challengeStatus?: "posting" | "voting" | "ended";
+  challengeStatus?: TChallengeStatus;
   new_activity?: boolean;
 };
 
@@ -43,7 +45,7 @@ export type TProfileInGroup = TProfileDB & {
 
 export type TGroupsStatus = {
   group_id: number;
-  status: "posting" | "voting" | "ended";
+  status: TChallengeStatus;
 };
 
 // POSTS

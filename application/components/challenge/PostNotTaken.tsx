@@ -1,11 +1,8 @@
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 import Capture from "@/components/Capture";
-import Button from "@/components/Button";
 import { TChallengeDB, TGroupDB, TPostDB } from "@/types/types";
 
-import { View, Text, ViewProps, ActivityIndicator } from "react-native";
-import CarouselMedia from "@/components/challenge/CarouselMedia";
+import { View, ViewProps, ActivityIndicator } from "react-native";
 
 interface PostNotTakenProps extends ViewProps {
   posts: TPostDB[] | undefined;
@@ -24,8 +21,6 @@ const PostNotTaken = ({
   isLoading,
   ...props
 }: PostNotTakenProps) => {
-  const [isCapturing, setIsCapturing] = useState<boolean>(false);
-
   if (isLoading) {
     return (
       <View className="flex flex-col gap-y-1">
@@ -36,33 +31,10 @@ const PostNotTaken = ({
 
   return (
     <View {...props} className={cn("", className)}>
-      {isCapturing ? (
-        <Capture
-          setIsCapturing={setIsCapturing}
-          refreshChallengeData={refreshChallengeData}
-          challenge={challenge}
-        />
-      ) : (
-        <View className="w-full flex flex-col items-center gap-2 relative rounded-xl">
-          {posts && posts.length > 0 && (
-            <CarouselMedia
-              posts={posts}
-              challengeStatus={challenge.status}
-              groupLength={group.members.length}
-            />
-          )}
-          <View className="flex flex-col gap-4">
-            <Text className="text-xl font-grotesque text-center">
-              À toi de jouer !
-            </Text>
-            <Button
-              text="Capturer mon Derkap"
-              className="font-grotesque"
-              onClick={() => setIsCapturing(true)}
-            />
-          </View>
-        </View>
-      )}
+      <Capture
+        refreshChallengeData={refreshChallengeData}
+        challenge={challenge}
+      />
     </View>
   );
 };
