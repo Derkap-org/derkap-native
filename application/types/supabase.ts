@@ -152,6 +152,39 @@ export type Database = {
           },
         ];
       };
+      delete_account: {
+        Row: {
+          created_at: string;
+          id: number;
+          profile_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          profile_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          profile_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "delete_account_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "friends";
+            referencedColumns: ["profile_id"];
+          },
+          {
+            foreignKeyName: "delete_account_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       friends_request: {
         Row: {
           created_at: string | null;
