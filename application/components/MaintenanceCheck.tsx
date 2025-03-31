@@ -16,7 +16,6 @@ export default function MaintenanceCheck({ children }: MaintenanceCheckProps) {
       try {
         setIsChecking(true);
         const isInMaintenance = await getIsMaintenance();
-
         if (isInMaintenance) {
           setIsInMaintenance(true);
         }
@@ -35,7 +34,7 @@ export default function MaintenanceCheck({ children }: MaintenanceCheckProps) {
   if (isChecking) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#8C4BF5" />
+        <ActivityIndicator size="large" color="white" />
       </View>
     );
   }

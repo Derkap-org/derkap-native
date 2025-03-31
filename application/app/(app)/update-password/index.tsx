@@ -1,30 +1,53 @@
 import React, { useState } from "react";
 import { useSupabase } from "@/context/auth-context";
 import { Link, router } from "expo-router";
-import { View, Text, TextInput, Alert } from "react-native";
+import { View, Text, TextInput } from "react-native";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
 import Toast from "react-native-toast-message";
+import { EyeOff } from "lucide-react-native";
+import { Eye } from "lucide-react-native";
 
 export default function UpdatePassword() {
   const { session } = useSupabase();
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isPasswordConfirmationVisible, setIsPasswordConfirmationVisible] =
+    useState(false);
   const [isLoading, setLoading] = useState(false);
 
   async function updatePassword() {
-    setLoading(true);
-    const { error } = await supabase.auth.updateUser({
-      password,
-    });
-
-    setLoading(false);
-    if (error) console.error(error);
-    else {
-      Toast.show({
-        type: "success",
-        text1: "Votre mot de passe a été mis à jour.",
+    try {
+      setLoading(true);
+      if (password !== passwordConfirmation) {
+        Toast.show({
+          type: "error",
+          text1: "Les mots de passe ne correspondent pas.",
+        });
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({
+        password,
       });
-      router.push("/");
+
+      setLoading(false);
+      if (error) throw error;
+      else {
+        Toast.show({
+          type: "success",
+          text1: "Votre mot de passe a été mis à jour.",
+        });
+        router.push("/");
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Une erreur est survenue",
+        text2: error?.message || "Une erreur est survenue",
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -40,14 +63,58 @@ export default function UpdatePassword() {
             Entre ton nouveau mot de passe.
           </Text>
 
-          <TextInput
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            placeholder="Mot de passe"
-            secureTextEntry={true}
-            autoCapitalize={"none"}
-            className="w-full h-16 p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
-          />
+          <View className="flex flex-row items-center justify-between relative bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl w-full pr-2">
+            <TextInput
+              onChangeText={(text) => setPassword(text)}
+              value={password}
+              secureTextEntry={!isPasswordVisible}
+              placeholder="Nouveau mot de passe"
+              autoCapitalize={"none"}
+              className="w-10/12 h-16 p-2 placeholder:text-zinc-400 text-white"
+            />
+            {isPasswordVisible ? (
+              <Eye
+                size={24}
+                className=""
+                color={"white"}
+                onPress={() => setIsPasswordVisible(false)}
+              />
+            ) : (
+              <EyeOff
+                size={24}
+                color={"white"}
+                className=""
+                onPress={() => setIsPasswordVisible(true)}
+              />
+            )}
+          </View>
+
+          <View className="flex flex-row items-center justify-between relative w-full bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl pr-2">
+            <TextInput
+              onChangeText={(text) => setPasswordConfirmation(text)}
+              value={passwordConfirmation}
+              secureTextEntry={!isPasswordConfirmationVisible}
+              placeholder="Confirmer le mot de passe"
+              autoCapitalize={"none"}
+              className="w-10/12 h-16 p-2 placeholder:text-zinc-400 text-white"
+            />
+            {isPasswordConfirmationVisible ? (
+              <Eye
+                size={24}
+                className=""
+                color={"white"}
+                onPress={() => setIsPasswordConfirmationVisible(false)}
+              />
+            ) : (
+              <EyeOff
+                size={24}
+                color={"white"}
+                className=""
+                onPress={() => setIsPasswordConfirmationVisible(true)}
+              />
+            )}
+          </View>
+
           <Button
             withLoader
             text="Envoyer"

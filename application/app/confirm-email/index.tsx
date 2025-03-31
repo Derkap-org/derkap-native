@@ -2,13 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { useSupabase } from "@/context/auth-context";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
-import {
-  View,
-  Text,
-  Alert,
-  Keyboard,
-  TouchableWithoutFeedback,
-} from "react-native";
+import { View, Text, Keyboard, TouchableWithoutFeedback } from "react-native";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
 import * as Linking from "expo-linking";

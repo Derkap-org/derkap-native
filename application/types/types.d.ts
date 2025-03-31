@@ -89,3 +89,11 @@ export type GroupRanking =
 export type TCommentDB = Database["public"]["Tables"]["comment"]["Row"] & {
   creator: TProfileDB | null;
 };
+
+// DERKAPS
+
+export type TDerkapDB = Database["public"]["Tables"]["derkap"]["Row"] & {
+  creator: TProfileDB | null;
+  derkap_allowed_users: TProfileDB[];
+  base64img: string;
+};

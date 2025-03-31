@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
 import { verifyToken } from '@/services/auth.service'
-import { getEncryptionKey } from '@/services/encryption.service'
+import { generateEncryptionKey, generateDerkapBaseKey } from '@/services/encryption.service'
+import { getSupabaseClient } from '@/services/supabase.service'
 export async function POST(req: Request) {
   try {
     const authResult = await verifyToken(req)
@@ -14,25 +15,26 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { derkap_id } = body
+    const { challenge } = body
+    
 
-    if (!derkap_id) {
-      return NextResponse.json(
-        { success: false, message: 'No derkap_id found' },
-        { status: 400 }
-      )
+    const supabase = await getSupabaseClient({ access_token: authResult.access_token, refresh_token: authResult.refresh_token });
+    const user_id = (await supabase.auth.getSession()).data.session?.user.id;
+    if (!user_id) {
+      throw new Error('User not found')
     }
+    
+    const derkap_base_key = await generateDerkapBaseKey({
+      user_id: user_id,
+      challenge,
+    });
 
-    const encryption_key = await getEncryptionKey({
-      derkapId: derkap_id,
-      access_token: authResult.access_token,
-      refresh_token: authResult.refresh_token,
-    })
+    const encryption_key = generateEncryptionKey(derkap_base_key);
 
     return NextResponse.json(
-      { success: true, key: encryption_key },
+      { success: true, key: encryption_key, base_key: derkap_base_key },
       { status: 200 }
-    )
+    );
   } catch (error) {
     console.error('Error :', error)
     const errorMessage =

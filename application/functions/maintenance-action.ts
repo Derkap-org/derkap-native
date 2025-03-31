@@ -28,7 +28,7 @@ export const getIsMaintenance = async (): Promise<boolean> => {
 
     return data[0].maintenance_active;
   } catch (error) {
-    console.error("Error getting app version:", error);
+    // console.error("Error getting app version:", error);
     return false;
   }
 };

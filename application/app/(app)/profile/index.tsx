@@ -1,10 +1,9 @@
-import { Text, View, Image, Pressable } from "react-native";
+import { Text, View } from "react-native";
 import React, { useRef, useState, useEffect } from "react";
 import Button from "@/components/Button";
 import { useSupabase } from "@/context/auth-context";
-import ProfileHeader from "@/components/group/ProfileHeader";
+import ProfileHeader from "@/components/profile/ProfileHeader";
 import * as ImagePicker from "expo-image-picker";
-import { Pencil } from "lucide-react-native";
 import { updateAvatarProfile } from "@/functions/profile-action";
 import Toast from "react-native-toast-message";
 import { Modal } from "@/components/Modal";
@@ -15,6 +14,7 @@ import {
   isAccountDeleting,
   cancelDeleteAccount,
 } from "@/functions/profile-action";
+import { compressImage } from "@/functions/image-action";
 
 export default function Group() {
   const [profileImage, setNewProfileImage] = useState<string | null>(null);
@@ -34,20 +34,26 @@ export default function Group() {
     try {
       // No permissions request is necessary for launching the image library
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images", "videos"],
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.3,
+        quality: 0.2,
       });
 
       if (result.canceled) return;
 
       const imgUrl = result.assets[0].uri;
 
-      setNewProfileImage(imgUrl);
+      const compressedPhoto = await compressImage({
+        uri: imgUrl,
+        width: 200,
+        compression: 0.9,
+      });
 
-      await updateAvatarProfile(imgUrl);
-      updateProfileImg(imgUrl); // todo improve this, and overall the profile img update
+      setNewProfileImage(compressedPhoto.uri);
+
+      await updateAvatarProfile(compressedPhoto.uri);
+      updateProfileImg(compressedPhoto.uri); // todo improve this, and overall the profile img update
     } catch (error) {
       Toast.show({
         type: "error",

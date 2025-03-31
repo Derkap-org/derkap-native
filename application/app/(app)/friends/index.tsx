@@ -1,6 +1,5 @@
 import BackButton from "@/components/BackButton";
 import { cn } from "@/lib/utils";
-import useGroupStore from "@/store/useGroupStore";
 import { useRouter } from "expo-router";
 import React, { useState, useRef, useEffect } from "react";
 import {
@@ -30,7 +29,6 @@ export default function Friends() {
   const router = useRouter();
   const [queryUser, setQueryUser] = useState("");
   const [debouncedQuery] = useDebounce(queryUser, 400);
-  const { fetchGroups } = useGroupStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"friends" | "requests">(
@@ -39,11 +37,10 @@ export default function Friends() {
 
   const { searchedUsers, setSearchedUsers } = useSearchStore();
 
-  const { fetchRequests, fetchFriends } = useFriendStore();
+  const { fetchRequests, fetchFriends, requests } = useFriendStore();
   const inputRef = useRef<TextInput>(null);
 
   const handleBack = () => {
-    fetchGroups();
     router.back();
   };
 
@@ -137,7 +134,11 @@ export default function Friends() {
         {debouncedQuery.length > 0 || isFocused ? (
           <QueryUserList isLoading={isLoading} searchedUsers={searchedUsers} />
         ) : (
-          <TabList selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+          <TabList
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+            requests={requests}
+          />
         )}
       </View>
     </TouchableWithoutFeedback>
@@ -147,9 +148,11 @@ export default function Friends() {
 const TabList = ({
   selectedTab,
   setSelectedTab,
+  requests,
 }: {
   selectedTab: "friends" | "requests";
   setSelectedTab: (tab: "friends" | "requests") => void;
+  requests: TFriendRequestDB[];
 }) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -173,7 +176,7 @@ const TabList = ({
           </Pressable>
           <Pressable
             className={cn(
-              "w-1/2 flex justify-center items-center rounded-xl py-2",
+              "w-1/2 flex justify-center items-center rounded-xl py-2 relative",
               selectedTab === "requests" && "bg-custom-primary",
             )}
             onPress={() => setSelectedTab("requests")}
@@ -186,6 +189,13 @@ const TabList = ({
             >
               Demandes d'amis
             </Text>
+            {requests.length > 0 && (
+              <View className="absolute top-1 right-4 bg-red-500 flex items-center justify-center rounded-full w-4 h-4">
+                <Text className="text-white text-xs font-grotesque">
+                  {requests.length}
+                </Text>
+              </View>
+            )}
           </Pressable>
         </View>
         <View className="mt-2">

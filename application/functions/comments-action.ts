@@ -2,14 +2,14 @@ import { supabase } from "@/lib/supabase";
 import { TCommentDB } from "@/types/types";
 
 export const getCommentsFromDB = async ({
-  post_id,
+  derkap_id,
 }: {
-  post_id: number;
+  derkap_id: number;
 }): Promise<TCommentDB[]> => {
   const { data, error } = await supabase
     .from("comment")
     .select(`*, creator:profile(*)`)
-    .eq("post_id", post_id)
+    .eq("derkap_id", derkap_id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -20,10 +20,10 @@ export const getCommentsFromDB = async ({
 };
 
 export const createComment = async ({
-  post_id,
+  derkap_id,
   content,
 }: {
-  post_id: number;
+  derkap_id: number;
   content: string;
 }) => {
   const user = await supabase.auth.getUser();
@@ -33,7 +33,7 @@ export const createComment = async ({
   }
   const { error } = await supabase
     .from("comment")
-    .insert({ post_id, content, creator_id: user_id });
+    .insert({ derkap_id, content, creator_id: user_id });
 
   if (error) {
     throw new Error(error.message);

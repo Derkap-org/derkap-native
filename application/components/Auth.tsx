@@ -91,12 +91,9 @@ export default function Auth() {
       if (!cguChecked) {
         throw new Error("Veuillez accepter les CGU pour continuer.");
       }
-      console.log("username", username);
       if (!isUsernameValid(username)) {
         throw new Error("Le pseudo doit contenir entre 3 et 16 caractères.");
       }
-
-      console.log("username", username);
 
       setLoading(true);
 
@@ -230,7 +227,7 @@ export default function Auth() {
                     color={"white"}
                     value={cguChecked}
                     onValueChange={setChecked}
-                    style={{ height: 16, width: 16, borderRadius: "100%" }}
+                    style={{ height: 32, width: 32, borderRadius: "100%" }}
                   />
                   <Text className="text-white">
                     J'accepte les{" "}
@@ -301,12 +298,12 @@ export default function Auth() {
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
-                className="flex flex-col bg-white gap-y-4"
+                className="flex flex-col gap-y-4"
               >
-                <Text className="text-2xl font-bold">
+                <Text className="text-2xl font-bold text-white">
                   Conditions Générales d'Utilisation (CGU) de Derkap {"\n"}
                 </Text>
-                <Text>
+                <Text className="text-white">
                   1. Présentation de l'Application {"\n"}
                   Derkap est une application mobile permettant aux utilisateurs
                   de créer et de participer à des challenges photo entre amis.
