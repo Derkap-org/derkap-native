@@ -119,8 +119,7 @@ const Home = () => {
         </Link>
         <Link
           href={{
-            pathname: "/profile/[id]",
-            params: { id: user.id },
+            pathname: "/profile",
           }}
         >
           <Avatar
@@ -158,6 +157,7 @@ const Home = () => {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
           data={filteredDerkaps}
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <DerkapCard
               alreadyMadeThisChallenge={alreadyMadeThisChallenge(

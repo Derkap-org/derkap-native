@@ -1,10 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Crypto from "expo-crypto";
 import * as FileSystem from "expo-file-system";
 import CryptoJS from "crypto-js";
-import { UUID } from "crypto";
-
 export const getEncryptionKey = async ({
   derkap_id,
 }: {

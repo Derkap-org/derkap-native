@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSupabase } from "@/context/auth-context";
 import { Link, router } from "expo-router";
-import { View, Text, TextInput, Alert } from "react-native";
+import { View, Text, TextInput } from "react-native";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
 import Toast from "react-native-toast-message";

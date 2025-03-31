@@ -44,7 +44,9 @@ export default function New() {
 
       if (caption.length > 35) return;
 
-      const compressedPhoto = await compressImage(capturedPhoto);
+      const compressedPhoto = await compressImage({
+        uri: capturedPhoto,
+      });
       setCapturedPhoto(compressedPhoto.uri);
 
       const { encryption_key, derkap_base_key } = await generateKeys({

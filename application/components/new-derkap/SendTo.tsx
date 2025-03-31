@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useEffect, useState } from "react";
-import { Users, ArrowRight } from "lucide-react-native";
+import { Users, ArrowRight, Forward } from "lucide-react-native";
 import colors from "tailwindcss/colors";
 import { TFriendRequestDB as Friend } from "@/types/types";
 
@@ -149,7 +149,7 @@ export default function SendTo({
               className="flex-row items-center p-3"
             >
               <View className="w-10 h-10 rounded-full bg-gray-700 mr-4 items-center justify-center">
-                <Users size={24} color={colors.white} />
+                <Forward size={24} color={colors.white} />
               </View>
               <Text
                 className={`flex-1 text-lg font-grotesque ${areAllFollowingSelected ? "font-bold" : "font-normal"}`}
@@ -157,7 +157,7 @@ export default function SendTo({
                   color: areAllFollowingSelected ? primaryColor : colors.white,
                 }}
               >
-                Utilisateurs pertinents ({friendsFollowingUsers.length})
+                Amis du Derkap ({friendsFollowingUsers.length})
               </Text>
               <View
                 className={`w-6 h-6 rounded-full border-2 ${areAllFollowingSelected ? "" : "border-gray-500"}`}
