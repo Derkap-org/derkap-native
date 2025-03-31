@@ -2,20 +2,20 @@ import { create } from "zustand";
 import { fetchAllMyChallenges } from "@/functions/derkap-action";
 
 interface MyChallengesState {
-  challenges: string[];
+  myChallenges: string[];
   isLoading: boolean;
-  refreshChallenges: () => Promise<void>;
+  refreshMyChallenges: () => Promise<void>;
   alreadyMadeThisChallenge: (challenge: string) => boolean;
 }
 
 const useMyChallengesStore = create<MyChallengesState>((set) => ({
-  challenges: [],
+  myChallenges: [],
   isLoading: false,
-  refreshChallenges: async () => {
+  refreshMyChallenges: async () => {
     try {
       set({ isLoading: true });
-      const challenges = await fetchAllMyChallenges();
-      set({ challenges });
+      const myChallenges = await fetchAllMyChallenges();
+      set({ myChallenges });
     } catch (error) {
       console.error(error);
     } finally {
@@ -23,7 +23,7 @@ const useMyChallengesStore = create<MyChallengesState>((set) => ({
     }
   },
   alreadyMadeThisChallenge: (challenge: string) => {
-    return useMyChallengesStore.getState().challenges.includes(challenge);
+    return useMyChallengesStore.getState().myChallenges.includes(challenge);
   },
 }));
 

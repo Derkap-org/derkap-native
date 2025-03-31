@@ -8,7 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Users, ArrowRight } from "lucide-react-native";
 import colors from "tailwindcss/colors";
 import { TFriendRequestDB as Friend } from "@/types/types";
@@ -18,6 +18,7 @@ interface SendToProps {
   setAllowedUsers: (allowedUsers: string[]) => void;
   postDerkap: () => void;
   isSendingDerkap: boolean;
+  followingUsers?: string[];
 }
 
 const primaryColor = colors.purple[500];
@@ -27,8 +28,20 @@ export default function SendTo({
   setAllowedUsers,
   postDerkap,
   isSendingDerkap,
+  followingUsers,
 }: SendToProps) {
+  const [friendsFollowingUsers, setFriendsFollowingUsers] = useState<Friend[]>(
+    [],
+  );
   const { friends, fetchFriends } = useFriendStore();
+
+  useEffect(() => {
+    if (followingUsers) {
+      setFriendsFollowingUsers(
+        friends.filter((friend) => followingUsers.includes(friend.profile.id)),
+      );
+    }
+  }, [followingUsers, friends]);
 
   useEffect(() => {
     fetchFriends();
@@ -50,6 +63,22 @@ export default function SendTo({
       setAllowedUsers([]);
     } else {
       setAllowedUsers(friends.map((f) => f.profile.id));
+    }
+  };
+
+  const handleSelectAllFollowing = () => {
+    const followingIds = friendsFollowingUsers.map((f) => f.profile.id);
+    const areAllFollowingSelected = followingIds.every((id) =>
+      allowedUsers.includes(id),
+    );
+
+    if (areAllFollowingSelected) {
+      // Deselect all following users
+      setAllowedUsers(allowedUsers.filter((id) => !followingIds.includes(id)));
+    } else {
+      // Select all following users while keeping other selections
+      const newSelection = [...new Set([...allowedUsers, ...followingIds])];
+      setAllowedUsers(newSelection);
     }
   };
 
@@ -85,28 +114,80 @@ export default function SendTo({
     );
   };
 
-  const ListHeader = () => (
-    <TouchableOpacity
-      onPress={handleSelectAll}
-      className="flex-row items-center p-3 border-b border-gray-700 mb-2"
-    >
-      <View className="w-10 h-10 rounded-full bg-gray-700 mr-4 items-center justify-center">
-        <Users size={24} color={colors.white} />
+  const ListHeader = () => {
+    const areAllFollowingSelected =
+      friendsFollowingUsers.length > 0 &&
+      friendsFollowingUsers.every((f) => allowedUsers.includes(f.profile.id));
+
+    return (
+      <View>
+        <TouchableOpacity
+          onPress={handleSelectAll}
+          className="flex-row items-center p-3 border-b border-gray-700 mb-2"
+        >
+          <View className="w-10 h-10 rounded-full bg-gray-700 mr-4 items-center justify-center">
+            <Users size={24} color={colors.white} />
+          </View>
+          <Text
+            className={`flex-1 text-lg font-grotesque ${isAllSelected ? "font-bold" : "font-normal"}`}
+            style={{ color: isAllSelected ? primaryColor : colors.white }}
+          >
+            Tous mes amis
+          </Text>
+          <View
+            className={`w-6 h-6 rounded-full border-2 ${isAllSelected ? "" : "border-gray-500"}`}
+            style={{
+              backgroundColor: isAllSelected ? primaryColor : "transparent",
+            }}
+          />
+        </TouchableOpacity>
+
+        {friendsFollowingUsers.length > 0 && (
+          <View className="border-b border-gray-700 mb-2">
+            <TouchableOpacity
+              onPress={handleSelectAllFollowing}
+              className="flex-row items-center p-3"
+            >
+              <View className="w-10 h-10 rounded-full bg-gray-700 mr-4 items-center justify-center">
+                <Users size={24} color={colors.white} />
+              </View>
+              <Text
+                className={`flex-1 text-lg font-grotesque ${areAllFollowingSelected ? "font-bold" : "font-normal"}`}
+                style={{
+                  color: areAllFollowingSelected ? primaryColor : colors.white,
+                }}
+              >
+                Utilisateurs pertinents ({friendsFollowingUsers.length})
+              </Text>
+              <View
+                className={`w-6 h-6 rounded-full border-2 ${areAllFollowingSelected ? "" : "border-gray-500"}`}
+                style={{
+                  backgroundColor: areAllFollowingSelected
+                    ? primaryColor
+                    : "transparent",
+                }}
+              />
+            </TouchableOpacity>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="ml-14 mb-3"
+            >
+              {friendsFollowingUsers.map((friend, index) => (
+                <Text
+                  key={friend.profile.id}
+                  className="text-gray-400 text-sm mr-2"
+                >
+                  {friend.profile.username}
+                  {index < friendsFollowingUsers.length - 1 ? "," : ""}
+                </Text>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </View>
-      <Text
-        className={`flex-1 text-lg font-grotesque ${isAllSelected ? "font-bold" : "font-normal"}`}
-        style={{ color: isAllSelected ? primaryColor : colors.white }}
-      >
-        Tous mes amis
-      </Text>
-      <View
-        className={`w-6 h-6 rounded-full border-2 ${isAllSelected ? "" : "border-gray-500"}`}
-        style={{
-          backgroundColor: isAllSelected ? primaryColor : "transparent",
-        }}
-      />
-    </TouchableOpacity>
-  );
+    );
+  };
 
   // Get selected friend names
   const selectedFriendsNames = friends

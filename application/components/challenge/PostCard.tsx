@@ -51,7 +51,7 @@ export default function PostCard({
   const heartScale = useRef(new Animated.Value(0)).current;
 
   const handleFetchComments = async () => {
-    const comments = await getCommentsFromDB({ post_id: post.id });
+    const comments = await getCommentsFromDB({ derkap_id: post.id });
     setComments(comments);
   };
 
@@ -96,7 +96,7 @@ export default function PostCard({
     try {
       setPostingComment(true);
       await createComment({
-        post_id: post.id,
+        derkap_id: post.id,
         content: newComment,
       });
       await handleFetchComments();

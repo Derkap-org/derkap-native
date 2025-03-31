@@ -13,9 +13,11 @@ import { compressImage } from "@/functions/image-action";
 import React from "react";
 import SendTo from "@/components/new-derkap/SendTo";
 export default function New() {
-  const { challenge: challengeParam } = useLocalSearchParams() as {
-    challenge?: string;
-  };
+  const { challenge: challengeParam, followingUsers } =
+    useLocalSearchParams() as {
+      challenge?: string;
+      followingUsers?: string[];
+    };
   const [challenge, setChallenge] = useState(challengeParam || "");
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [caption, setCaption] = useState<string>("");
@@ -126,6 +128,7 @@ export default function New() {
         )}
         {step === "post" && (
           <SendTo
+            followingUsers={followingUsers}
             isSendingDerkap={isSendingDerkap}
             allowedUsers={allowedUsers}
             setAllowedUsers={setAllowedUsers}

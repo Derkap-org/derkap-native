@@ -8,8 +8,9 @@ import {
   Keyboard,
   Pressable,
   Animated,
+  FlatList,
 } from "react-native";
-import { TCommentDB, TDerkapDB } from "@/types/types";
+import { TCommentDB, TDerkapDB, TProfileDB } from "@/types/types";
 import { cn } from "@/lib/utils";
 import Button from "../Button";
 import { ActionSheetRef } from "react-native-actions-sheet";
@@ -38,12 +39,13 @@ export default function DerkapCard({
   const [newComment, setNewComment] = useState("");
   const [postingComment, setPostingComment] = useState(false);
   const modalCommentRef = useRef<ActionSheetRef>(null);
+  const modalVisibilityRef = useRef<ActionSheetRef>(null);
   const [showHeart, setShowHeart] = useState(false);
   const heartScale = useRef(new Animated.Value(0)).current;
   const { user } = useSupabase();
 
   const handleFetchComments = async () => {
-    const comments = await getCommentsFromDB({ post_id: derkap.id });
+    const comments = await getCommentsFromDB({ derkap_id: derkap.id });
     setComments(comments);
   };
 
@@ -94,12 +96,13 @@ export default function DerkapCard({
     try {
       setPostingComment(true);
       await createComment({
-        post_id: derkap.id,
+        derkap_id: derkap.id,
         content: newComment,
       });
       await handleFetchComments();
       setNewComment("");
     } catch (error) {
+      console.log("error", error);
       Toast.show({
         text1: "Erreur lors de la création du commentaire",
         type: "error",
@@ -112,6 +115,9 @@ export default function DerkapCard({
   const openModalComment = async () => {
     await handleFetchComments();
     modalCommentRef.current?.show();
+  };
+  const openModalVisibility = async () => {
+    modalVisibilityRef.current?.show();
   };
 
   return (
@@ -128,6 +134,7 @@ export default function DerkapCard({
           pathname: "/new",
           params: {
             challenge: derkap.challenge,
+            followingUsers: derkap.derkap_allowed_users.map((user) => user.id),
           },
         }}
       >
@@ -150,6 +157,9 @@ export default function DerkapCard({
                   pathname: "/new",
                   params: {
                     challenge: derkap.challenge,
+                    followingUsers: derkap.derkap_allowed_users.map(
+                      (user) => user.id,
+                    ),
                   },
                 }}
                 className="bg-custom-primary px-6 py-3 rounded-xl"
@@ -191,11 +201,13 @@ export default function DerkapCard({
             </Text>
           </View>
         </View>
-        {derkap.creator_id === user.id && (
-          <View className="absolute top-2 right-4 z-10 flex flex-row items-center justify-between p-2 bg-zinc-800/50 rounded-full">
-            <EyeIcon className="w-6 h-6 text-white" color="white" />
-          </View>
-        )}
+
+        <Pressable
+          onPress={openModalVisibility}
+          className="absolute top-2 right-4 z-30 flex flex-row items-center justify-between p-2 bg-zinc-800/50 rounded-full"
+        >
+          <EyeIcon className="w-6 h-6 text-white" color="white" />
+        </Pressable>
         {showHeart && (
           <Animated.View
             style={{
@@ -228,8 +240,8 @@ export default function DerkapCard({
           />
         </TapGestureHandler>
       </View>
-      <View className="w-full flex flex-row items-center justify-between px-4 mt-2">
-        <Pressable
+      <View className="w-full flex flex-row items-center justify-end px-4 mt-2">
+        {/* <Pressable
           className="px-4 py-2"
           onPress={() => {
             likeDerkap({ derkap_id: derkap.id });
@@ -241,7 +253,7 @@ export default function DerkapCard({
             </Text>
             <Text className="text-white font-grotesque text-4xl">🤣</Text>
           </View>
-        </Pressable>
+        </Pressable> */}
         <Pressable className="px-4 py-2" onPress={openModalComment}>
           <Text className="text-white font-grotesque">
             {comments?.length || 0} commentaires
@@ -291,6 +303,44 @@ export default function DerkapCard({
           </View>
         </View>
       </Modal>
+      <Modal fullScreen={true} actionSheetRef={modalVisibilityRef}>
+        <View className="flex flex-col h-full">
+          <Text className="text-2xl font-bold font-grotesque text-center py-4 text-white">
+            Qui peut voir ce Derkap ?
+          </Text>
+          <FlatList
+            data={derkap.derkap_allowed_users}
+            renderItem={({ item }) => (
+              <AllowedUser profile={item} userIdConnected={user.id} />
+            )}
+          />
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const AllowedUser = ({
+  profile,
+  userIdConnected,
+}: {
+  profile: TProfileDB;
+  userIdConnected: string;
+}) => {
+  if (profile.id === userIdConnected) return null;
+  return (
+    <View className="flex-row items-center p-3 border-b border-gray-700">
+      {profile.avatar_url ? (
+        <Image
+          source={{ uri: profile.avatar_url }}
+          className="w-10 h-10 rounded-full mr-4"
+        />
+      ) : (
+        <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
+      )}
+      <Text className={`flex-1 text-lg font-grotesque text-white`}>
+        {profile.username}
+      </Text>
+    </View>
+  );
+};

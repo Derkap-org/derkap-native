@@ -91,12 +91,9 @@ export default function Auth() {
       if (!cguChecked) {
         throw new Error("Veuillez accepter les CGU pour continuer.");
       }
-      console.log("username", username);
       if (!isUsernameValid(username)) {
         throw new Error("Le pseudo doit contenir entre 3 et 16 caractères.");
       }
-
-      console.log("username", username);
 
       setLoading(true);
 

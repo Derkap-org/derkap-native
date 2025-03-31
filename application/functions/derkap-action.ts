@@ -110,7 +110,6 @@ export const fetchDerkaps = async ({
 
   const user = await supabase.auth.getUser();
   const user_id = user.data.user?.id;
-  console.log("user_id", user_id);
   if (!user || !user_id) {
     throw new Error("Not authorized");
   }
@@ -119,30 +118,62 @@ export const fetchDerkaps = async ({
   const offset = (page - 1) * RESULT_PER_PAGE;
 
   // Query the derkap table while joining with derkap_allowed_users and profile
+
+  // // get derkap allowed users profiles using derkap_allowed_users.allowed_user_id and profile.id
+  // // const { data, error } = await supabase
+  //   .from("derkap")
+  //   .select(
+  //     `
+  //     id,
+  //     created_at,
+  //     challenge,
+  //     caption,
+  //     file_path,
+  //     base_key,
+  //     creator_id,
+  //     creator:creator_id (
+  //       id,
+  //       username,
+  //       avatar_url,
+  //       created_at,
+  //       email
+  //     ),
+  //     derkap_allowed_users(
+  //       profile(*)
+  //     )
+  //   `,
+  //   )
+  //   .eq("derkap_allowed_users.allowed_user_id", user_id) // Only return derkaps the user is allowed to see
+  //   .order("created_at", { ascending: false }) // Order by most recent first
+  //   .range(offset, offset + RESULT_PER_PAGE - 1); // Apply pagination
+
   const { data, error } = await supabase
-    .from("derkap")
+    .from("derkap_allowed_users")
     .select(
       `
-      id,
-      created_at,
-      challenge,
-      caption,
-      file_path,
-      base_key,
-      creator_id,
-      creator:creator_id (
+      *,
+      derkap(
         id,
-        username,
-        avatar_url,
         created_at,
-        email
-      ),
-      derkap_allowed_users (
-        allowed_user_id
+        challenge,
+        caption,
+        file_path,
+        base_key,
+        creator_id,
+        derkap_allowed_users(
+          profile(*)
+        ),
+        creator:creator_id(
+          id,
+          username,
+          avatar_url,
+          created_at,
+          email
       )
+    )
     `,
     )
-    .eq("derkap_allowed_users.allowed_user_id", user_id) // Only return derkaps the user is allowed to see
+    .eq("allowed_user_id", user_id) // Only return derkaps the user is allowed to see
     .order("created_at", { ascending: false }) // Order by most recent first
     .range(offset, offset + RESULT_PER_PAGE - 1); // Apply pagination
 
@@ -155,8 +186,15 @@ export const fetchDerkaps = async ({
     return [];
   }
 
+  const derkapsWithoutPhotos = data.map((derkap) => ({
+    ...derkap.derkap,
+    derkap_allowed_users: derkap.derkap.derkap_allowed_users.map(
+      (user) => user.profile,
+    ),
+  }));
+
   const derkapsWithPhotos = await addPhotosToDerkaps({
-    derkaps: data,
+    derkaps: derkapsWithoutPhotos,
   });
 
   return derkapsWithPhotos;

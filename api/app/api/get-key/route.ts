@@ -23,11 +23,6 @@ export async function POST(req: Request) {
       )
     }
 
-    console.log('derkap_id', derkap_id)
-    console.log('authResult.access_token', authResult.access_token)
-    console.log('authResult.refresh_token', authResult.refresh_token)
-    console.log('authResult.user', authResult.user)
-
     const encryption_key = await getEncryptionKey({
       derkapId: derkap_id,
       access_token: authResult.access_token,
