@@ -2,8 +2,9 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { sendNotification } from "../_shared/send-notification.ts";
 
 type Record = {
-  derkap_id: string;
-  allowed_user_id: string;
+  sender_id: string;
+  receiver_id: string;
+  status: "pending" | "accepted" | "rejected";
 };
 
 type Profile = {
@@ -21,36 +22,40 @@ const supabase = createClient(
 
 Deno.serve(async (req) => {
   const { record } = (await req.json()) as { record: Record };
-  console.log(record);
 
-  const derkap_id = record.derkap_id;
-  const allowed_user_id = record.allowed_user_id;
+  const sender_id = record.sender_id;
+  const receiver_id = record.receiver_id;
+  const status = record.status;
 
-  console.log(allowed_user_id, derkap_id);
+  console.log(sender_id, receiver_id, status);
 
-  const { data: derkapData, error: derkapError } = await supabase
-    .from("derkap")
-    .select(
-      `
-        profile!derkap_creator_id_fkey(
-          username
-        )
-      `,
-    )
-    .eq("id", derkap_id)
-    .single();
-
-  if (derkapError) {
-    console.error("Error fetching derkap", derkapError);
-    throw derkapError;
+  if (status !== "accepted") {
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  const profile = derkapData.profile as unknown as Profile;
+  const { data: senderData, error: senderError } = await supabase
+    .from("profile")
+    .select(
+      `
+        username
+      `,
+    )
+    .eq("id", receiver_id)
+    .single();
+
+  if (senderError) {
+    console.error("Error fetching sender", senderError);
+    throw senderError;
+  }
+
+  const sender = senderData as unknown as Profile;
 
   const { data: subscriptionsData, error: subscriptionsError } = await supabase
     .from("notification_subscription")
     .select("expo_push_token")
-    .eq("user_id", allowed_user_id)
+    .eq("user_id", sender_id)
     .single();
 
   if (subscriptionsError) {
@@ -60,9 +65,8 @@ Deno.serve(async (req) => {
 
   const subscriptions = subscriptionsData as unknown as Subscription;
 
-  const title = profile?.username ?? "Derkap";
-  const subtitle = "Nouveau Derkap";
-  const message = `${profile?.username} a posté un nouveau Derkap !`;
+  const title = "Enfin ami !";
+  const message = `T'es maintenant ami avec ${sender?.username} !`;
 
   // const EXPO_ACCESS_TOKEN = Deno.env.get("EXPO_ACCESS_TOKEN")!;
 
@@ -76,7 +80,7 @@ Deno.serve(async (req) => {
   await sendNotification({
     expoPushToken: subscriptions.expo_push_token,
     title,
-    subtitle,
+    subtitle: "",
     message,
     // EXPO_ACCESS_TOKEN: EXPO_ACCESS_TOKEN,
   });

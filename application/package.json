@@ -18,7 +18,8 @@
     "db-seed": "supabase db dump --data-only -f supabase/seed.sql",
     "db-push": "supabase db push",
     "db-squash": "supabase migration squash",
-    "db-types": "npx supabase gen types typescript --local --schema public > types/supabase.ts"
+    "db-types": "npx supabase gen types typescript --local --schema public > types/supabase.ts",
+    "db-types-prod": "npx supabase gen types typescript --project-id hrktxqpsqbjnockggnic --schema public > types/supabase.ts"
   },
   "jest": {
     "preset": "jest-expo"
