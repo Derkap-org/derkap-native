@@ -400,16 +400,15 @@ export default function DerkapCard({
             <Text className="text-2xl font-bold font-grotesque text-center py-4 text-white">
               Qui peut voir ce Derkap ?
             </Text>
-            <Pressable
-              onPress={openModalAddUser}
-              className="p-2 bg-custom-primary rounded-full"
-            >
-              <Plus size={24} color="white" />
-            </Pressable>
+            {derkap.creator_id === user.id && (
+              <Pressable
+                onPress={openModalAddUser}
+                className="p-2 bg-custom-primary rounded-full"
+              >
+                <Plus size={24} color="white" />
+              </Pressable>
+            )}
           </View>
-          <Text className="py-4 text-2xl font-bold text-center text-white font-grotesque">
-            Qui peut voir ce Derkap ?
-          </Text>
           <FlatList
             data={allowedUsers}
             renderItem={({ item }) => (
@@ -417,6 +416,7 @@ export default function DerkapCard({
                 profile={item}
                 userIdConnected={user.id}
                 onRemove={handleRemoveAllowedUser}
+                canEdit={derkap.creator_id === user.id}
               />
             )}
           />
@@ -539,14 +539,18 @@ const AllowedUser = ({
   profile,
   userIdConnected,
   onRemove,
+  canEdit,
 }: {
   profile: TProfileDB;
   userIdConnected: string;
   onRemove: (userId: string) => Promise<void>;
+  canEdit: boolean;
 }) => {
   const swipeableRef = useRef<Swipeable>(null);
 
-  if (profile.id === userIdConnected) return null;
+  if (profile.id === userIdConnected) {
+    return null;
+  }
 
   const renderRightActions = () => {
     return (
@@ -558,13 +562,33 @@ const AllowedUser = ({
     );
   };
 
+  if (!canEdit) {
+    return (
+      <View className="flex-row items-center p-3 border-b border-gray-700 bg-[#0E0E10]">
+        {profile.avatar_url ? (
+          <Image
+            source={{ uri: profile.avatar_url }}
+            className="w-10 h-10 rounded-full mr-4"
+          />
+        ) : (
+          <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
+        )}
+        <Text className={`flex-1 text-lg font-grotesque text-white`}>
+          {profile.username}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <Swipeable
       ref={swipeableRef}
       renderRightActions={renderRightActions}
       onSwipeableOpen={() => {
-        onRemove(profile.id);
-        swipeableRef.current?.close();
+        if (canEdit) {
+          onRemove(profile.id);
+          swipeableRef.current?.close();
+        }
       }}
     >
       <View className="flex-row items-center p-3 border-b border-gray-700 bg-[#0E0E10]">
