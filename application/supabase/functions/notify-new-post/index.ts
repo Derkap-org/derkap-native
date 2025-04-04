@@ -38,6 +38,7 @@ Deno.serve(async (req) => {
       `,
     )
     .eq("id", derkap_id)
+    .neq("creator_id", allowed_user_id)
     .single();
 
   if (derkapError) {

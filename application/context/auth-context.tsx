@@ -5,13 +5,16 @@ import { TProfileDB } from "../types/types";
 import { getProfile } from "../functions/profile-action";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
+import { getFriendsCount } from "@/functions/friends-action";
 
 type SupabaseContextType = {
   session: Session | null;
   user: User | null;
   profile: TProfileDB | null;
+  friendsCount: number;
   isLoading: boolean;
   updateProfileImg: (newImgUrl: string) => void;
+  fetchFriendsCount: () => Promise<void>;
 };
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(
@@ -26,7 +29,7 @@ export const SupabaseProvider = ({
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<TProfileDB | null>(null);
-
+  const [friendsCount, setFriendsCount] = useState(0);
   useEffect(() => {
     const handleDeepLink = async (event: { url: string }) => {
       const url = event.url;
@@ -107,9 +110,15 @@ export const SupabaseProvider = ({
     if (data) setProfile(data);
   };
 
+  const fetchFriendsCount = async () => {
+    const { count } = await getFriendsCount();
+    if (count || count === 0) setFriendsCount(count);
+  };
+
   useEffect(() => {
     if (session) {
       fetchProfile();
+      fetchFriendsCount();
     }
   }, [session]);
 
@@ -130,6 +139,8 @@ export const SupabaseProvider = ({
         profile,
         user: session?.user || null,
         isLoading,
+        friendsCount,
+        fetchFriendsCount,
       }}
     >
       {children}

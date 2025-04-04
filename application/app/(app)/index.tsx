@@ -6,9 +6,10 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from "react-native";
 import React, { useState, useCallback, useEffect } from "react";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { UserPlus, Plus } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
 import DerkapCard from "@/components/derkap/DerkapCard";
@@ -19,6 +20,7 @@ import useFriendStore from "@/store/useFriendStore";
 import { TDerkapDB } from "@/types/types";
 import { fetchDerkaps } from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
+import Button from "@/components/Button";
 
 const Home = () => {
   const { refreshMyChallenges, alreadyMadeThisChallenge } =
@@ -27,7 +29,7 @@ const Home = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "unrevealed">("all");
 
   const { requests, fetchRequests } = useFriendStore();
-  const { user, profile } = useSupabase();
+  const { user, profile, fetchFriendsCount, friendsCount } = useSupabase();
 
   const [derkaps, setDerkaps] = useState<TDerkapDB[]>([]);
   const [derkapsPage, setDerkapsPage] = useState(1);
@@ -86,6 +88,7 @@ const Home = () => {
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
+      await fetchFriendsCount();
       await refreshMyChallenges();
       await fetchDerkapsTimeline({ page: 1, reset: true });
       await fetchRequests();
@@ -193,18 +196,33 @@ const Home = () => {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-          <View className="items-center justify-center flex-1">
-            <Text className="text-center text-white">
-              Aucun derkap pour le moment
-            </Text>
-          </View>
+          {friendsCount === 0 ? (
+            <View className="items-center justify-center flex-1">
+              <Text className="text-xl text-center text-white font-grotesque">
+                Ajoutez des amis pour derkapper
+              </Text>
+              <Button className="mt-4" onClick={() => router.push("/friends")}>
+                <Text className="text-xl text-center text-white font-grotesque">
+                  Ajouter des amis
+                </Text>
+              </Button>
+            </View>
+          ) : (
+            <View className="items-center justify-center flex-1">
+              <Text className="text-center text-white">
+                Aucun derkap pour le moment
+              </Text>
+            </View>
+          )}
         </ScrollView>
       )}
-      <Link href="/new" asChild>
-        <Pressable className="absolute items-center justify-center w-20 h-20 rounded-full shadow-lg bottom-6 right-6 bg-custom-primary">
-          <Plus size={30} color="white" />
-        </Pressable>
-      </Link>
+      {friendsCount > 0 && (
+        <Link href="/new" asChild>
+          <Pressable className="absolute items-center justify-center w-20 h-20 rounded-full shadow-lg bottom-6 right-6 bg-custom-primary">
+            <Plus size={30} color="white" />
+          </Pressable>
+        </Link>
+      )}
     </View>
   );
 };
