@@ -127,3 +127,22 @@ export const getUserAndCheckFriendship = async (
   console.log(data);
   return { data };
 };
+
+export const getFriendsCount = async () => {
+  const { user } = (await supabase.auth.getUser()).data;
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const { count, error } = await supabase
+    .from("friends_request")
+    .select("id", { count: "exact" })
+    .eq("status", "accepted")
+    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`);
+
+  if (error) {
+    throw error;
+  }
+  return { count: count };
+};
