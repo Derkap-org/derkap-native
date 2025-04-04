@@ -73,6 +73,10 @@ const Home = () => {
     }
   };
 
+  const removeDerkapLocally = (derkap_id: number) => {
+    setDerkaps(derkaps.filter((derkap) => derkap.id !== derkap_id));
+  };
+
   useFocusEffect(
     useCallback(() => {
       handleRefresh();
@@ -106,11 +110,11 @@ const Home = () => {
     <View className="flex-1">
       <View className="flex-row justify-between w-full px-8 mb-4">
         <Link href="/friends">
-          <View className="flex-row items-center gap-x-2 relative">
+          <View className="relative flex-row items-center gap-x-2">
             <UserPlus size={30} color="white" />
             {friendsRequestsCount > 0 && (
-              <View className="absolute -top-0 -left-3 bg-red-500 flex items-center justify-center rounded-full w-4 h-4">
-                <Text className="text-white text-xs font-grotesque">
+              <View className="absolute flex items-center justify-center w-4 h-4 bg-red-500 rounded-full -top-0 -left-3">
+                <Text className="text-xs text-white font-grotesque">
                   {friendsRequestsCount}
                 </Text>
               </View>
@@ -132,7 +136,7 @@ const Home = () => {
         </Link>
       </View>
 
-      <View className="flex-row justify-center gap-x-4 mb-4 px-4">
+      <View className="flex-row justify-center px-4 mb-4 gap-x-4">
         <Pressable
           onPress={() => setActiveFilter("all")}
           className={`py-2 px-4 rounded ${
@@ -160,6 +164,7 @@ const Home = () => {
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <DerkapCard
+              removeDerkapLocally={removeDerkapLocally}
               alreadyMadeThisChallenge={alreadyMadeThisChallenge(
                 item.challenge,
               )}
@@ -170,7 +175,7 @@ const Home = () => {
           onEndReached={fetchMoreDerkaps}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() => (
-            <View className="py-4 px-4">
+            <View className="px-4 py-4">
               {derkapsLoading ? (
                 <ActivityIndicator size="large" color="white" />
               ) : !hasMoreDerkaps && filteredDerkaps.length > 0 ? (
@@ -188,7 +193,7 @@ const Home = () => {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-          <View className="flex-1 items-center justify-center">
+          <View className="items-center justify-center flex-1">
             <Text className="text-center text-white">
               Aucun derkap pour le moment
             </Text>
@@ -196,7 +201,7 @@ const Home = () => {
         </ScrollView>
       )}
       <Link href="/new" asChild>
-        <Pressable className="absolute bottom-6 right-6 bg-custom-primary w-20 h-20 rounded-full items-center justify-center shadow-lg">
+        <Pressable className="absolute items-center justify-center w-20 h-20 rounded-full shadow-lg bottom-6 right-6 bg-custom-primary">
           <Plus size={30} color="white" />
         </Pressable>
       </Link>

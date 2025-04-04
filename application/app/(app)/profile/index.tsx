@@ -6,7 +6,7 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import * as ImagePicker from "expo-image-picker";
 import { updateAvatarProfile } from "@/functions/profile-action";
 import Toast from "react-native-toast-message";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import Avatar from "@/components/Avatar";
 import {

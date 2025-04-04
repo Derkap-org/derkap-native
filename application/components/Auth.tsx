@@ -17,7 +17,7 @@ import Checkbox from "expo-checkbox";
 import Button from "./Button";
 import { EyeOff, Eye } from "lucide-react-native";
 import Toast from "react-native-toast-message";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
