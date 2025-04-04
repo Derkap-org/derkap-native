@@ -330,6 +330,75 @@ end;$$;
 ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") RETURNS TABLE("derkap_id" bigint)
+    LANGUAGE "plpgsql"
+    AS $$
+declare
+    v_derkap_id bigint;
+begin
+    -- Insert into the 'derkap' table
+    insert into public.derkap(challenge, creator_id, file_path, caption, base_key)
+    values (p_challenge, p_user_id, p_file_path, p_caption, p_base_key)
+    returning id into v_derkap_id;
+
+    -- Insert allowed users into 'derkap_allowed_users' table
+    insert into public.derkap_allowed_users(derkap_id, allowed_user_id)
+    select v_derkap_id, unnest(p_allowed_users);
+
+    -- Return the inserted derkap ID
+    return query select v_derkap_id;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_encrypted_post" "bytea", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") RETURNS TABLE("derkap_id" bigint)
+    LANGUAGE "plpgsql"
+    AS $$
+declare
+    v_derkap_id bigint;
+begin
+    -- Insert into the 'derkap' table
+    insert into public.derkap(challenge, creator_id, file_path, caption, base_key)
+    values (p_challenge, p_user_id, p_file_path, p_caption, p_base_key)
+    returning id into v_derkap_id;
+
+    -- Insert allowed users into 'derkap_allowed_users' table
+    insert into public.derkap_allowed_users(derkap_id, allowed_user_id)
+    select v_derkap_id, unnest(p_allowed_users);
+
+    -- Return the inserted derkap ID
+    return query select v_derkap_id;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_encrypted_post" "bytea", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."is_derkap_accessible"("target_derkap_id" bigint, "requesting_user_id" "uuid") RETURNS boolean
+    LANGUAGE "sql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+  SELECT EXISTS (
+    -- Check if the user is the creator
+    SELECT 1
+    FROM public.derkap
+    WHERE id = target_derkap_id AND creator_id = requesting_user_id
+  ) OR EXISTS (
+    -- Check if the user is in the allowed list
+    SELECT 1
+    FROM public.derkap_allowed_users
+    WHERE derkap_id = target_derkap_id AND allowed_user_id = requesting_user_id
+  );
+$$;
+
+
+ALTER FUNCTION "public"."is_derkap_accessible"("target_derkap_id" bigint, "requesting_user_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."notify_backend_of_new_challenge"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -392,48 +461,6 @@ $$;
 ALTER FUNCTION "public"."notify_challenge_update"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."notify_new_comment"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$
-DECLARE
-  challenge_id BIGINT;
-  group_name TEXT;
-  challenge_description TEXT;
-  group_id BIGINT;
-BEGIN
-  -- Fetch challenge and group details
-  SELECT c.id, g.name, c.description, g.id
-  INTO challenge_id, group_name, challenge_description, group_id
-  FROM post p
-  JOIN challenge c ON p.challenge_id = c.id
-  JOIN "group" g ON c.group_id = g.id
-  WHERE p.id = NEW.post_id;
-
-  -- Call Supabase Edge Function
-  PERFORM net.http_post(
-    url := 'https://hrktxqpsqbjnockggnic.supabase.co/functions/v1/notify-new-comment',
-    headers := json_build_object(
-      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhya3R4cXBzcWJqbm9ja2dnbmljIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNzc0ODMxOSwiZXhwIjoyMDMzMzI0MzE5fQ.eT0_E89SJcXMMxwiQBxr0IwIhASgms4BDNRVz3CZ_xc'
-    )::jsonb,
-    body := json_build_object(
-      'post_id', NEW.post_id,
-      'creator_id', NEW.creator_id,
-      'comment_content', NEW.content,
-      'challenge_id', challenge_id,
-      'group_name', group_name,
-      'challenge_description', challenge_description,
-      'group_id', group_id
-    )::jsonb
-  );
-
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."notify_new_comment"() OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."notify_new_encrypted_post"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
@@ -484,8 +511,7 @@ ALTER FUNCTION "public"."notify_new_group_member"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."notify_new_post"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
+    AS $$BEGIN
   PERFORM
     net.http_post(
       url := 'https://hrktxqpsqbjnockggnic.supabase.co/functions/v1/notify-new-post',
@@ -493,15 +519,13 @@ BEGIN
         'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhya3R4cXBzcWJqbm9ja2dnbmljIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNzc0ODMxOSwiZXhwIjoyMDMzMzI0MzE5fQ.eT0_E89SJcXMMxwiQBxr0IwIhASgms4BDNRVz3CZ_xc'
       )::jsonb,
       body := json_build_object(
-        'post_id', NEW.id,
-        'challenge_id', NEW.challenge_id,
-        'sender_id', NEW.profile_id
+        'allowed_user_id', NEW.allowed_user_id
+        'derkap_id', NEW.derkap_id
       )::jsonb
     );
 
   RETURN NEW;
-END;
-$$;
+END;$$;
 
 
 ALTER FUNCTION "public"."notify_new_post"() OWNER TO "postgres";
@@ -659,29 +683,6 @@ $$;
 ALTER FUNCTION "public"."update_last_activity_on_challenge_change"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."update_last_activity_on_comment_insert"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$
-begin
-  update "group"
-  set last_activity = now()
-  where id = (
-    select group_id 
-    from challenge 
-    where id = (
-      select challenge_id 
-      from post 
-      where id = new.post_id
-    )
-  );
-  return null;
-end;
-$$;
-
-
-ALTER FUNCTION "public"."update_last_activity_on_comment_insert"() OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."update_last_activity_on_group_profile_change"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -837,8 +838,8 @@ CREATE TABLE IF NOT EXISTS "public"."comment" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "creator_id" "uuid",
-    "post_id" bigint,
-    "content" "text"
+    "content" "text",
+    "derkap_id" bigint
 );
 
 
@@ -868,6 +869,41 @@ ALTER TABLE "public"."delete_account" OWNER TO "postgres";
 
 ALTER TABLE "public"."delete_account" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."delete_account_id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."derkap" (
+    "id" bigint NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "challenge" "text",
+    "creator_id" "uuid",
+    "caption" "text",
+    "file_path" "text",
+    "base_key" "text"
+);
+
+
+ALTER TABLE "public"."derkap" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."derkap_allowed_users" (
+    "derkap_id" bigint NOT NULL,
+    "allowed_user_id" "uuid" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."derkap_allowed_users" OWNER TO "postgres";
+
+
+ALTER TABLE "public"."derkap" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME "public"."derkap_id_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1060,6 +1096,16 @@ ALTER TABLE ONLY "public"."delete_account"
 
 
 
+ALTER TABLE ONLY "public"."derkap_allowed_users"
+    ADD CONSTRAINT "derkap_permissions_pkey" PRIMARY KEY ("derkap_id", "allowed_user_id");
+
+
+
+ALTER TABLE ONLY "public"."derkap"
+    ADD CONSTRAINT "derkap_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."friends_request"
     ADD CONSTRAINT "friends_request_pkey" PRIMARY KEY ("id");
 
@@ -1157,10 +1203,6 @@ CREATE OR REPLACE TRIGGER "trigger_last_activity_on_challenge_update" AFTER UPDA
 
 
 
-CREATE OR REPLACE TRIGGER "trigger_last_activity_on_comment_insert" AFTER INSERT ON "public"."comment" FOR EACH ROW EXECUTE FUNCTION "public"."update_last_activity_on_comment_insert"();
-
-
-
 CREATE OR REPLACE TRIGGER "trigger_last_activity_on_group_profile_delete" AFTER DELETE ON "public"."group_profile" FOR EACH ROW EXECUTE FUNCTION "public"."update_last_activity_on_group_profile_change"();
 
 
@@ -1193,15 +1235,7 @@ CREATE OR REPLACE TRIGGER "trigger_last_activity_on_vote_update" AFTER UPDATE ON
 
 
 
-CREATE OR REPLACE TRIGGER "trigger_notify_new_comment" AFTER INSERT ON "public"."comment" FOR EACH ROW EXECUTE FUNCTION "public"."notify_new_comment"();
-
-
-
 CREATE OR REPLACE TRIGGER "trigger_notify_new_group_member" AFTER INSERT ON "public"."group_profile" FOR EACH ROW EXECUTE FUNCTION "public"."notify_new_group_member"();
-
-
-
-CREATE OR REPLACE TRIGGER "trigger_notify_new_post" AFTER INSERT ON "public"."post" FOR EACH ROW EXECUTE FUNCTION "public"."notify_new_post"();
 
 
 
@@ -1210,6 +1244,18 @@ CREATE OR REPLACE TRIGGER "trigger_set_invite_code" BEFORE INSERT ON "public"."g
 
 
 CREATE OR REPLACE TRIGGER "update_friends_request_updated_at" BEFORE UPDATE ON "public"."friends_request" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
+
+
+
+CREATE OR REPLACE TRIGGER "webhook_notify_accept_friend" AFTER UPDATE ON "public"."friends_request" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://hrktxqpsqbjnockggnic.supabase.co/functions/v1/notify-accept-friend', 'POST', '{"Content-type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhya3R4cXBzcWJqbm9ja2dnbmljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3NDgzMTksImV4cCI6MjAzMzMyNDMxOX0.vnNh1kwokAi43XuAArlkyhlAFxDuKVzYkPKOvnOoRp4"}', '{}', '5000');
+
+
+
+CREATE OR REPLACE TRIGGER "webhook_notify_new_friend_request" AFTER INSERT ON "public"."friends_request" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://hrktxqpsqbjnockggnic.supabase.co/functions/v1/notify-new-friend', 'POST', '{"Content-type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhya3R4cXBzcWJqbm9ja2dnbmljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3NDgzMTksImV4cCI6MjAzMzMyNDMxOX0.vnNh1kwokAi43XuAArlkyhlAFxDuKVzYkPKOvnOoRp4"}', '{}', '5000');
+
+
+
+CREATE OR REPLACE TRIGGER "webhook_notify_new_post" AFTER INSERT ON "public"."derkap_allowed_users" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://hrktxqpsqbjnockggnic.supabase.co/functions/v1/notify-new-post', 'POST', '{"Content-type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhya3R4cXBzcWJqbm9ja2dnbmljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3NDgzMTksImV4cCI6MjAzMzMyNDMxOX0.vnNh1kwokAi43XuAArlkyhlAFxDuKVzYkPKOvnOoRp4"}', '{}', '5000');
 
 
 
@@ -1229,12 +1275,27 @@ ALTER TABLE ONLY "public"."comment"
 
 
 ALTER TABLE ONLY "public"."comment"
-    ADD CONSTRAINT "comment_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "public"."post"("id");
+    ADD CONSTRAINT "comment_derkap_id_fkey" FOREIGN KEY ("derkap_id") REFERENCES "public"."derkap"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 
 ALTER TABLE ONLY "public"."delete_account"
     ADD CONSTRAINT "delete_account_profile_id_fkey" FOREIGN KEY ("profile_id") REFERENCES "public"."profile"("id");
+
+
+
+ALTER TABLE ONLY "public"."derkap_allowed_users"
+    ADD CONSTRAINT "derkap_allowed_users_derkap_id_fkey" FOREIGN KEY ("derkap_id") REFERENCES "public"."derkap"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."derkap"
+    ADD CONSTRAINT "derkap_creator_id_fkey" FOREIGN KEY ("creator_id") REFERENCES "public"."profile"("id");
+
+
+
+ALTER TABLE ONLY "public"."derkap_allowed_users"
+    ADD CONSTRAINT "fk_user" FOREIGN KEY ("allowed_user_id") REFERENCES "public"."profile"("id") ON DELETE CASCADE;
 
 
 
@@ -1302,6 +1363,40 @@ CREATE POLICY "All" ON "public"."delete_account" USING (true);
 
 
 
+CREATE POLICY "Allow comment delete for creator" ON "public"."comment" FOR DELETE USING (("creator_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Allow comment update for creator" ON "public"."comment" FOR UPDATE USING (("creator_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Allow commenting if allowed user" ON "public"."comment" FOR INSERT WITH CHECK (((EXISTS ( SELECT 1
+   FROM "public"."derkap_allowed_users" "dau"
+  WHERE (("dau"."derkap_id" = "comment"."derkap_id") AND ("dau"."allowed_user_id" = "auth"."uid"())))) AND ("creator_id" = "auth"."uid"())));
+
+
+
+CREATE POLICY "Allow creator to insert allowed users" ON "public"."derkap_allowed_users" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
+   FROM "public"."derkap" "d"
+  WHERE ("d"."creator_id" = "auth"."uid"()))));
+
+
+
+CREATE POLICY "Allow creator to view their own derkap" ON "public"."derkap" FOR SELECT USING (("creator_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Allow delete for creator" ON "public"."derkap" FOR DELETE USING (("creator_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Allow deleting allowed users if creator" ON "public"."derkap_allowed_users" FOR DELETE USING ((EXISTS ( SELECT 1
+   FROM "public"."derkap" "d"
+  WHERE ("d"."creator_id" = "auth"."uid"()))));
+
+
+
 CREATE POLICY "Allow group member to read challenges" ON "public"."challenge" FOR SELECT USING ((EXISTS ( SELECT 1
    FROM "public"."group_profile" "gp"
   WHERE (("gp"."group_id" = "challenge"."group_id") AND ("gp"."profile_id" = "auth"."uid"())))));
@@ -1324,9 +1419,41 @@ CREATE POLICY "Allow group member, or creator to read" ON "public"."group" FOR S
 
 
 
+CREATE POLICY "Allow insert for creator" ON "public"."derkap" FOR INSERT WITH CHECK (("creator_id" = "auth"."uid"()));
+
+
+
 CREATE POLICY "Allow member of group to leave - delete row" ON "public"."group_profile" FOR DELETE TO "authenticated" USING (("group_id" IN ( SELECT "group_profile_1"."group_id"
    FROM "public"."group_profile" "group_profile_1"
   WHERE ("group_profile_1"."profile_id" = "auth"."uid"()))));
+
+
+
+CREATE POLICY "Allow reading comments if allowed user" ON "public"."comment" FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM "public"."derkap_allowed_users" "dau"
+  WHERE (("dau"."derkap_id" = "comment"."derkap_id") AND ("dau"."allowed_user_id" = "auth"."uid"())))));
+
+
+
+CREATE POLICY "Allow update for creator" ON "public"."derkap" FOR UPDATE USING (("creator_id" = "auth"."uid"()));
+
+
+
+CREATE POLICY "Allow updating allowed users if creator" ON "public"."derkap_allowed_users" FOR UPDATE USING ((EXISTS ( SELECT 1
+   FROM "public"."derkap" "d"
+  WHERE ("d"."creator_id" = "auth"."uid"())))) WITH CHECK ((EXISTS ( SELECT 1
+   FROM "public"."derkap" "d"
+  WHERE ("d"."creator_id" = "auth"."uid"()))));
+
+
+
+CREATE POLICY "Allow view for allowed users" ON "public"."derkap" FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM "public"."derkap_allowed_users" "dau"
+  WHERE (("dau"."derkap_id" = "derkap"."id") AND ("dau"."allowed_user_id" = "auth"."uid"())))));
+
+
+
+CREATE POLICY "Auth to get dau" ON "public"."derkap_allowed_users" FOR SELECT TO "authenticated" USING (true);
 
 
 
@@ -1435,6 +1562,12 @@ ALTER TABLE "public"."comment" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."delete_account" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."derkap" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."derkap_allowed_users" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."friends_request" ENABLE ROW LEVEL SECURITY;
 
 
@@ -1444,14 +1577,6 @@ ALTER TABLE "public"."group" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."group_profile" ENABLE ROW LEVEL SECURITY;
 
 
-CREATE POLICY "insert_comment_if_group_member" ON "public"."comment" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
-   FROM (("public"."group_profile" "gp"
-     JOIN "public"."challenge" "c" ON (("c"."group_id" = "gp"."group_id")))
-     JOIN "public"."post" "p" ON (("p"."challenge_id" = "c"."id")))
-  WHERE (("gp"."profile_id" = "auth"."uid"()) AND ("p"."id" = "comment"."post_id")))));
-
-
-
 ALTER TABLE "public"."notification_subscription" ENABLE ROW LEVEL SECURITY;
 
 
@@ -1459,18 +1584,6 @@ ALTER TABLE "public"."post" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."profile" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE POLICY "select_comment_if_group_member" ON "public"."comment" FOR SELECT USING ((EXISTS ( SELECT 1
-   FROM (("public"."group_profile" "gp"
-     JOIN "public"."challenge" "c" ON (("c"."group_id" = "gp"."group_id")))
-     JOIN "public"."post" "p" ON (("p"."challenge_id" = "c"."id")))
-  WHERE (("gp"."profile_id" = "auth"."uid"()) AND ("p"."id" = "comment"."post_id")))));
-
-
-
-CREATE POLICY "update_delete_own_comment" ON "public"."comment" USING (("creator_id" = "auth"."uid"()));
-
 
 
 ALTER TABLE "public"."vote" ENABLE ROW LEVEL SECURITY;
@@ -1780,6 +1893,24 @@ GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_encrypted_post" "bytea", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_encrypted_post" "bytea", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."insert_derkap_with_users"("p_challenge" "text", "p_encrypted_post" "bytea", "p_caption" "text", "p_allowed_users" "uuid"[], "p_base_key" "text", "p_file_path" "text", "p_user_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."is_derkap_accessible"("target_derkap_id" bigint, "requesting_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."is_derkap_accessible"("target_derkap_id" bigint, "requesting_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."is_derkap_accessible"("target_derkap_id" bigint, "requesting_user_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."notify_backend_of_new_challenge"() TO "anon";
 GRANT ALL ON FUNCTION "public"."notify_backend_of_new_challenge"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."notify_backend_of_new_challenge"() TO "service_role";
@@ -1789,12 +1920,6 @@ GRANT ALL ON FUNCTION "public"."notify_backend_of_new_challenge"() TO "service_r
 GRANT ALL ON FUNCTION "public"."notify_challenge_update"() TO "anon";
 GRANT ALL ON FUNCTION "public"."notify_challenge_update"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."notify_challenge_update"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."notify_new_comment"() TO "anon";
-GRANT ALL ON FUNCTION "public"."notify_new_comment"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."notify_new_comment"() TO "service_role";
 
 
 
@@ -1843,12 +1968,6 @@ GRANT ALL ON FUNCTION "public"."update_challenge_status_to_voting"() TO "service
 GRANT ALL ON FUNCTION "public"."update_last_activity_on_challenge_change"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_last_activity_on_challenge_change"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_last_activity_on_challenge_change"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."update_last_activity_on_comment_insert"() TO "anon";
-GRANT ALL ON FUNCTION "public"."update_last_activity_on_comment_insert"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."update_last_activity_on_comment_insert"() TO "service_role";
 
 
 
@@ -1954,6 +2073,24 @@ GRANT ALL ON TABLE "public"."delete_account" TO "service_role";
 GRANT ALL ON SEQUENCE "public"."delete_account_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."delete_account_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."delete_account_id_seq" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."derkap" TO "anon";
+GRANT ALL ON TABLE "public"."derkap" TO "authenticated";
+GRANT ALL ON TABLE "public"."derkap" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."derkap_allowed_users" TO "anon";
+GRANT ALL ON TABLE "public"."derkap_allowed_users" TO "authenticated";
+GRANT ALL ON TABLE "public"."derkap_allowed_users" TO "service_role";
+
+
+
+GRANT ALL ON SEQUENCE "public"."derkap_id_seq" TO "anon";
+GRANT ALL ON SEQUENCE "public"."derkap_id_seq" TO "authenticated";
+GRANT ALL ON SEQUENCE "public"."derkap_id_seq" TO "service_role";
 
 
 
