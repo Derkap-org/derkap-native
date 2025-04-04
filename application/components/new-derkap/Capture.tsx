@@ -13,7 +13,7 @@ import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
 import Toast from "react-native-toast-message";
-import { Modal } from "../Modal";
+import { Modal } from "../modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import React from "react";
 import {
