@@ -17,8 +17,9 @@ const generatePostPath = ({
   challenge: string;
   user_id: string;
 }) => {
-  const randomId = generateRandomId();
-  return `user_${user_id}/challenge_${challenge}_${randomId}`;
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `user_${user_id}/${timestamp}_${random}`;
 };
 
 export const uploadDerkapToDB = async ({
