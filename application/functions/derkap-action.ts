@@ -333,3 +333,19 @@ export const addAllowedUser = async ({
     throw new Error(error.message);
   }
 };
+
+export const deleteDerkap = async ({ derkap_id }: { derkap_id: number }) => {
+  const user = await supabase.auth.getUser();
+  const user_id = user.data.user?.id;
+  if (!user || !user_id) {
+    throw new Error("Not authorized");
+  }
+  const { error } = await supabase
+    .from("derkap")
+    .delete()
+    .eq("id", derkap_id)
+    .eq("creator_id", user_id);
+  if (error) {
+    throw new Error(error.message);
+  }
+};

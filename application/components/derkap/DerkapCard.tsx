@@ -15,10 +15,11 @@ import { cn } from "@/lib/utils";
 import Button from "../Button";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import { useRef, useState, useEffect } from "react";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/components/modals/Modal";
 import { Comment } from "@/components/comment/Comment";
 import Toast from "react-native-toast-message";
 import { createComment, getCommentsFromDB } from "@/functions/comments-action";
+import React from "react";
 import {
   TapGestureHandler,
   State,
@@ -26,7 +27,7 @@ import {
 } from "react-native-gesture-handler";
 import ChallengeBox from "@/components/ChallengeBox";
 import { Link } from "expo-router";
-import { EyeIcon, Plus } from "lucide-react-native";
+import { EyeIcon, Plus, Ellipsis } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
 import {
   removeAllowedUser,
@@ -34,24 +35,28 @@ import {
   addAllowedUser,
 } from "@/functions/derkap-action";
 import useFriendStore from "@/store/useFriendStore";
+import { deleteDerkap } from "@/functions/derkap-action";
+import useMyChallengesStore from "@/store/useMyChallengesStore";
 
 interface DerkapCardProps extends ViewProps {
   derkap: TDerkapDB;
   alreadyMadeThisChallenge: boolean;
+  removeDerkapLocally: (derkap_id: number) => void;
 }
 
 export default function DerkapCard({
   derkap,
   className,
   alreadyMadeThisChallenge,
+  removeDerkapLocally,
   ...props
 }: DerkapCardProps) {
   const [comments, setComments] = useState<TCommentDB[]>([]);
   const [newComment, setNewComment] = useState("");
   const [postingComment, setPostingComment] = useState(false);
-  const modalCommentRef = useRef<ActionSheetRef>(null);
-  const modalVisibilityRef = useRef<ActionSheetRef>(null);
+
   const modalAddUserRef = useRef<ActionSheetRef>(null);
+
   const [showHeart, setShowHeart] = useState(false);
   const heartScale = useRef(new Animated.Value(0)).current;
   const { user } = useSupabase();
@@ -73,6 +78,11 @@ export default function DerkapCard({
     const allowedUsers = await fetchAllowedUsers({ derkap_id: derkap.id });
     setAllowedUsers(allowedUsers);
   };
+
+  const modalCommentRef = useRef<ActionSheetRef>(null);
+  const modalVisibilityRef = useRef<ActionSheetRef>(null);
+  const modalActionsRef = useRef<ActionSheetRef>(null);
+  const modalDeleteRef = useRef<ActionSheetRef>(null);
 
   const handleFetchComments = async () => {
     const comments = await getCommentsFromDB({ derkap_id: derkap.id });
@@ -151,6 +161,12 @@ export default function DerkapCard({
     }
   };
 
+  const handleDeleteDerkap = async () => {
+    await deleteDerkap({ derkap_id: derkap.id });
+    removeDerkapLocally(derkap.id);
+    modalDeleteRef.current?.hide();
+  };
+
   const openModalComment = async () => {
     modalCommentRef.current?.show();
     await handleFetchComments();
@@ -182,6 +198,14 @@ export default function DerkapCard({
     modalAddUserRef.current?.hide();
   };
 
+  const openModalActions = async () => {
+    modalActionsRef.current?.show();
+  };
+
+  const openModalDelete = async () => {
+    modalDeleteRef.current?.show();
+  };
+
   return (
     <View
       className={cn(
@@ -209,9 +233,9 @@ export default function DerkapCard({
 
       <View className="w-full aspect-[4/5] relative">
         {!alreadyMadeThisChallenge && (
-          <View className="absolute w-full h-full z-20 flex items-center justify-center bg-black/50">
+          <View className="absolute z-20 flex items-center justify-center w-full h-full bg-black/50">
             <View className="flex flex-col items-center gap-y-4">
-              <Text className="text-2xl font-bold text-white text-center">
+              <Text className="text-2xl font-bold text-center text-white">
                 Révèle son Derkap !
               </Text>
               <Link
@@ -224,23 +248,23 @@ export default function DerkapCard({
                     ),
                   },
                 }}
-                className="bg-custom-primary px-6 py-3 rounded-xl"
+                className="px-6 py-3 bg-custom-primary rounded-xl"
               >
-                <Text className="text-white font-bold text-lg">Capturer</Text>
+                <Text className="text-lg font-bold text-white">Capturer</Text>
               </Link>
             </View>
           </View>
         )}
         {derkap.caption && (
-          <View className="absolute bottom-0 left-0 right-0 z-10 p-4 flex-row items-start justify-between">
+          <View className="absolute bottom-0 left-0 right-0 z-10 flex-row items-start justify-between p-4">
             <View className="w-full p-4 bg-zinc-800/80 rounded-xl">
-              <Text className="text-white text-center font-grotesque">
+              <Text className="text-center text-white font-grotesque">
                 {derkap.caption}
               </Text>
             </View>
           </View>
         )}
-        <View className="absolute top-2 left-4 z-30 flex flex-row items-center justify-between py-2 px-4 bg-zinc-800/50 rounded-xl">
+        <View className="absolute z-30 flex flex-row items-center justify-between px-4 py-2 top-2 left-4 bg-zinc-800/50 rounded-xl">
           <View className="flex flex-row items-center gap-x-2">
             <View className={`rounded-full overflow-hidden`}>
               {derkap.creator.avatar_url ? (
@@ -264,12 +288,17 @@ export default function DerkapCard({
           </View>
         </View>
 
-        <Pressable
-          onPress={openModalVisibility}
-          className="absolute top-2 right-4 z-30 flex flex-row items-center justify-between p-2 bg-zinc-800/50 rounded-full"
-        >
-          <EyeIcon className="w-6 h-6 text-white" color="white" />
-        </Pressable>
+        <View className="absolute z-30 flex flex-row items-center justify-between gap-x-3 top-2 right-4">
+          <Pressable
+            onPress={openModalVisibility}
+            className="p-2 rounded-full bg-zinc-800/50"
+          >
+            <EyeIcon className="w-6 h-6 text-white" color="white" />
+          </Pressable>
+          <Pressable onPress={openModalActions}>
+            <Ellipsis className="w-6 h-6 text-white" color="white" />
+          </Pressable>
+        </View>
         {showHeart && (
           <Animated.View
             style={{
@@ -284,7 +313,7 @@ export default function DerkapCard({
               transform: [{ scale: heartScale }],
             }}
           >
-            <Text className="text-9xl font-bold pt-10 text-white">🤣</Text>
+            <Text className="pt-10 font-bold text-white text-9xl">🤣</Text>
           </Animated.View>
         )}
         <TapGestureHandler
@@ -302,18 +331,18 @@ export default function DerkapCard({
           />
         </TapGestureHandler>
       </View>
-      <View className="w-full flex flex-row items-center justify-end px-4 mt-2">
+      <View className="flex flex-row items-center justify-end w-full px-4 mt-2">
         {/* <Pressable
           className="px-4 py-2"
           onPress={() => {
             likeDerkap({ derkap_id: derkap.id });
           }}
         >
-          <View className="flex relative flex-row items-center gap-x-2">
-            <Text className="text-white text-center absolute -top-3 -right-2 z-10 bg-black/50 p-1 rounded-full font-grotesque">
+          <View className="relative flex flex-row items-center gap-x-2">
+            <Text className="absolute z-10 p-1 text-center text-white rounded-full -top-3 -right-2 bg-black/50 font-grotesque">
               12
             </Text>
-            <Text className="text-white font-grotesque text-4xl">🤣</Text>
+            <Text className="text-4xl text-white font-grotesque">🤣</Text>
           </View>
         </Pressable> */}
         <Pressable className="px-4 py-2" onPress={openModalComment}>
@@ -324,13 +353,13 @@ export default function DerkapCard({
       </View>
       <Modal fullScreen={true} actionSheetRef={modalCommentRef}>
         <View className="flex flex-col h-full">
-          <Text className="text-2xl font-bold font-grotesque text-center py-4 text-white">
+          <Text className="py-4 text-2xl font-bold text-center text-white font-grotesque">
             Commentaires
           </Text>
           <ScrollView
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}
-            className="flex-1 flex-col gap-y-2"
+            className="flex-col flex-1 gap-y-2"
           >
             {comments?.length > 0 ? (
               comments.map((comment) => (
@@ -346,11 +375,11 @@ export default function DerkapCard({
               </Text>
             )}
           </ScrollView>
-          <View className="flex flex-col gap-y-2 px-4 py-4 justify-center items-center">
+          <View className="flex flex-col items-center justify-center px-4 py-4 gap-y-2">
             <TextInput
               value={newComment}
               onChangeText={setNewComment}
-              className="w-full p-2 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl"
+              className="w-full p-2 text-white bg-zinc-800 placeholder:text-zinc-400 rounded-xl"
               placeholder="Ajouter un commentaire"
             />
             <Button
@@ -378,6 +407,9 @@ export default function DerkapCard({
               <Plus size={24} color="white" />
             </Pressable>
           </View>
+          <Text className="py-4 text-2xl font-bold text-center text-white font-grotesque">
+            Qui peut voir ce Derkap ?
+          </Text>
           <FlatList
             data={allowedUsers}
             renderItem={({ item }) => (
@@ -454,6 +486,49 @@ export default function DerkapCard({
               </View>
             )}
           </View>
+        </Modal>
+      </Modal>
+      <Modal actionSheetRef={modalActionsRef}>
+        <View className="flex flex-col">
+          <View className="flex flex-col gap-y-4">
+            <Button text="Signaler le contenu" onClick={() => {}} />
+            {derkap.creator_id === user.id && (
+              <Button
+                color="danger"
+                text="Supprimer"
+                onClick={openModalDelete}
+              />
+            )}
+          </View>
+        </View>
+        <Modal actionSheetRef={modalDeleteRef}>
+          <>
+            <Text className="font-bold text-center text-white">
+              Êtes-vous sûr de vouloir supprimer ce Derkap ? Cette action est
+              irréversible.
+            </Text>
+
+            <Button
+              withLoader={true}
+              color="green"
+              className="flex items-center justify-center gap-2"
+              onClick={() => {
+                modalDeleteRef.current?.hide();
+                modalActionsRef.current?.hide();
+              }}
+              text={"Annuler"}
+            />
+            <View className="flex flex-row items-center justify-center gap-2">
+              <Button
+                withLoader={true}
+                color="danger"
+                className="flex items-center justify-center gap-2"
+                textClassName="text-xs"
+                onClick={handleDeleteDerkap}
+                text={"Supprimer le Derkap"}
+              />
+            </View>
+          </>
         </Modal>
       </Modal>
     </View>
