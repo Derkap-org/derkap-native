@@ -19,11 +19,22 @@ import { Modal } from "@/components/modals/Modal";
 import { Comment } from "@/components/comment/Comment";
 import Toast from "react-native-toast-message";
 import { createComment, getCommentsFromDB } from "@/functions/comments-action";
-import { TapGestureHandler, State } from "react-native-gesture-handler";
+import React from "react";
+import {
+  TapGestureHandler,
+  State,
+  Swipeable,
+} from "react-native-gesture-handler";
 import ChallengeBox from "@/components/ChallengeBox";
 import { Link } from "expo-router";
-import { Ellipsis, EyeIcon } from "lucide-react-native";
+import { EyeIcon, Plus, Ellipsis } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
+import {
+  removeAllowedUser,
+  fetchAllowedUsers,
+  addAllowedUser,
+} from "@/functions/derkap-action";
+import useFriendStore from "@/store/useFriendStore";
 import { deleteDerkap } from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
 
@@ -44,9 +55,29 @@ export default function DerkapCard({
   const [newComment, setNewComment] = useState("");
   const [postingComment, setPostingComment] = useState(false);
 
+  const modalAddUserRef = useRef<ActionSheetRef>(null);
+
   const [showHeart, setShowHeart] = useState(false);
   const heartScale = useRef(new Animated.Value(0)).current;
   const { user } = useSupabase();
+  const { friends, fetchFriends } = useFriendStore();
+  const [allowedUsers, setAllowedUsers] = useState<TProfileDB[]>(
+    derkap.derkap_allowed_users,
+  );
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    setAllowedUsers(derkap.derkap_allowed_users);
+  }, [derkap]);
+
+  useEffect(() => {
+    fetchFriends();
+  }, []);
+
+  const handleFetchAllowedUsers = async () => {
+    const allowedUsers = await fetchAllowedUsers({ derkap_id: derkap.id });
+    setAllowedUsers(allowedUsers);
+  };
 
   const modalCommentRef = useRef<ActionSheetRef>(null);
   const modalVisibilityRef = useRef<ActionSheetRef>(null);
@@ -68,6 +99,15 @@ export default function DerkapCard({
 
   const handleLike = async () => {
     await likeDerkap({ derkap_id: derkap.id });
+  };
+
+  const handleRemoveAllowedUser = async (userId: string) => {
+    await removeAllowedUser({ derkap_id: derkap.id, allowed_user_id: userId });
+    await handleFetchAllowedUsers();
+  };
+
+  const handleAddAllowedUser = async (userId: string) => {
+    await addAllowedUser({ derkap_id: derkap.id, allowed_user_id: userId });
   };
 
   const animateHeart = () => {
@@ -128,11 +168,34 @@ export default function DerkapCard({
   };
 
   const openModalComment = async () => {
-    await handleFetchComments();
     modalCommentRef.current?.show();
+    await handleFetchComments();
   };
   const openModalVisibility = async () => {
     modalVisibilityRef.current?.show();
+    await handleFetchAllowedUsers();
+  };
+
+  const openModalAddUser = () => {
+    setSelectedUsers([]);
+    modalAddUserRef.current?.show();
+  };
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUsers((prev) => {
+      if (prev.includes(userId)) {
+        return prev.filter((id) => id !== userId);
+      }
+      return [...prev, userId];
+    });
+  };
+
+  const handleConfirmSelection = async () => {
+    for (const userId of selectedUsers) {
+      await handleAddAllowedUser(userId);
+    }
+    await handleFetchAllowedUsers();
+    modalAddUserRef.current?.hide();
   };
 
   const openModalActions = async () => {
@@ -333,22 +396,100 @@ export default function DerkapCard({
       </Modal>
       <Modal fullScreen={true} actionSheetRef={modalVisibilityRef}>
         <View className="flex flex-col h-full">
+          <View className="flex flex-row items-center justify-between">
+            <Text className="text-2xl font-bold font-grotesque text-center py-4 text-white">
+              Qui peut voir ce Derkap ?
+            </Text>
+            <Pressable
+              onPress={openModalAddUser}
+              className="p-2 bg-custom-primary rounded-full"
+            >
+              <Plus size={24} color="white" />
+            </Pressable>
+          </View>
           <Text className="py-4 text-2xl font-bold text-center text-white font-grotesque">
             Qui peut voir ce Derkap ?
           </Text>
           <FlatList
-            data={derkap.derkap_allowed_users}
+            data={allowedUsers}
             renderItem={({ item }) => (
-              <AllowedUser profile={item} userIdConnected={user.id} />
+              <AllowedUser
+                profile={item}
+                userIdConnected={user.id}
+                onRemove={handleRemoveAllowedUser}
+              />
             )}
           />
         </View>
+        <Modal fullScreen={true} actionSheetRef={modalAddUserRef}>
+          <View className="flex flex-col h-full">
+            <Text className="text-2xl font-bold font-grotesque text-center py-4 text-white">
+              Ajouter des amis
+            </Text>
+            <FlatList
+              data={friends}
+              renderItem={({ item }) => {
+                const isAlreadyAllowed = allowedUsers.some(
+                  (user) => user.id === item.profile.id,
+                );
+                const isSelected = selectedUsers.includes(item.profile.id);
+                return (
+                  <Pressable
+                    onPress={() => {
+                      if (!isAlreadyAllowed) {
+                        handleSelectUser(item.profile.id);
+                      }
+                    }}
+                    className={`flex-row items-center p-3 border-b border-gray-700 ${
+                      isAlreadyAllowed ? "opacity-50" : ""
+                    }`}
+                  >
+                    {item.profile.avatar_url ? (
+                      <Image
+                        source={{ uri: item.profile.avatar_url }}
+                        className="w-10 h-10 rounded-full mr-4"
+                      />
+                    ) : (
+                      <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
+                    )}
+                    <Text className="flex-1 text-lg font-grotesque text-white">
+                      {item.profile.username}
+                    </Text>
+                    {isAlreadyAllowed ? (
+                      <Text className="text-custom-primary">Déjà ajouté</Text>
+                    ) : (
+                      <View
+                        className={`w-6 h-6 rounded-full border-2 ${
+                          isSelected
+                            ? "border-custom-primary"
+                            : "border-gray-500"
+                        }`}
+                        style={{
+                          backgroundColor: isSelected
+                            ? "#9333EA"
+                            : "transparent",
+                        }}
+                      />
+                    )}
+                  </Pressable>
+                );
+              }}
+            />
+            {selectedUsers.length > 0 && (
+              <View className="absolute bottom-0 left-0 right-0 p-4 bg-[#0E0E10] border-t border-gray-700">
+                <Button
+                  text="Confirmer"
+                  withLoader={true}
+                  onClick={handleConfirmSelection}
+                  className="w-full"
+                />
+              </View>
+            )}
+          </View>
+        </Modal>
       </Modal>
       <Modal actionSheetRef={modalActionsRef}>
         <View className="flex flex-col">
-          <Text className="py-4 text-2xl font-bold text-center text-white font-grotesque">
-            Actions
-          </Text>
           <View className="flex flex-col gap-y-4">
             <Button text="Signaler le contenu" onClick={() => {}} />
             {derkap.creator_id === user.id && (
@@ -397,24 +538,48 @@ export default function DerkapCard({
 const AllowedUser = ({
   profile,
   userIdConnected,
+  onRemove,
 }: {
   profile: TProfileDB;
   userIdConnected: string;
+  onRemove: (userId: string) => Promise<void>;
 }) => {
+  const swipeableRef = useRef<Swipeable>(null);
+
   if (profile.id === userIdConnected) return null;
+
+  const renderRightActions = () => {
+    return (
+      <View className="flex-1 bg-red-500 justify-center items-end rounded-xl">
+        <View className="h-full w-fit justify-center items-center px-4">
+          <Text className="text-white font-bold text-center">Supprimer</Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
-    <View className="flex-row items-center p-3 border-b border-gray-700">
-      {profile.avatar_url ? (
-        <Image
-          source={{ uri: profile.avatar_url }}
-          className="w-10 h-10 mr-4 rounded-full"
-        />
-      ) : (
-        <View className="w-10 h-10 mr-4 bg-gray-700 rounded-full" />
-      )}
-      <Text className={`flex-1 text-lg font-grotesque text-white`}>
-        {profile.username}
-      </Text>
-    </View>
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      onSwipeableOpen={() => {
+        onRemove(profile.id);
+        swipeableRef.current?.close();
+      }}
+    >
+      <View className="flex-row items-center p-3 border-b border-gray-700 bg-[#0E0E10]">
+        {profile.avatar_url ? (
+          <Image
+            source={{ uri: profile.avatar_url }}
+            className="w-10 h-10 rounded-full mr-4"
+          />
+        ) : (
+          <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
+        )}
+        <Text className={`flex-1 text-lg font-grotesque text-white`}>
+          {profile.username}
+        </Text>
+      </View>
+    </Swipeable>
   );
 };
