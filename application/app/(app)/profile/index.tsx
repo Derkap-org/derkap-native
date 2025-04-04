@@ -1,10 +1,10 @@
-import { Text, View } from "react-native";
+import { Text, View, TextInput } from "react-native";
 import React, { useRef, useState, useEffect } from "react";
 import Button from "@/components/Button";
 import { useSupabase } from "@/context/auth-context";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import * as ImagePicker from "expo-image-picker";
-import { updateAvatarProfile } from "@/functions/profile-action";
+import { updateAvatarProfile, updateUsernameProfile } from "@/functions/profile-action";
 import Toast from "react-native-toast-message";
 import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
@@ -18,8 +18,11 @@ import { compressImage } from "@/functions/image-action";
 
 export default function Group() {
   const [profileImage, setNewProfileImage] = useState<string | null>(null);
-  const { user, signOut, profile, updateProfileImg } = useSupabase();
+  const { user, signOut, profile, updateProfileImg, updateProfileUsername } = useSupabase();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [username, setUsername] = useState(profile?.username || "");
+  const [isLoadingUsername, setIsLoadingUsername] = useState(false);
 
   const fetchIsDeleting = async () => {
     const isDeleting = await isAccountDeleting();
@@ -29,6 +32,12 @@ export default function Group() {
   useEffect(() => {
     fetchIsDeleting();
   }, []);
+
+  useEffect(() => {
+    if (profile?.username) {
+      setUsername(profile.username);
+    }
+  }, [profile?.username]);
 
   const pickImage = async () => {
     try {
@@ -60,6 +69,40 @@ export default function Group() {
         text1: "Erreur lors de la mise à jour de l'image",
         text2: error?.message || "Une erreur inconnue est survenue",
       });
+    }
+  };
+
+  const handleUpdateUsername = async () => {
+    if (!username.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Le pseudo ne peut pas être vide",
+      });
+      return;
+    }
+
+    setIsLoadingUsername(true);
+    try {
+      await updateUsernameProfile(username);
+      updateProfileUsername(username);
+      
+      Toast.show({
+        type: "success",
+        text1: "Pseudo mis à jour avec succès",
+      });
+      setIsEditingUsername(false);
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: error.message === "Ce pseudo est déjà utilisé par un autre utilisateur" 
+          ? "Ce pseudo est déjà utilisé" 
+          : "Erreur lors de la mise à jour du pseudo",
+        text2: error.message === "Ce pseudo est déjà utilisé par un autre utilisateur"
+          ? "Veuillez choisir un autre pseudo"
+          : error?.message || "Une erreur inconnue est survenue",
+      });
+    } finally {
+      setIsLoadingUsername(false);
     }
   };
 
@@ -122,13 +165,48 @@ export default function Group() {
               pickImage={pickImage}
               classNameImage="w-24 h-24"
             />
-            {/* )} */}
-            <Text
+            
+            {isEditingUsername ? (
+              <View className="flex flex-col w-full gap-3 px-4 justify-center items-center">
+                <TextInput
+                  value={username}
+                  onChangeText={setUsername}
+                  placeholder="Nouveau pseudo"
+                  placeholderTextColor="#9ca3af"
+                  className="px-4 py-3 bg-gray-800 rounded-lg text-white w-full"
+                  maxLength={30}
+                />
+                <View className="flex flex-row gap-2 w-full">
+                  <Button
+                    withLoader={isLoadingUsername}
+                    color="danger"
+                    className="flex-1"
+                    onClick={() => setIsEditingUsername(false)}
+                    text="Annuler"
+                  />
+                  <Button
+                    withLoader={isLoadingUsername}
+                    className="flex-1"
+                    onClick={handleUpdateUsername}
+                    text="Enregistrer"
+                  />
+                </View>
+              </View>
+            ) : (
+              <>
+                <Text
               // style={{ fontFamily: "Grotesque" }}
               className="overflow-hidden text-xl text-white tracking-wider text-center capitalize font-grotesque max-w-52 text-wrap text-ellipsis"
-            >
-              {profile?.username}
-            </Text>
+                >
+                  {profile?.username}
+                </Text>
+                <Button
+                  className="mt-2"
+                  onClick={() => setIsEditingUsername(true)}
+                  text="Modifier mon pseudo"
+                />
+              </>
+            )}
           </View>
         </View>
       </View>

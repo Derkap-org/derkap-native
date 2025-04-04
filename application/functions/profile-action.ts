@@ -81,6 +81,17 @@ export const getProfileByUsername = async (username: string) => {
   return { data: transformedData };
 };
 
+export const updateUsernameProfile = async (username: string) => {
+  const { user } = (await supabase.auth.getUser()).data;
+  const { error } = await supabase
+    .from("profile")
+    .update({ username })
+    .eq("id", user.id);
+  if (error) {
+    throw error;
+  }
+};
+
 export const deleteAccount = async () => {
   const { user } = (await supabase.auth.getUser()).data;
   if (!user) {
