@@ -1,14 +1,10 @@
 import { supabase } from "@/lib/supabase";
 import { UUID } from "crypto";
 import { DERKAP_PHOTOS_BUCKET_NAME } from "@/lib/constants";
-import { TDerkapDB } from "@/types/types";
+import { TDerkapDB, TProfileDB } from "@/types/types";
 import { decryptPhoto } from "./encryption-action";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getEncryptionKey } from "./encryption-action";
-
-const generateRandomId = () => {
-  return Math.random().toString(36).substring(2, 15);
-};
 
 const generatePostPath = ({
   challenge,
@@ -285,4 +281,71 @@ export const fetchAllMyChallenges = async (): Promise<string[]> => {
   }
 
   return challenges;
+};
+
+export const removeAllowedUser = async ({
+  derkap_id,
+  allowed_user_id,
+}: {
+  derkap_id: number;
+  allowed_user_id: string;
+}) => {
+  const { data, error } = await supabase
+    .from("derkap_allowed_users")
+    .delete()
+    .eq("derkap_id", derkap_id)
+    .eq("allowed_user_id", allowed_user_id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const fetchAllowedUsers = async ({
+  derkap_id,
+}: {
+  derkap_id: number;
+}): Promise<TProfileDB[]> => {
+  const { data, error } = await supabase
+    .from("derkap_allowed_users")
+    .select("*, profile(*)")
+    .eq("derkap_id", derkap_id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data.map((derkap) => derkap.profile);
+};
+
+export const addAllowedUser = async ({
+  derkap_id,
+  allowed_user_id,
+}: {
+  derkap_id: number;
+  allowed_user_id: string;
+}) => {
+  const { data, error } = await supabase
+    .from("derkap_allowed_users")
+    .insert({ derkap_id, allowed_user_id });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const deleteDerkap = async ({ derkap_id }: { derkap_id: number }) => {
+  const user = await supabase.auth.getUser();
+  const user_id = user.data.user?.id;
+  if (!user || !user_id) {
+    throw new Error("Not authorized");
+  }
+  const { error } = await supabase
+    .from("derkap")
+    .delete()
+    .eq("id", derkap_id)
+    .eq("creator_id", user_id);
+  if (error) {
+    throw new Error(error.message);
+  }
 };

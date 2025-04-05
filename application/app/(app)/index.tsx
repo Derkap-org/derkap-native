@@ -6,9 +6,10 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from "react-native";
 import React, { useState, useCallback, useEffect } from "react";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { UserPlus, Plus } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
 import DerkapCard from "@/components/derkap/DerkapCard";
@@ -19,6 +20,7 @@ import useFriendStore from "@/store/useFriendStore";
 import { TDerkapDB } from "@/types/types";
 import { fetchDerkaps } from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
+import Button from "@/components/Button";
 
 const Home = () => {
   const { refreshMyChallenges, alreadyMadeThisChallenge } =
@@ -27,7 +29,7 @@ const Home = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "unrevealed">("all");
 
   const { requests, fetchRequests } = useFriendStore();
-  const { user, profile } = useSupabase();
+  const { user, profile, fetchFriendsCount, friendsCount } = useSupabase();
 
   const [derkaps, setDerkaps] = useState<TDerkapDB[]>([]);
   const [derkapsPage, setDerkapsPage] = useState(1);
@@ -73,6 +75,10 @@ const Home = () => {
     }
   };
 
+  const removeDerkapLocally = (derkap_id: number) => {
+    setDerkaps(derkaps.filter((derkap) => derkap.id !== derkap_id));
+  };
+
   useFocusEffect(
     useCallback(() => {
       handleRefresh();
@@ -82,6 +88,7 @@ const Home = () => {
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
+      await fetchFriendsCount();
       await refreshMyChallenges();
       await fetchDerkapsTimeline({ page: 1, reset: true });
       await fetchRequests();
@@ -106,11 +113,11 @@ const Home = () => {
     <View className="flex-1">
       <View className="flex-row justify-between w-full px-8 mb-4">
         <Link href="/friends">
-          <View className="flex-row items-center gap-x-2 relative">
+          <View className="relative flex-row items-center gap-x-2">
             <UserPlus size={30} color="white" />
             {friendsRequestsCount > 0 && (
-              <View className="absolute -top-0 -left-3 bg-red-500 flex items-center justify-center rounded-full w-4 h-4">
-                <Text className="text-white text-xs font-grotesque">
+              <View className="absolute flex items-center justify-center w-4 h-4 bg-red-500 rounded-full -top-0 -left-3">
+                <Text className="text-xs text-white font-grotesque">
                   {friendsRequestsCount}
                 </Text>
               </View>
@@ -132,7 +139,7 @@ const Home = () => {
         </Link>
       </View>
 
-      <View className="flex-row justify-center gap-x-4 mb-4 px-4">
+      <View className="flex-row justify-center px-4 mb-4 gap-x-4">
         <Pressable
           onPress={() => setActiveFilter("all")}
           className={`py-2 px-4 rounded ${
@@ -160,6 +167,7 @@ const Home = () => {
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <DerkapCard
+              removeDerkapLocally={removeDerkapLocally}
               alreadyMadeThisChallenge={alreadyMadeThisChallenge(
                 item.challenge,
               )}
@@ -170,7 +178,7 @@ const Home = () => {
           onEndReached={fetchMoreDerkaps}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() => (
-            <View className="py-4 px-4">
+            <View className="px-4 py-4">
               {derkapsLoading ? (
                 <ActivityIndicator size="large" color="white" />
               ) : !hasMoreDerkaps && filteredDerkaps.length > 0 ? (
@@ -188,18 +196,33 @@ const Home = () => {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         >
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-center text-white">
-              Aucun derkap pour le moment
-            </Text>
-          </View>
+          {friendsCount === 0 ? (
+            <View className="items-center justify-center flex-1">
+              <Text className="text-xl text-center text-white font-grotesque">
+                Ajoutez des amis pour derkapper
+              </Text>
+              <Button className="mt-4" onClick={() => router.push("/friends")}>
+                <Text className="text-xl text-center text-white font-grotesque">
+                  Ajouter des amis
+                </Text>
+              </Button>
+            </View>
+          ) : (
+            <View className="items-center justify-center flex-1">
+              <Text className="text-center text-white">
+                Aucun derkap pour le moment
+              </Text>
+            </View>
+          )}
         </ScrollView>
       )}
-      <Link href="/new" asChild>
-        <Pressable className="absolute bottom-6 right-6 bg-custom-primary w-20 h-20 rounded-full items-center justify-center shadow-lg">
-          <Plus size={30} color="white" />
-        </Pressable>
-      </Link>
+      {friendsCount > 0 && (
+        <Link href="/new" asChild>
+          <Pressable className="absolute items-center justify-center w-20 h-20 rounded-full shadow-lg bottom-6 right-6 bg-custom-primary">
+            <Plus size={30} color="white" />
+          </Pressable>
+        </Link>
+      )}
     </View>
   );
 };

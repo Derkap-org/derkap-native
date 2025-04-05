@@ -5,7 +5,7 @@ import { fr } from "date-fns/locale";
 import { useRef } from "react";
 import { deleteComment } from "@/functions/comments-action";
 import Toast from "react-native-toast-message";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import Button from "@/components/Button";
 import React from "react";

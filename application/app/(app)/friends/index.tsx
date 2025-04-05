@@ -21,7 +21,7 @@ import ProfileLine from "@/components/profile/ProfileLine";
 import useFriendStore from "@/store/useFriendStore";
 import { getUserAndCheckFriendship } from "@/functions/friends-action";
 import useSearchStore from "@/store/useSearchStore";
-import { Modal } from "@/components/Modal";
+import { Modal } from "@/components/modals/Modal";
 import Button from "@/components/Button";
 import { ActionSheetRef } from "react-native-actions-sheet";
 
