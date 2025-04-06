@@ -131,7 +131,6 @@ const Home = () => {
         >
           <Avatar
             profile={profile}
-            index={0}
             user={user}
             classNameImage="w-12 h-12"
             classNameContainer="border-2 border-custom-primary"

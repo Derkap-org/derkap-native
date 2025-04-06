@@ -17,7 +17,6 @@ import {
 import { compressImage } from "@/functions/image-action";
 
 export default function Group() {
-  const [profileImage, setNewProfileImage] = useState<string | null>(null);
   const { user, signOut, profile, updateProfileImg } = useSupabase();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -49,8 +48,6 @@ export default function Group() {
         width: 200,
         compression: 0.9,
       });
-
-      setNewProfileImage(compressedPhoto.uri);
 
       await updateAvatarProfile(compressedPhoto.uri);
       updateProfileImg(compressedPhoto.uri); // todo improve this, and overall the profile img update
@@ -117,7 +114,6 @@ export default function Group() {
             <Avatar
               profile={profile}
               classNameContainer="border-2 border-custom-primary"
-              index={0}
               user={user}
               pickImage={pickImage}
               classNameImage="w-24 h-24"

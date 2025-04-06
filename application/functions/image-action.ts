@@ -1,8 +1,8 @@
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 export const compressImage = async ({
   uri,
-  width = 500,
-  compression = 0.8,
+  width = 400,
+  compression = 0.9,
 }: {
   uri: string;
   width?: number;

@@ -8,7 +8,7 @@ import {
   Dimensions,
   TextInput,
 } from "react-native";
-import { XIcon, Timer, Zap, ZapOff } from "lucide-react-native";
+import { XIcon, Timer, Zap, ZapOff, RefreshCcw } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import { Image } from "react-native";
 import Button from "@/components/Button";
@@ -218,7 +218,7 @@ export default function Capture({
 
   return (
     <>
-      <View className="flex flex-col h-full w-full gap-y-2">
+      <View className="flex flex-col w-full gap-y-2">
         <View style={{ height: cameraHeight }} className="">
           {/* Top bar with reset button */}
 
@@ -314,6 +314,14 @@ export default function Capture({
                 }}
               >
                 <View className="h-14 w-14 rounded-full bg-gray-100" />
+              </Pressable>
+            </View>
+          )}
+          {/*Bottom right button */}
+          {!capturedPhoto && (
+            <View className="absolute bottom-2 right-0 z-10 p-4">
+              <Pressable onPress={toggleCameraFacing}>
+                <RefreshCcw size={28} color="white" />
               </Pressable>
             </View>
           )}
