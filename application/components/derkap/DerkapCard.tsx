@@ -316,7 +316,7 @@ export default function DerkapCard({
           <Image
             src={derkap.base64img}
             className="w-full h-full"
-            blurRadius={!alreadyMadeThisChallenge ? 10 : 0}
+            blurRadius={!alreadyMadeThisChallenge ? 30 : 0}
           />
         </TapGestureHandler>
       </View>
