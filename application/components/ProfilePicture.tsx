@@ -58,7 +58,6 @@ export default function ProfilePicture({
 
         setCachedAvatarUri(base64Data);
       } catch (error) {
-        console.error("Error caching avatar:", error);
         setCachedAvatarUri(avatar_url); // Fallback to original URL
       }
     };
