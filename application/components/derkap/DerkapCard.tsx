@@ -36,7 +36,7 @@ import {
 } from "@/functions/derkap-action";
 import useFriendStore from "@/store/useFriendStore";
 import { deleteDerkap } from "@/functions/derkap-action";
-import useMyChallengesStore from "@/store/useMyChallengesStore";
+import ProfilePicture from "../ProfilePicture";
 
 interface DerkapCardProps extends ViewProps {
   derkap: TDerkapDB;
@@ -266,22 +266,11 @@ export default function DerkapCard({
         )}
         <View className="absolute z-30 flex flex-row items-center justify-between px-4 py-2 top-2 left-4 bg-zinc-800/50 rounded-xl">
           <View className="flex flex-row items-center gap-x-2">
-            <View className={`rounded-full overflow-hidden`}>
-              {derkap.creator.avatar_url ? (
-                <Image
-                  source={{
-                    uri: `${derkap.creator.avatar_url}?t=${new Date().getTime()}`,
-                  }}
-                  className="w-10 h-10 rounded-full"
-                />
-              ) : (
-                <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
-                  <Text className="text-sm text-gray-300">
-                    {derkap.creator.username?.charAt(0) || "?"}
-                  </Text>
-                </View>
-              )}
-            </View>
+            <ProfilePicture
+              avatar_url={derkap.creator.avatar_url}
+              username={derkap.creator.username}
+              userId={derkap.creator.id}
+            />
             <Text className="text-lg font-bold text-white">
               {derkap.creator.username}
             </Text>
@@ -444,15 +433,12 @@ export default function DerkapCard({
                       isAlreadyAllowed ? "opacity-50" : ""
                     }`}
                   >
-                    {item.profile.avatar_url ? (
-                      <Image
-                        source={{ uri: item.profile.avatar_url }}
-                        className="w-10 h-10 rounded-full mr-4"
-                      />
-                    ) : (
-                      <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
-                    )}
-                    <Text className="flex-1 text-lg font-grotesque text-white">
+                    <ProfilePicture
+                      avatar_url={item.profile.avatar_url}
+                      username={item.profile.username}
+                      userId={item.profile.id}
+                    />
+                    <Text className="flex-1 text-lg font-grotesque text-white ml-4">
                       {item.profile.username}
                     </Text>
                     {isAlreadyAllowed ? (
@@ -565,15 +551,12 @@ const AllowedUser = ({
   if (!canEdit) {
     return (
       <View className="flex-row items-center p-3 border-b border-gray-700 bg-[#0E0E10]">
-        {profile.avatar_url ? (
-          <Image
-            source={{ uri: profile.avatar_url }}
-            className="w-10 h-10 rounded-full mr-4"
-          />
-        ) : (
-          <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
-        )}
-        <Text className={`flex-1 text-lg font-grotesque text-white`}>
+        <ProfilePicture
+          avatar_url={profile.avatar_url}
+          username={profile.username}
+          userId={profile.id}
+        />
+        <Text className={`flex-1 text-lg font-grotesque text-white ml-4`}>
           {profile.username}
         </Text>
       </View>
@@ -592,15 +575,12 @@ const AllowedUser = ({
       }}
     >
       <View className="flex-row items-center p-3 border-b border-gray-700 bg-[#0E0E10]">
-        {profile.avatar_url ? (
-          <Image
-            source={{ uri: profile.avatar_url }}
-            className="w-10 h-10 rounded-full mr-4"
-          />
-        ) : (
-          <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
-        )}
-        <Text className={`flex-1 text-lg font-grotesque text-white`}>
+        <ProfilePicture
+          avatar_url={profile.avatar_url}
+          username={profile.username}
+          userId={profile.id}
+        />
+        <Text className={`flex-1 text-lg font-grotesque text-white ml-4`}>
           {profile.username}
         </Text>
       </View>

@@ -5,7 +5,8 @@ import {
   TUserWithFriendshipStatus,
 } from "@/types/types";
 import React from "react";
-import { View, Image, Text } from "react-native";
+import { View, Text } from "react-native";
+import ProfilePicture from "../ProfilePicture";
 
 export default function ProfileLine({
   member,
@@ -26,22 +27,11 @@ export default function ProfileLine({
         className,
       )}
     >
-      {member.avatar_url ? (
-        <Image
-          source={{
-            uri: avatarReloaded
-              ? `${member.avatar_url}?t=${new Date().getTime()}`
-              : `${member.avatar_url}`,
-          }}
-          className="w-10 h-10 rounded-full"
-        />
-      ) : (
-        <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
-          <Text className="text-sm text-gray-300">
-            {member.username?.charAt(0) || "?"}
-          </Text>
-        </View>
-      )}
+      <ProfilePicture
+        avatar_url={member.avatar_url}
+        username={member.username}
+        userId={member.id}
+      />
       <Text className={cn("text-sm text-gray-300", classNameText)}>
         {member.username}
       </Text>
