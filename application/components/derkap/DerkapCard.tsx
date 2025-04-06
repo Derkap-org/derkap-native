@@ -364,23 +364,45 @@ export default function DerkapCard({
               </Text>
             )}
           </ScrollView>
-          <View className="flex flex-col items-center justify-center px-4 py-4 gap-y-2">
-            <TextInput
-              value={newComment}
-              onChangeText={setNewComment}
-              className="w-full p-2 text-white bg-zinc-800 placeholder:text-zinc-400 rounded-xl"
-              placeholder="Ajouter un commentaire"
-            />
-            <Button
-              className="w-full rounded-xl"
-              isCancel={
-                postingComment || !newComment || newComment.length === 0
-              }
-              text="Envoyer"
-              onClick={handleCreateComment}
-              withLoader={true}
-            />
-          </View>
+          {alreadyMadeThisChallenge ? (
+            <View className="flex flex-col items-center justify-center px-4 py-4 gap-y-2">
+              <TextInput
+                value={newComment}
+                onChangeText={setNewComment}
+                className="w-full p-2 text-white bg-zinc-800 placeholder:text-zinc-400 rounded-xl"
+                placeholder="Ajouter un commentaire"
+              />
+              <Button
+                className="w-full rounded-xl"
+                isCancel={
+                  postingComment || !newComment || newComment.length === 0
+                }
+                text="Envoyer"
+                onClick={handleCreateComment}
+                withLoader={true}
+              />
+            </View>
+          ) : (
+            <Link
+              onPress={() => {
+                modalCommentRef.current?.hide();
+              }}
+              href={{
+                pathname: "/new",
+                params: {
+                  challenge: derkap.challenge,
+                  followingUsers: derkap.derkap_allowed_users.map(
+                    (user) => user.id,
+                  ),
+                },
+              }}
+              className="px-6 py-3 bg-custom-primary rounded-xl"
+            >
+              <Text className="text-lg font-bold text-white text-center">
+                Capture pour commenter
+              </Text>
+            </Link>
+          )}
         </View>
       </Modal>
       <Modal fullScreen={true} actionSheetRef={modalVisibilityRef}>
