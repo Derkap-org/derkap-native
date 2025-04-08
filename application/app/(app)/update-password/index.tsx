@@ -53,16 +53,12 @@ export default function UpdatePassword() {
 
   if (session) {
     return (
-      <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
+      <View className="relative flex-col items-center justify-start pt-12 flex-1 w-full gap-y-4">
         <Text className="px-16 text-4xl text-center font-grotesque text-white">
-          Mettre à jour ton mot de passe 🤔
+          Met à jour ton mot de passe
         </Text>
 
         <View className="flex flex-col w-96 gap-y-4">
-          <Text className="text-center text-white">
-            Entre ton nouveau mot de passe.
-          </Text>
-
           <View className="flex flex-row items-center justify-between relative bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl w-full pr-2">
             <TextInput
               onChangeText={(text) => setPassword(text)}
@@ -117,7 +113,7 @@ export default function UpdatePassword() {
 
           <Button
             withLoader
-            text="Envoyer"
+            text="Confirmer"
             isCancel={isLoading}
             onClick={updatePassword}
             className="w-fit"
