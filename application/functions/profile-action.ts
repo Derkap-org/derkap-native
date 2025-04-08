@@ -128,3 +128,16 @@ export const cancelDeleteAccount = async () => {
     throw error;
   }
 };
+
+export const isUsernameAvailableInDB = async (
+  username: string,
+): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from("profile")
+    .select("*")
+    .eq("username", username);
+  if (error) {
+    throw error;
+  }
+  return data.length === 0;
+};

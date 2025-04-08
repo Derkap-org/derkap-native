@@ -14,7 +14,7 @@ interface ButtonProps extends PressableProps {
   textClassName?: string;
   onClick: () => Promise<any> | any;
   withLoader?: boolean;
-  color?: "primary" | "danger" | "gray" | "green";
+  color?: "primary" | "danger" | "gray" | "green" | "gray-dark";
   children?: React.ReactNode;
 }
 
@@ -61,7 +61,9 @@ export default function Button({
                   ? "#ff4747"
                   : color === "green"
                     ? "#16a34a"
-                    : "transparent",
+                    : color === "gray-dark"
+                      ? "#212123"
+                      : "transparent",
 
           opacity: pressed ? 0.7 : 1,
         },
