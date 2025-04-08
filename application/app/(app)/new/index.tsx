@@ -112,7 +112,7 @@ export default function New() {
         </View>
 
         {step === "capture" && (
-          <>
+          <View className="flex-1 justify-center">
             <ChallengeBox
               challenge={challenge}
               setChallenge={setChallenge}
@@ -126,7 +126,7 @@ export default function New() {
               caption={caption}
               passToPost={passToPost}
             />
-          </>
+          </View>
         )}
         {step === "post" && (
           <SendTo

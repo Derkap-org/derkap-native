@@ -13,15 +13,13 @@ export const postSubscription = async ({
     };
   }
 
-  console.log("posting subscription", user.id, expoPushToken);
-
   const { data, error } = await supabase
     .from("notification_subscription")
     .upsert(
       {
         user_id: user.id,
         expo_push_token: expoPushToken,
-        updated_at: new Date().toString(),
+        updated_at: new Date().toISOString(),
       },
       {
         onConflict: "user_id",

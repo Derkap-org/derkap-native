@@ -4,7 +4,6 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
@@ -12,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Users, ArrowRight, Forward } from "lucide-react-native";
 import colors from "tailwindcss/colors";
 import { TFriendRequestDB as Friend } from "@/types/types";
+import ProfilePicture from "../ProfilePicture";
 
 interface SendToProps {
   allowedUsers: string[];
@@ -92,16 +92,13 @@ export default function SendTo({
         onPress={() => handleSelectFriend(item.profile.id)}
         className="flex-row items-center p-3 border-b border-gray-700"
       >
-        {item.profile.avatar_url ? (
-          <Image
-            source={{ uri: item.profile.avatar_url }}
-            className="w-10 h-10 rounded-full mr-4"
-          />
-        ) : (
-          <View className="w-10 h-10 rounded-full mr-4 bg-gray-700" />
-        )}
+        <ProfilePicture
+          avatar_url={item.profile.avatar_url}
+          username={item.profile.username}
+          userId={item.profile.id}
+        />
         <Text
-          className={`flex-1 text-lg font-grotesque ${isSelected ? "font-bold" : "font-normal"}`}
+          className={`flex-1 text-lg font-grotesque ml-4 ${isSelected ? "font-bold" : "font-normal"}`}
           style={{ color: isSelected ? primaryColor : colors.white }}
         >
           {item.profile.username}

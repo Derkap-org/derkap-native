@@ -3,18 +3,17 @@ import { TProfileDB } from "@/types/types";
 import { User } from "@supabase/supabase-js";
 import { Pencil } from "lucide-react-native";
 import React from "react";
-import { View, Image, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
+import ProfilePicture from "./ProfilePicture";
 
 export default function Avatar({
   profile,
-  index,
   user,
   classNameImage,
   classNameContainer,
   pickImage,
 }: {
   profile: TProfileDB;
-  index: number;
   user: User;
   classNameImage?: string;
   classNameContainer?: string;
@@ -27,7 +26,6 @@ export default function Avatar({
       className={cn(
         "border-2 border-white rounded-full flex",
         classNameContainer,
-        index !== 0 ? "-ml-3" : "",
       )}
     >
       {pickImage && (
@@ -38,27 +36,12 @@ export default function Avatar({
           <Pencil size={20} color={"white"} />
         </Pressable>
       )}
-      {profile?.avatar_url ? (
-        <Image
-          width={70}
-          height={70}
-          source={{
-            uri: `${profile?.avatar_url}?t=${user.user_metadata.avatarTimestamp}`,
-          }}
-          className={cn("w-10 h-10 rounded-full", classNameImage)}
-        />
-      ) : (
-        <View
-          className={cn(
-            "items-center justify-center w-10 h-10 bg-black rounded-full",
-            classNameImage,
-          )}
-        >
-          <Text className="text-white">
-            {profile?.username?.charAt(0) || "?"}
-          </Text>
-        </View>
-      )}
+      <ProfilePicture
+        avatar_url={profile.avatar_url}
+        username={profile.username}
+        imgClassName={classNameImage}
+        userId={profile.id}
+      />
     </View>
   );
 }

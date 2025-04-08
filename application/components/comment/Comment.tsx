@@ -1,5 +1,5 @@
 import { TCommentDB } from "@/types/types";
-import { View, Text, Image, Pressable } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useRef } from "react";
@@ -9,6 +9,7 @@ import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 import Button from "@/components/Button";
 import React from "react";
+import ProfilePicture from "../ProfilePicture";
 interface CommentProps {
   comment: TCommentDB;
   refreshComments: () => void;
@@ -56,22 +57,11 @@ export const Comment = ({ comment, refreshComments }: CommentProps) => {
           className="flex flex-row gap-x-3 p-2"
         >
           {/* Avatar */}
-          <View className={`rounded-full overflow-hidden`}>
-            {comment.creator?.avatar_url ? (
-              <Image
-                source={{
-                  uri: `${comment.creator.avatar_url}`,
-                }}
-                className="w-10 h-10 rounded-full"
-              />
-            ) : (
-              <View className="items-center justify-center w-10 h-10 bg-black rounded-full">
-                <Text className="text-sm text-gray-300">
-                  {comment.creator?.username?.charAt(0) || "?"}
-                </Text>
-              </View>
-            )}
-          </View>
+          <ProfilePicture
+            avatar_url={comment.creator.avatar_url}
+            username={comment.creator.username}
+            userId={comment.creator.id}
+          />
 
           {/* Comment content container */}
           <View className="flex-1">
