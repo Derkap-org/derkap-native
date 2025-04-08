@@ -103,7 +103,7 @@ export default function ConfirmEmail() {
           <Pressable onPress={() => router.back()}>
             <ChevronLeft size={32} color={"white"} />
           </Pressable>
-          <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
+          <View className="relative flex-col items-center justify-start flex-1 w-full gap-y-4">
             <Text className="px-16 text-2xl text-center font-grotesque text-white">
               Entre ici le code de confirmation que tu as reçu par email.
             </Text>
