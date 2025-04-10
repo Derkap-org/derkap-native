@@ -141,3 +141,19 @@ export const isUsernameAvailableInDB = async (
   }
   return data.length === 0;
 };
+
+export const updateUsername = async (username: string) => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+
+  const { error } = await supabase
+    .from("profile")
+    .update({ username })
+    .eq("id", user.id);
+
+  if (error) {
+    throw error;
+  }
+};

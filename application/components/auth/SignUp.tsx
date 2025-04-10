@@ -235,8 +235,8 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
               {username.length < 3 || username.length > 16 || step !== 2
                 ? ""
                 : isUsernameAvailable
-                  ? "Ce pseudo est disponible"
-                  : "Ce pseudo est déjà pris"}
+                  ? "✅ Ce pseudo est disponible"
+                  : "❌ Ce pseudo est déjà pris"}
             </Text>
           </View>
 

@@ -69,7 +69,7 @@ const Home = () => {
         setDerkaps(reset ? newDerkaps : [...derkaps, ...newDerkaps]);
       }
     } catch (error) {
-      console.error(error);
+      //console.error(error);
     } finally {
       setDerkapsLoading(false);
     }
