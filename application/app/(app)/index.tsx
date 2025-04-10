@@ -196,9 +196,12 @@ const Home = () => {
           }
         >
           {friendsCount === 0 ? (
-            <View className="items-center justify-center flex-1">
-              <Text className="text-xl text-center text-white font-grotesque">
-                Ajoutez des amis pour derkapper
+            <View className="items-center justify-center gap-4 flex-1">
+              <Text className="text-3xl text-center text-white font-grotesque">
+                T'as pas d'amis ou quoi ?
+              </Text>
+              <Text className="text-lg text-center text-white font-grotesque">
+                Ajoute des amis pour Derkapper
               </Text>
               <Button className="mt-4" onClick={() => router.push("/friends")}>
                 <Text className="text-xl text-center text-white font-grotesque">

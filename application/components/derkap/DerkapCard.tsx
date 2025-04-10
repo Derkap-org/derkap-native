@@ -512,7 +512,7 @@ export default function DerkapCard({
         <Modal actionSheetRef={modalDeleteRef}>
           <>
             <Text className="font-bold text-center text-white">
-              Êtes-vous sûr de vouloir supprimer ce Derkap ? Cette action est
+              Es-tu sûr de vouloir supprimer ce Derkap ? Cette action est
               irréversible.
             </Text>
 

@@ -236,8 +236,8 @@ export default function Group() {
           ) : (
             <>
               <Text className="text-white text-center font-bold">
-                Êtes-vous sûr de vouloir supprimer votre compte ? Cette action
-                est irréversible.
+                Es-tu sûr de vouloir supprimer ton compte ? Cette action est
+                irréversible.
               </Text>
 
               <Button

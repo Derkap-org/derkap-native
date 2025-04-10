@@ -40,7 +40,7 @@ export default function SignIn({ onSignUpPress }: SignInProps) {
       Toast.show({
         type: "error",
         text1: "Erreur lors de la connexion",
-        text2: "Vérifiez vos identifiants",
+        text2: "Vérifie tes identifiants",
       });
     } finally {
       setLoading(false);

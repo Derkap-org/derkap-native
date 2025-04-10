@@ -257,7 +257,7 @@ const FriendsList = () => {
         >
           {friends?.length === 0 ? (
             <Text className="mt-4 text-center text-gray-500">
-              Vous n'avez pas encore d'amis
+              T'as pas encore d'amis
             </Text>
           ) : (
             friends?.map((request, index) => (
