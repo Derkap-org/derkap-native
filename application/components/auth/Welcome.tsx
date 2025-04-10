@@ -23,7 +23,7 @@ export default function Welcome({
           <Image
             source={require("../../assets/images/welcome.png")}
             className="w-72 h-72 rounded-3xl"
-          />{" "}
+          />
           <Text className="text-white text-center font-bold text-lg">
             Des barres entre potes 🤣
           </Text>
