@@ -21,12 +21,15 @@ import { TDerkapDB } from "@/types/types";
 import { fetchDerkaps } from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
 import Button from "@/components/Button";
+import Tutorial from "@/components/Tutorial";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Home = () => {
   const { refreshMyChallenges, alreadyMadeThisChallenge } =
     useMyChallengesStore();
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | "unrevealed">("all");
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const { requests, fetchRequests } = useFriendStore();
   const { user, profile, fetchFriendsCount, friendsCount } = useSupabase();
@@ -79,9 +82,22 @@ const Home = () => {
     setDerkaps(derkaps.filter((derkap) => derkap.id !== derkap_id));
   };
 
+  // Check if tutorial has been seen
+  const checkTutorialSeen = async () => {
+    try {
+      const tutorialSeen = await AsyncStorage.getItem("tutorialSeen");
+      if (tutorialSeen !== "true") {
+        setShowTutorial(true);
+      }
+    } catch (error) {
+      console.error("Error checking tutorial state:", error);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       handleRefresh();
+      checkTutorialSeen();
     }, []),
   );
 
@@ -108,6 +124,15 @@ const Home = () => {
     activeFilter === "all"
       ? derkaps
       : derkaps.filter((derkap) => !alreadyMadeThisChallenge(derkap.challenge));
+
+  const handleTutorialFinish = () => {
+    setShowTutorial(false);
+  };
+
+  // If tutorial is showing, only render the tutorial
+  if (showTutorial) {
+    return <Tutorial onFinish={handleTutorialFinish} />;
+  }
 
   return (
     <View className="flex-1">

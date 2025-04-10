@@ -21,6 +21,7 @@ import {
 import { compressImage } from "@/functions/image-action";
 import { Pencil } from "lucide-react-native";
 import { Pressable } from "react-native";
+import Tutorial from "@/components/Tutorial";
 
 export default function Group() {
   const { user, signOut, profile, updateProfileImg, fetchProfile } =
@@ -29,8 +30,8 @@ export default function Group() {
   const [newUsername, setNewUsername] = useState("");
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
   const [isUsernameValid, setIsUsernameValid] = useState(false);
-  const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const fetchIsDeleting = async () => {
     const isDeleting = await isAccountDeleting();
@@ -163,6 +164,20 @@ export default function Group() {
     }
   };
 
+  const handleShowTutorial = () => {
+    setShowTutorial(true);
+    modalRef.current?.hide();
+  };
+
+  const handleTutorialFinish = () => {
+    setShowTutorial(false);
+  };
+
+  // If tutorial is showing, only render the tutorial
+  if (showTutorial) {
+    return <Tutorial onFinish={handleTutorialFinish} />;
+  }
+
   return (
     <>
       <View className="flex-1">
@@ -188,6 +203,12 @@ export default function Group() {
         </View>
       </View>
       <Modal actionSheetRef={modalRef}>
+        <Button
+          withLoader={true}
+          className="flex items-center justify-center w-full gap-2"
+          onClick={handleShowTutorial}
+          text={"Tutoriel"}
+        />
         <Button
           withLoader={true}
           className="flex items-center justify-center w-full gap-2"
