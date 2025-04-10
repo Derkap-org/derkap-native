@@ -128,3 +128,32 @@ export const cancelDeleteAccount = async () => {
     throw error;
   }
 };
+
+export const isUsernameAvailableInDB = async (
+  username: string,
+): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from("profile")
+    .select("*")
+    .eq("username", username);
+  if (error) {
+    throw error;
+  }
+  return data.length === 0;
+};
+
+export const updateUsername = async (username: string) => {
+  const { user } = (await supabase.auth.getUser()).data;
+  if (!user) {
+    throw new Error("Utilisateur non trouvé");
+  }
+
+  const { error } = await supabase
+    .from("profile")
+    .update({ username })
+    .eq("id", user.id);
+
+  if (error) {
+    throw error;
+  }
+};

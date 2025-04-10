@@ -31,7 +31,7 @@ export default function PasswordForgotten() {
 
   if (!session) {
     return (
-      <View className="relative flex-col items-center justify-center flex-1 w-full gap-y-4">
+      <View className="relative flex-col items-center justify-start pt-12 flex-1 w-full gap-y-4">
         <Text className="px-16 text-2xl text-center font-grotesque text-white">
           Mot de passe oublié ? 🤔
         </Text>

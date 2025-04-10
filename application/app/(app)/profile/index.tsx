@@ -1,10 +1,14 @@
-import { Text, View } from "react-native";
+import { Text, View, TextInput } from "react-native";
 import React, { useRef, useState, useEffect } from "react";
 import Button from "@/components/Button";
 import { useSupabase } from "@/context/auth-context";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import * as ImagePicker from "expo-image-picker";
-import { updateAvatarProfile } from "@/functions/profile-action";
+import {
+  updateAvatarProfile,
+  updateUsername,
+  isUsernameAvailableInDB,
+} from "@/functions/profile-action";
 import Toast from "react-native-toast-message";
 import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
@@ -15,10 +19,19 @@ import {
   cancelDeleteAccount,
 } from "@/functions/profile-action";
 import { compressImage } from "@/functions/image-action";
+import { Pencil } from "lucide-react-native";
+import { Pressable } from "react-native";
+import Tutorial from "@/components/Tutorial";
 
 export default function Group() {
-  const { user, signOut, profile, updateProfileImg } = useSupabase();
+  const { user, signOut, profile, updateProfileImg, fetchProfile } =
+    useSupabase();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
+  const [isUsernameValid, setIsUsernameValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const fetchIsDeleting = async () => {
     const isDeleting = await isAccountDeleting();
@@ -105,6 +118,66 @@ export default function Group() {
     }
   };
 
+  // Username editing functions
+  const modalEditUsernameRef = useRef<ActionSheetRef>(null);
+  const showModalEditUsername = () => {
+    setNewUsername(profile?.username || "");
+    modalEditUsernameRef.current?.show();
+  };
+
+  const checkUsernameAvailability = async () => {
+    if (newUsername === profile?.username) {
+      setIsUsernameAvailable(true);
+      return;
+    }
+
+    const isAvailable = await isUsernameAvailableInDB(newUsername);
+    setIsUsernameAvailable(isAvailable);
+  };
+
+  useEffect(() => {
+    if (newUsername.length > 2 && newUsername.length < 16) {
+      const isValid = /^[a-zA-Z0-9]+$/.test(newUsername);
+      setIsUsernameValid(isValid);
+      checkUsernameAvailability();
+    } else {
+      setIsUsernameValid(false);
+      setIsUsernameAvailable(false);
+    }
+  }, [newUsername]);
+
+  const handleUpdateUsername = async () => {
+    try {
+      setIsLoading(true);
+      await updateUsername(newUsername);
+      await fetchProfile();
+      modalEditUsernameRef.current?.hide();
+      // Refresh profile data
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors de la mise à jour du pseudo",
+        text2: error?.message || "Une erreur inconnue est survenue",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleShowTutorial = () => {
+    setShowTutorial(true);
+    modalRef.current?.hide();
+  };
+
+  const handleTutorialFinish = () => {
+    setShowTutorial(false);
+  };
+
+  // If tutorial is showing, only render the tutorial
+  if (showTutorial) {
+    return <Tutorial onFinish={handleTutorialFinish} />;
+  }
+
   return (
     <>
       <View className="flex-1">
@@ -118,17 +191,24 @@ export default function Group() {
               pickImage={pickImage}
               classNameImage="w-24 h-24"
             />
-            {/* )} */}
-            <Text
-              // style={{ fontFamily: "Grotesque" }}
-              className="overflow-hidden text-xl text-white tracking-wider text-center capitalize font-grotesque max-w-52 text-wrap text-ellipsis"
-            >
-              {profile?.username}
-            </Text>
+            <View className="flex flex-row items-center gap-2">
+              <Text className="overflow-hidden text-xl text-white tracking-wider text-center capitalize font-grotesque max-w-52 text-wrap text-ellipsis">
+                {profile?.username}
+              </Text>
+              <Pressable onPress={showModalEditUsername}>
+                <Pencil size={20} color="white" />
+              </Pressable>
+            </View>
           </View>
         </View>
       </View>
       <Modal actionSheetRef={modalRef}>
+        <Button
+          withLoader={true}
+          className="flex items-center justify-center w-full gap-2"
+          onClick={handleShowTutorial}
+          text={"Tutoriel"}
+        />
         <Button
           withLoader={true}
           className="flex items-center justify-center w-full gap-2"
@@ -177,8 +257,8 @@ export default function Group() {
           ) : (
             <>
               <Text className="text-white text-center font-bold">
-                Êtes-vous sûr de vouloir supprimer votre compte ? Cette action
-                est irréversible.
+                Es-tu sûr de vouloir supprimer ton compte ? Cette action est
+                irréversible.
               </Text>
 
               <Button
@@ -201,6 +281,59 @@ export default function Group() {
             </>
           )}
         </Modal>
+      </Modal>
+
+      {/* Username Edit Modal */}
+      <Modal actionSheetRef={modalEditUsernameRef}>
+        <View className="flex flex-col gap-4">
+          <Text className="text-white text-center font-bold text-xl">
+            Modifier votre pseudo
+          </Text>
+
+          <TextInput
+            onChangeText={setNewUsername}
+            value={newUsername}
+            placeholder="Nouveau pseudo"
+            autoCapitalize="none"
+            className="w-full h-16 p-4 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl mb-2"
+          />
+
+          <Text
+            className={`text-white text-sm ${
+              isUsernameAvailable ? "text-[#16a34a]" : "text-[#ff4747]"
+            }`}
+          >
+            {newUsername.length < 3 || newUsername.length > 16
+              ? "Le pseudo doit contenir entre 3 et 16 caractères"
+              : !isUsernameValid
+                ? "Le pseudo ne doit contenir que des lettres et des chiffres"
+                : isUsernameAvailable
+                  ? "✅ Ce pseudo est disponible"
+                  : "❌ Ce pseudo est déjà pris"}
+          </Text>
+
+          <View className="flex flex-row gap-2 justify-center items-center">
+            <Button
+              withLoader={true}
+              color="danger"
+              className="flex items-center justify-center gap-2"
+              onClick={() => modalEditUsernameRef.current?.hide()}
+              text={"Annuler"}
+            />
+            <Button
+              withLoader={isLoading}
+              className="flex items-center justify-center gap-2"
+              onClick={handleUpdateUsername}
+              isCancel={
+                !isUsernameValid ||
+                !isUsernameAvailable ||
+                isLoading ||
+                newUsername === profile?.username
+              }
+              text={"Mettre à jour"}
+            />
+          </View>
+        </View>
       </Modal>
     </>
   );

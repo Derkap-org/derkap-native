@@ -29,7 +29,7 @@ export default function RootLayout() {
   return (
     <SupabaseProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaView className="flex-1 bg-[#0E0E10]">
+        <SafeAreaView className="flex-1 bg-black">
           <MaintenanceCheck>
             <VersionCheck>
               <Slot />

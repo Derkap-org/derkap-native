@@ -15,6 +15,7 @@ type SupabaseContextType = {
   isLoading: boolean;
   updateProfileImg: (newImgUrl: string) => void;
   fetchFriendsCount: () => Promise<void>;
+  fetchProfile: () => Promise<void>;
 };
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(
@@ -135,6 +136,7 @@ export const SupabaseProvider = ({
     <SupabaseContext.Provider
       value={{
         updateProfileImg,
+        fetchProfile,
         session,
         profile,
         user: session?.user || null,
