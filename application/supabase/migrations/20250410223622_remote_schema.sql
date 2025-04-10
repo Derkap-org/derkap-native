@@ -1275,7 +1275,7 @@ ALTER TABLE ONLY "public"."comment"
 
 
 ALTER TABLE ONLY "public"."comment"
-    ADD CONSTRAINT "comment_derkap_id_fkey" FOREIGN KEY ("derkap_id") REFERENCES "public"."derkap"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT "comment_derkap_id_fkey" FOREIGN KEY ("derkap_id") REFERENCES "public"."derkap"("id") ON DELETE CASCADE;
 
 
 
@@ -1379,7 +1379,7 @@ CREATE POLICY "Allow commenting if allowed user" ON "public"."comment" FOR INSER
 
 CREATE POLICY "Allow creator to insert allowed users" ON "public"."derkap_allowed_users" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
    FROM "public"."derkap" "d"
-  WHERE ("d"."creator_id" = "auth"."uid"()))));
+  WHERE (("d"."id" = "derkap_allowed_users"."derkap_id") AND ("d"."creator_id" = "auth"."uid"())))));
 
 
 
@@ -1393,7 +1393,7 @@ CREATE POLICY "Allow delete for creator" ON "public"."derkap" FOR DELETE USING (
 
 CREATE POLICY "Allow deleting allowed users if creator" ON "public"."derkap_allowed_users" FOR DELETE USING ((EXISTS ( SELECT 1
    FROM "public"."derkap" "d"
-  WHERE ("d"."creator_id" = "auth"."uid"()))));
+  WHERE (("d"."id" = "derkap_allowed_users"."derkap_id") AND ("d"."creator_id" = "auth"."uid"())))));
 
 
 

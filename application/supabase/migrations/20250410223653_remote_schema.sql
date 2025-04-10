@@ -1,9 +1,3 @@
-alter table "public"."comment" drop constraint "comment_derkap_id_fkey";
-
-alter table "public"."comment" add constraint "comment_derkap_id_fkey" FOREIGN KEY (derkap_id) REFERENCES derkap(id) ON DELETE CASCADE not valid;
-
-alter table "public"."comment" validate constraint "comment_derkap_id_fkey";
-
 set check_function_bodies = off;
 
 CREATE OR REPLACE FUNCTION public.get_group_ranking(group_id_param bigint)
