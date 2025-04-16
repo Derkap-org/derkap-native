@@ -1,9 +1,7 @@
-import ChallengeBox from "@/components/ChallengeBox";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { View, Text, Pressable, Keyboard } from "react-native";
 import { useState } from "react";
-import Capture from "@/components/new-derkap/Capture";
 import { generateKeys } from "@/functions/encryption-action";
 import { encryptPhoto } from "@/functions/encryption-action";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
@@ -12,6 +10,7 @@ import { UUID } from "crypto";
 import { compressImage } from "@/functions/image-action";
 import React from "react";
 import SendTo from "@/components/new-derkap/SendTo";
+import CaptureScreen from "@/components/new-derkap/CaptureScreen";
 export default function New() {
   const { challenge: challengeParam, followingUsers } =
     useLocalSearchParams() as {
@@ -112,21 +111,16 @@ export default function New() {
         </View>
 
         {step === "capture" && (
-          <View className="flex-1 justify-center">
-            <ChallengeBox
-              challenge={challenge}
-              setChallenge={setChallenge}
-              isChallengeChangeable={challengeParam === undefined}
-            />
-            <Capture
-              canPassToPost={!!capturedPhoto && !!challenge}
-              setCapturedPhoto={setCapturedPhoto}
-              capturedPhoto={capturedPhoto}
-              setCaption={setCaption}
-              caption={caption}
-              passToPost={passToPost}
-            />
-          </View>
+          <CaptureScreen
+            challenge={challenge}
+            setChallenge={setChallenge}
+            challengeParam={challengeParam}
+            capturedPhoto={capturedPhoto}
+            setCaption={setCaption}
+            passToPost={passToPost}
+            caption={caption}
+            setCapturedPhoto={setCapturedPhoto}
+          />
         )}
         {step === "post" && (
           <SendTo

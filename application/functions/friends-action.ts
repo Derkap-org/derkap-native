@@ -124,7 +124,6 @@ export const getUserAndCheckFriendship = async (
     console.log(error);
     throw error;
   }
-  console.log(data);
   return { data };
 };
 

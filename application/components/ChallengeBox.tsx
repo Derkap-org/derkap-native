@@ -17,17 +17,20 @@ export default function ChallengeBox({
 }: ChallengeBoxProps) {
   return (
     <View className={cn("w-full", className)}>
-      <View className="min-h-16 max-h-fit flex justify-center flex-row items-center w-full bg-zinc-800 rounded-t-xl py-2 gap-x-2">
+      <View className="min-h-16 flex justify-center flex-row items-center w-full bg-zinc-800 rounded-t-xl py-2 px-2 gap-x-2">
         {!isChallengeChangeable ? (
           <Text className="text-lg font-grotesque w-full text-white text-center">
             {challenge}
           </Text>
         ) : (
           <TextInput
-            className="text-lg font-grotesque text-white text-center max-w-full w-full"
+            className="text-lg font-grotesque text-white text-center w-full px-2"
             value={challenge}
             onChangeText={setChallenge}
-            placeholder="Choisi un défi..."
+            placeholder="Écris un défi..."
+            multiline={true}
+            textAlignVertical="center"
+            maxLength={130}
           />
         )}
       </View>
