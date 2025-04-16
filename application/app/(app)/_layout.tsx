@@ -109,7 +109,6 @@ export default function RootLayout() {
       .then((token) => {
         try {
           setExpoPushToken(token ?? "");
-          console.log("fetched token", token);
           if (token) {
             postSubscription({ expoPushToken: token });
           }

@@ -18,10 +18,12 @@ import {
   isAccountDeleting,
   cancelDeleteAccount,
 } from "@/functions/profile-action";
+import { getFeedbackLink } from "@/functions/feedback-action";
 import { compressImage } from "@/functions/image-action";
 import { Pencil } from "lucide-react-native";
 import { Pressable } from "react-native";
 import Tutorial from "@/components/Tutorial";
+import { ExternalPathString, Link } from "expo-router";
 
 export default function Group() {
   const { user, signOut, profile, updateProfileImg, fetchProfile } =
@@ -32,14 +34,23 @@ export default function Group() {
   const [isUsernameValid, setIsUsernameValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [feedbackLink, setFeedbackLink] = useState<ExternalPathString | null>(
+    null,
+  );
 
   const fetchIsDeleting = async () => {
     const isDeleting = await isAccountDeleting();
     setIsDeleting(isDeleting);
   };
 
+  const fetchFeedbackLink = async () => {
+    const link = await getFeedbackLink();
+    setFeedbackLink(link as ExternalPathString);
+  };
+
   useEffect(() => {
     fetchIsDeleting();
+    fetchFeedbackLink();
   }, []);
 
   const pickImage = async () => {
@@ -200,6 +211,13 @@ export default function Group() {
               </Pressable>
             </View>
           </View>
+          {feedbackLink && (
+            <Link href={feedbackLink} target="_blank">
+              <Text className="text-zinc-400 text-center  font-bold underline">
+                Aide-nous à amélorier Derkap en nous envoyant tes suggestions !
+              </Text>
+            </Link>
+          )}
         </View>
       </View>
       <Modal actionSheetRef={modalRef}>

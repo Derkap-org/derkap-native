@@ -97,3 +97,12 @@ export type TDerkapDB = Database["public"]["Tables"]["derkap"]["Row"] & {
   derkap_allowed_users: TProfileDB[];
   base64img: string;
 };
+
+export type TSuggestedChallenge = Omit<
+  Database["public"]["Tables"]["suggested_challenge"]["Row"],
+  "created_at" | "id"
+>;
+
+export type TSuggestedChallengeCategory =
+  | Database["public"]["Enums"]["suggested_challenge_category"]
+  | string;

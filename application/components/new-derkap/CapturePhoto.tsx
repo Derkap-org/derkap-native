@@ -29,7 +29,7 @@ import Animated, {
 
 import { useSupabase } from "@/context/auth-context";
 
-interface CameraProps extends ViewProps {
+interface CapturePhotoProps extends ViewProps {
   setCapturedPhoto: (photo: string | null) => void;
   capturedPhoto: string | null;
   setCaption: (caption: string) => void;
@@ -38,7 +38,7 @@ interface CameraProps extends ViewProps {
   canPassToPost: boolean;
 }
 
-export default function Capture({
+export default function CapturePhoto({
   setCapturedPhoto,
   capturedPhoto,
   setCaption,
@@ -46,7 +46,7 @@ export default function Capture({
   passToPost,
   canPassToPost,
   ...props
-}: CameraProps) {
+}: CapturePhotoProps) {
   const [facing, setFacing] = useState<CameraType>("front");
   const [permission, requestPermission] = useCameraPermissions();
 
