@@ -524,6 +524,55 @@ export interface Database {
           },
         ];
       };
+      reporting: {
+        Row: {
+          comment_id: number | null;
+          created_at: string | null;
+          derkap_id: number | null;
+          id: number;
+          reported_by: string | null;
+        };
+        Insert: {
+          comment_id?: number | null;
+          created_at?: string | null;
+          derkap_id?: number | null;
+          id?: number;
+          reported_by?: string | null;
+        };
+        Update: {
+          comment_id?: number | null;
+          created_at?: string | null;
+          derkap_id?: number | null;
+          id?: number;
+          reported_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reporting_comment_id_fkey";
+            columns: ["comment_id"];
+            referencedRelation: "comment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reporting_derkap_id_fkey";
+            columns: ["derkap_id"];
+            referencedRelation: "derkap";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reporting_reported_by_fkey";
+            columns: ["reported_by"];
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reporting_reported_by_fkey";
+            columns: ["reported_by"];
+            referencedRelation: "friends";
+            referencedColumns: ["profile_id"];
+          },
+        ];
+      };
       suggested_challenge: {
         Row: {
           category: Database["public"]["Enums"]["suggested_challenge_category"];

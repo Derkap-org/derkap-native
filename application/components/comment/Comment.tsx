@@ -10,6 +10,7 @@ import { ActionSheetRef } from "react-native-actions-sheet";
 import Button from "@/components/Button";
 import React from "react";
 import ProfilePicture from "../ProfilePicture";
+import { reportContent } from "@/functions/reporting-action";
 interface CommentProps {
   comment: TCommentDB;
   refreshComments: () => void;
@@ -39,13 +40,20 @@ export const Comment = ({ comment, refreshComments }: CommentProps) => {
     }
   };
 
-  const handleReport = () => {
-    // Implement report logic here
-    Toast.show({
-      text1: "Commentaire signalé",
-      type: "success",
-    });
-    hideModal();
+  const handleReport = async () => {
+    try {
+      await reportContent({
+        comment_id: comment.id,
+        reason: "Commentaire inapproprié", // TODO: add reason
+      });
+      Toast.show({
+        text1: "Commentaire signalé",
+        type: "success",
+      });
+      hideModal();
+    } catch (error) {
+      // console.error(error);
+    }
   };
 
   return (
