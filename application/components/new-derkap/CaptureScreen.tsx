@@ -101,11 +101,11 @@ export default function CaptureScreen({
       <View className="flex-1 justify-center">
         {!capturedPhoto && challengeParam === undefined && (
           <Pressable
-            className="flex items-center justify-center w-full gap-2 mb-4"
+            className="self-center gap-2 mb-4 bg-custom-primary rounded-xl py-2 px-4"
             onPress={() => modalSuggestedChallengesRef.current?.show()}
           >
-            <Text className="text-custom-primary text-center text-lg font-grotesque underline">
-              Clique ici pour voir des idées de défis
+            <Text className="text-white text-center  font-grotesque">
+              Voir des idées de défis
             </Text>
           </Pressable>
         )}

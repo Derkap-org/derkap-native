@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 /*
 create table
   public.app_version (
@@ -13,7 +14,12 @@ create table
   ) tablespace pg_default;
 */
 
-export const getAppVersionDB = async () => {
+export const getAppVersionDB = async (): Promise<{
+  version_ios: string;
+  version_android: string;
+  min_supported_version_ios: string;
+  min_supported_version_android: string;
+}> => {
   try {
     const { data, error } = await supabase
       .from("app_version")
@@ -29,12 +35,19 @@ export const getAppVersionDB = async () => {
       throw new Error("No data found");
     }
 
-    return data[0];
+    return {
+      version_ios: data[0].version,
+      version_android: data[0].version,
+      min_supported_version_ios: data[0].min_supported_version,
+      min_supported_version_android: data[0].min_supported_version_android,
+    };
   } catch (error) {
     // console.error("Error getting app version:", error);
     return {
-      version: "0.0.0",
-      min_supported_version: "0.0.0",
+      version_ios: "0.0.0",
+      version_android: "0.0.0",
+      min_supported_version_ios: "0.0.0",
+      min_supported_version_android: "0.0.0",
     };
   }
 };
@@ -72,10 +85,13 @@ const compareVersions = (version1: string, version2: string): number => {
 export const mustUpdateApp = async () => {
   try {
     const appVersion = getCurrentAppVersion();
-    const { min_supported_version } = await getAppVersionDB();
+    const { min_supported_version_ios, min_supported_version_android } =
+      await getAppVersionDB();
 
-    console.log("Current app version:", appVersion);
-    console.log("Minimum supported version:", min_supported_version);
+    const isIOS = Platform.OS === "ios";
+    const min_supported_version = isIOS
+      ? min_supported_version_ios
+      : min_supported_version_android;
 
     // Compare full version (X.Y.Z) instead of just major version
     return compareVersions(appVersion, min_supported_version) < 0;

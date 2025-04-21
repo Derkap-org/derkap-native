@@ -37,7 +37,7 @@ import {
 import useFriendStore from "@/store/useFriendStore";
 import { deleteDerkap } from "@/functions/derkap-action";
 import ProfilePicture from "../ProfilePicture";
-
+import { reportContent } from "@/functions/reporting-action";
 interface DerkapCardProps extends ViewProps {
   derkap: TDerkapDB;
   alreadyMadeThisChallenge: boolean;
@@ -87,6 +87,22 @@ export default function DerkapCard({
   const handleFetchComments = async () => {
     const comments = await getCommentsFromDB({ derkap_id: derkap.id });
     setComments(comments);
+  };
+
+  const handleReportDerkap = async () => {
+    try {
+      await reportContent({
+        derkap_id: derkap.id,
+        reason: "Derkap inapproprié",
+      });
+      Toast.show({
+        text1: "Derkap signalé",
+        type: "success",
+      });
+      modalActionsRef.current?.hide();
+    } catch (error) {
+      // console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -499,7 +515,11 @@ export default function DerkapCard({
       <Modal actionSheetRef={modalActionsRef}>
         <View className="flex flex-col">
           <View className="flex flex-col gap-y-4">
-            <Button text="Signaler le contenu" onClick={() => {}} />
+            <Button
+              withLoader={true}
+              text="Signaler"
+              onClick={handleReportDerkap}
+            />
             {derkap.creator_id === user.id && (
               <Button
                 color="danger"

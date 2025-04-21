@@ -1,6 +1,6 @@
 import React, { useEffect, useState, ReactNode } from "react";
 import { getIsMaintenance } from "@/functions/maintenance-action";
-import { View, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator, Platform } from "react-native";
 import Maintenance from "./Maintenance";
 
 interface MaintenanceCheckProps {
@@ -15,7 +15,14 @@ export default function MaintenanceCheck({ children }: MaintenanceCheckProps) {
     const checkMaintenance = async () => {
       try {
         setIsChecking(true);
-        const isInMaintenance = await getIsMaintenance();
+        const { maintenance_active_android, maintenance_active_ios } =
+          await getIsMaintenance();
+
+        const isIOS = Platform.OS === "ios";
+        const isInMaintenance = isIOS
+          ? maintenance_active_ios
+          : maintenance_active_android;
+
         if (isInMaintenance) {
           setIsInMaintenance(true);
         }

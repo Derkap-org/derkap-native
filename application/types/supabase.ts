@@ -14,16 +14,19 @@ export interface Database {
           created_at: string;
           id: number;
           maintenance_active: boolean;
+          maintenance_active_android: boolean | null;
         };
         Insert: {
           created_at?: string;
           id?: number;
           maintenance_active?: boolean;
+          maintenance_active_android?: boolean | null;
         };
         Update: {
           created_at?: string;
           id?: number;
           maintenance_active?: boolean;
+          maintenance_active_android?: boolean | null;
         };
         Relationships: [];
       };
@@ -50,25 +53,31 @@ export interface Database {
           created_at: string | null;
           id: number;
           min_supported_version: string;
+          min_supported_version_android: string | null;
           notes: string | null;
           updated_at: string | null;
           version: string;
+          version_android: string | null;
         };
         Insert: {
           created_at?: string | null;
           id?: number;
           min_supported_version: string;
+          min_supported_version_android?: string | null;
           notes?: string | null;
           updated_at?: string | null;
           version: string;
+          version_android?: string | null;
         };
         Update: {
           created_at?: string | null;
           id?: number;
           min_supported_version?: string;
+          min_supported_version_android?: string | null;
           notes?: string | null;
           updated_at?: string | null;
           version?: string;
+          version_android?: string | null;
         };
         Relationships: [];
       };
@@ -496,6 +505,7 @@ export interface Database {
       profile: {
         Row: {
           avatar_url: string | null;
+          birthdate: string | null;
           created_at: string;
           email: string;
           id: string;
@@ -503,6 +513,7 @@ export interface Database {
         };
         Insert: {
           avatar_url?: string | null;
+          birthdate?: string | null;
           created_at?: string;
           email: string;
           id: string;
@@ -510,6 +521,7 @@ export interface Database {
         };
         Update: {
           avatar_url?: string | null;
+          birthdate?: string | null;
           created_at?: string;
           email?: string;
           id?: string;
@@ -521,6 +533,58 @@ export interface Database {
             columns: ["id"];
             referencedRelation: "users";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      reporting: {
+        Row: {
+          comment_id: number | null;
+          created_at: string | null;
+          derkap_id: number | null;
+          id: number;
+          reason: string | null;
+          reported_by: string | null;
+        };
+        Insert: {
+          comment_id?: number | null;
+          created_at?: string | null;
+          derkap_id?: number | null;
+          id?: number;
+          reason?: string | null;
+          reported_by?: string | null;
+        };
+        Update: {
+          comment_id?: number | null;
+          created_at?: string | null;
+          derkap_id?: number | null;
+          id?: number;
+          reason?: string | null;
+          reported_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reporting_comment_id_fkey";
+            columns: ["comment_id"];
+            referencedRelation: "comment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reporting_derkap_id_fkey";
+            columns: ["derkap_id"];
+            referencedRelation: "derkap";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reporting_reported_by_fkey";
+            columns: ["reported_by"];
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reporting_reported_by_fkey";
+            columns: ["reported_by"];
+            referencedRelation: "friends";
+            referencedColumns: ["profile_id"];
           },
         ];
       };

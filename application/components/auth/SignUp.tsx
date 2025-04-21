@@ -14,11 +14,13 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [birthdate, setBirthdate] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const [isUsernameValid, setIsUsernameValid] = useState(false);
+  const [isBirthdateValid, setIsBirthdateValid] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
@@ -56,6 +58,52 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
     setIsPasswordValid(isPasswordValid);
   }, [password]);
 
+  const formatBirthdate = (input: string) => {
+    // Remove all non-numeric characters
+    const numbers = input.replace(/\D/g, "");
+
+    // Format the date as DD/MM/YYYY
+    if (numbers.length <= 2) {
+      return numbers;
+    } else if (numbers.length <= 4) {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    } else {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
+    }
+  };
+
+  const handleBirthdateChange = (text: string) => {
+    const formatted = formatBirthdate(text);
+    setBirthdate(formatted);
+  };
+
+  useEffect(() => {
+    const validateBirthdate = () => {
+      if (birthdate.length !== 10) return false; // DD/MM/YYYY format
+
+      const [day, month, year] = birthdate.split("/").map(Number);
+      const today = new Date();
+      const birthDate = new Date(year, month - 1, day);
+      const age = today.getFullYear() - birthDate.getFullYear();
+
+      // check day and month are valid
+      if (day < 1 || day > 31 || month < 1 || month > 12) return false;
+
+      // Check if birthday has occurred this year
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        return age - 1 >= 15;
+      }
+      console.log({ birthdate, age });
+      return age >= 15;
+    };
+
+    setIsBirthdateValid(validateBirthdate());
+  }, [birthdate]);
+
   useEffect(() => {
     if (step === 1) {
       setIsButtonDisabled(!isEmailValid);
@@ -65,12 +113,20 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
       );
     } else if (step === 3) {
       setIsButtonDisabled(
-        !isEmailValid || !isUsernameValid || !isPasswordValid,
+        !isEmailValid || !isUsernameValid || !isBirthdateValid,
+      );
+    } else if (step === 4) {
+      setIsButtonDisabled(
+        !isEmailValid ||
+          !isUsernameValid ||
+          !isBirthdateValid ||
+          !isPasswordValid,
       );
     }
   }, [
     isEmailValid,
     isUsernameValid,
+    isBirthdateValid,
     isPasswordValid,
     step,
     isUsernameAvailable,
@@ -90,7 +146,7 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
       } = await supabase.auth.signUp({
         email: email,
         password: password,
-        options: { data: { username: username } },
+        options: { data: { username: username, birthdate: birthdate } },
       });
 
       if (error) throw error;
@@ -110,7 +166,7 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
   }
 
   const handleContinue = async () => {
-    if (step < 3) {
+    if (step < 4) {
       setStep(step + 1);
     } else {
       await handleSignUp();
@@ -138,7 +194,7 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
         </View>
 
         <View className="flex flex-row justify-center gap-x-4 mb-12">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3, 4].map((i) => (
             <View
               key={i}
               className={`h-4 w-4 rounded-full transition-colors ${
@@ -196,6 +252,33 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
             <>
               <View className="flex flex-col justify-between mb-4">
                 <Text className="text-white text-lg font-bold">
+                  Quelle est ta date de naissance ?
+                </Text>
+                <Text className="text-zinc-400 text-sm">
+                  Tu dois avoir au moins 15 ans pour t'inscrire sur Derkap
+                </Text>
+              </View>
+              <TextInput
+                onChangeText={handleBirthdateChange}
+                value={birthdate}
+                placeholder="JJ/MM/AAAA"
+                keyboardType="numeric"
+                maxLength={10}
+                className="w-full h-16 p-4 bg-zinc-800 placeholder:text-zinc-400 text-white rounded-xl mb-2"
+              />
+
+              <Text className="text-[#ff4747] text-sm ">
+                {birthdate.length === 10 && !isBirthdateValid
+                  ? "Tu dois avoir au moins 15 ans minimum"
+                  : ""}
+              </Text>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <View className="flex flex-col justify-between mb-4">
+                <Text className="text-white text-lg font-bold">
                   Choisi un mot de passe
                 </Text>
                 <Text className="text-zinc-400 text-sm">
@@ -241,7 +324,7 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
           </View>
 
           <Button
-            text={step === 3 ? "Confirmer" : "Continuer"}
+            text={step === 4 ? "Confirmer" : "Continuer"}
             onClick={handleContinue}
             withLoader={true}
             isCancel={loading || isButtonDisabled}
@@ -256,7 +339,7 @@ export default function SignUp({ onSignInPress }: SignUpProps) {
             </Pressable>
           </View>
 
-          {step === 3 && (
+          {step === 4 && (
             <Text className="text-zinc-400 text-center text-sm mt-6">
               En t'inscrivant sur Derkap, tu acceptes de respecter{"\n"}
               les{" "}
