@@ -10,7 +10,10 @@ create table
   ) tablespace pg_default;
 */
 
-export const getIsMaintenance = async (): Promise<boolean> => {
+export const getIsMaintenance = async (): Promise<{
+  maintenance_active_ios: boolean;
+  maintenance_active_android: boolean;
+}> => {
   try {
     const { data, error } = await supabase
       .from("app_ maintenance")
@@ -26,9 +29,15 @@ export const getIsMaintenance = async (): Promise<boolean> => {
       throw new Error("No data found");
     }
 
-    return data[0].maintenance_active;
+    return {
+      maintenance_active_ios: data[0].maintenance_active,
+      maintenance_active_android: data[0].maintenance_active_android,
+    };
   } catch (error) {
     // console.error("Error getting app version:", error);
-    return false;
+    return {
+      maintenance_active_ios: false,
+      maintenance_active_android: false,
+    };
   }
 };
