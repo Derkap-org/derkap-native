@@ -36,7 +36,8 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.nicoalz.derkap"
+      "package": "com.nicoalz.derkap",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
