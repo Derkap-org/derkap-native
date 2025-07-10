@@ -1,8 +1,8 @@
 # Dossier Technique - Derkap
 
 **Version :** 2.4.6  
-**Date :** Janvier 2025  
-**Équipe :** nicoalz  
+**Date :** Juillet 2025  
+**Équipe :** Derkap  
 
 ---
 
@@ -42,7 +42,7 @@
 - ✅ **Cross-platform** : iOS/Android avec une seule codebase
 - ✅ **Écosystème mature** : nombreuses librairies natives
 - ✅ **Hot reload** : développement rapide
-- ✅ **OTA Updates** : mise à jour sans validation App Store
+- ✅ **Release Updates** : mise à jour après validation App Store
 - ✅ **Expo Router** : navigation moderne file-based
 
 **Backend : Next.js + Vercel**
@@ -334,15 +334,46 @@ export const generateDerkapBaseKey = async ({ user_id, challenge }) => {
 ### Stratégie de tests
 
 **État actuel :**
-- Tests automatisés : **Non implémentés** (prévu prochainement)
-- Tests manuels : Effectués durant développement
-- Tests utilisateurs : Beta testing avec 81 utilisateurs
+- Tests automatisés : **Implémentés** ✅
+- Tests unitaires : Jest + React Native Testing Library (application)
+- Tests d'intégration : Jest + Supertest (API)
+- Tests E2E : Jest (workflows critiques), Detox (prévu)
+- Couverture cible : 70% minimum (branches, fonctions, lignes, statements)
+- CI/CD : GitHub Actions avec Codecov
 
-**Stratégie prévue :**
-- **Tests unitaires** : Jest + React Native Testing Library
-- **Tests d'intégration** : API avec base de données test
-- **Tests E2E** : Detox pour scénarios critiques
-- **Couverture cible** : 80% minimum
+**Structure des tests :**
+- `application/__tests__/functions/` : Fonctions métier (chiffrement, amis...)
+- `application/__tests__/store/` : Stores Zustand
+- `application/__tests__/e2e/` : Workflows utilisateur complets
+- `api/__tests__/` : Endpoints API (Next.js)
+
+**Outils utilisés :**
+- Jest, jest-expo, @testing-library/react-native, supertest
+- Mocks Supabase, Expo, AsyncStorage
+- Scripts : `test`, `test:watch`, `test:coverage`
+
+**Exemples de scénarios testés :**
+- Chiffrement/déchiffrement photo (AES)
+- Génération et récupération de clés
+- Authentification et gestion des amis
+- Workflow complet utilisateur (auth → amis → défi → réponse)
+- API : endpoints `/api/generate-key`, `/api/get-key`, validation JWT, gestion erreurs
+- Performance : temps de réponse, requêtes concurrentes
+
+**Couverture actuelle :**
+- Branches : 70%
+- Fonctions : 70%
+- Lignes : 70%
+- Statements : 70%
+
+**CI/CD :**
+- Tests lancés automatiquement sur chaque push/pull request
+- Rapport de couverture envoyé à Codecov
+
+**Stratégie d'évolution :**
+- Ajout de tests Detox pour E2E mobile réel
+- Tests de charge (Artillery), accessibilité, sécurité automatisée
+- Maintien de la couverture >70% sur toutes les features critiques
 
 ---
 
@@ -569,11 +600,3 @@ Derkap représente une réussite technique avec une stack moderne et évolutive.
 
 **Prêt pour la croissance :** 
 L'infrastructure actuelle supporte la phase 0-50k utilisateurs et la roadmap technique est claire pour les phases suivantes.
-
----
-
-**Contacts techniques :**
-- **Lead Developer** : nicoalz
-- **API Production** : https://derkap-api.vercel.app/api
-- **Documentation** : Ce dossier technique
-- **Support** : support@derkap.app
