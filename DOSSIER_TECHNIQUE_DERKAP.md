@@ -452,8 +452,9 @@ npm run start
 
 **URLs Production :**
 - **API** : https://derkap-api.vercel.app/api
-- **iOS** : App Store (com.nicoalz.derkap)
+- **iOS** : https://apps.apple.com/fr/app/derkap/id6741578374
 - **Android** : En cours de review Google Play
+- **Repository** : https://github.com/Derkap-org/derkap-native
 
 ---
 
