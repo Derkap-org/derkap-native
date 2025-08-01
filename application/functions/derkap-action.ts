@@ -349,3 +349,110 @@ export const deleteDerkap = async ({ derkap_id }: { derkap_id: number }) => {
     throw new Error(error.message);
   }
 };
+
+export const fetchAllowedChallenges = async ({
+  page = 1,
+}: {
+  page?: number;
+} = {}): Promise<{ challenges: string[]; hasMore: boolean }> => {
+  const RESULT_PER_PAGE = 50;
+  
+  const user = await supabase.auth.getUser();
+  const user_id = user.data.user?.id;
+  if (!user || !user_id) {
+    throw new Error("Not authorized");
+  }
+
+  // Calculate pagination offset
+  const offset = (page - 1) * RESULT_PER_PAGE;
+
+  // Get unique challenges from derkaps the user is allowed to see
+  // We use a raw SQL query to get distinct challenges with proper ordering
+  const { data, error } = await supabase.rpc('get_user_allowed_challenges', {
+    p_user_id: user_id,
+    p_limit: RESULT_PER_PAGE,
+    p_offset: offset
+  });
+
+  if (error) {
+    console.error("Error fetching allowed challenges:", error);
+    throw new Error(error.message);
+  }
+
+  const challenges = data?.map((item: { challenge: string }) => item.challenge) || [];
+  const hasMore = challenges.length === RESULT_PER_PAGE;
+
+  return { challenges, hasMore };
+};
+
+export const fetchDerkapsByChallenge = async ({
+  challenge,
+  page,
+}: {
+  challenge: string;
+  page: number;
+}): Promise<TDerkapDB[]> => {
+  const RESULT_PER_PAGE = 6;
+
+  const user = await supabase.auth.getUser();
+  const user_id = user.data.user?.id;
+  if (!user || !user_id) {
+    throw new Error("Not authorized");
+  }
+
+  // Calculate pagination offset
+  const offset = (page - 1) * RESULT_PER_PAGE;
+
+  const { data, error } = await supabase
+    .from("derkap_allowed_users")
+    .select(
+      `
+      *,
+      derkap(
+        id,
+        created_at,
+        challenge,
+        caption,
+        file_path,
+        base_key,
+        creator_id,
+        derkap_allowed_users(
+          profile(*)
+        ),
+        creator:creator_id(
+          id,
+          username,
+          avatar_url,
+          created_at,
+          email
+      )
+    )
+    `,
+    )
+    .eq("allowed_user_id", user_id) // Only return derkaps the user is allowed to see
+    .eq("derkap.challenge", challenge) // Filter by specific challenge
+    .order("created_at", { ascending: false }) // Order by most recent first
+    .range(offset, offset + RESULT_PER_PAGE - 1); // Apply pagination
+
+  if (error) {
+    console.error("Error fetching derkaps by challenge:", error);
+    throw new Error(error.message);
+  }
+
+  if (data.length === 0) {
+    return [];
+  }
+
+  const derkapsWithoutPhotos = data.map((derkap) => ({
+    ...derkap.derkap,
+    derkap_allowed_users: derkap.derkap.derkap_allowed_users.map(
+      (user) => user.profile,
+    ),
+  }));
+
+  const derkapsWithPhotos = await addPhotosToDerkaps({
+    derkaps: derkapsWithoutPhotos,
+  });
+
+  return derkapsWithPhotos;
+};
