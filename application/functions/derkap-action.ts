@@ -116,34 +116,6 @@ export const fetchDerkaps = async ({
 
   // Query the derkap table while joining with derkap_allowed_users and profile
 
-  // // get derkap allowed users profiles using derkap_allowed_users.allowed_user_id and profile.id
-  // // const { data, error } = await supabase
-  //   .from("derkap")
-  //   .select(
-  //     `
-  //     id,
-  //     created_at,
-  //     challenge,
-  //     caption,
-  //     file_path,
-  //     base_key,
-  //     creator_id,
-  //     creator:creator_id (
-  //       id,
-  //       username,
-  //       avatar_url,
-  //       created_at,
-  //       email
-  //     ),
-  //     derkap_allowed_users(
-  //       profile(*)
-  //     )
-  //   `,
-  //   )
-  //   .eq("derkap_allowed_users.allowed_user_id", user_id) // Only return derkaps the user is allowed to see
-  //   .order("created_at", { ascending: false }) // Order by most recent first
-  //   .range(offset, offset + RESULT_PER_PAGE - 1); // Apply pagination
-
   const { data, error } = await supabase
     .from("derkap_allowed_users")
     .select(

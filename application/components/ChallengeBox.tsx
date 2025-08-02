@@ -24,7 +24,7 @@ export default function ChallengeBox({
           </Text>
         ) : (
           <TextInput
-            className="text-lg font-grotesque text-white text-center w-full px-2"
+            className="text-lg font-grotesque text-white text-center w-full px-2 placeholder:text-white"
             value={challenge}
             onChangeText={setChallenge}
             placeholder="Écris un défi..."
