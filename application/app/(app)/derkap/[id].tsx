@@ -39,32 +39,6 @@ export default function DerkapPage() {
     fetchDerkap();
   }, [id]);
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-black">
-        <ActivityIndicator size="large" color="white" />
-      </View>
-    );
-  }
-
-  if (error || !derkap) {
-    return (
-      <View className="flex-1 justify-center items-center bg-black px-4">
-        <Text className="text-white text-xl mb-4">
-          {error || "Derkap introuvable"}
-        </Text>
-        <Pressable
-          onPress={() => router.back()}
-          className="px-6 py-3 bg-custom-primary rounded-xl"
-        >
-          <Text className="text-white font-bold">Retour</Text>
-        </Pressable>
-      </View>
-    );
-  }
-
-  const hasAccess = alreadyMadeThisChallenge(derkap.challenge);
-
   return (
     <>
       <Stack.Screen
@@ -81,14 +55,34 @@ export default function DerkapPage() {
         }}
       />
 
-      <View className="flex-1 bg-black">
-        <DerkapCard
-          derkap={derkap}
-          alreadyMadeThisChallenge={hasAccess}
-          isStandalone={true}
-          onBack={() => router.back()}
-        />
-      </View>
+      {loading ? (
+        <View className="flex-1 justify-center items-center bg-black">
+          <ActivityIndicator size="large" color="white" />
+        </View>
+      ) : error || !derkap ? (
+        <View className="flex-1 justify-center items-center bg-black px-4">
+          <Text className="text-white text-xl mb-4">
+            {error || "Derkap introuvable"}
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            className="px-6 py-3 bg-custom-primary rounded-xl"
+          >
+            <Text className="text-white font-bold">Retour</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <View className="flex-1 bg-black">
+          <DerkapCard
+            derkap={derkap}
+            alreadyMadeThisChallenge={alreadyMadeThisChallenge(
+              derkap.challenge,
+            )}
+            isStandalone={true}
+            onBack={() => router.back()}
+          />
+        </View>
+      )}
     </>
   );
 }
