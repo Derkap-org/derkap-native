@@ -1,5 +1,6 @@
 import { TCommentDB } from "@/types/types";
 import { View, Text, Pressable } from "react-native";
+import { router } from "expo-router";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useRef } from "react";
@@ -74,9 +75,11 @@ export const Comment = ({ comment, refreshComments }: CommentProps) => {
           {/* Comment content container */}
           <View className="flex-1">
             <View className="flex flex-row items-center justify-between">
-              <Text className="font-grotesque text-white">
-                {comment.creator?.username || "Utilisateur supprimé"}
-              </Text>
+              <Pressable onPress={() => comment.creator?.username && router.push(`/profile/${comment.creator.username}`)}>
+                <Text className="font-grotesque text-white">
+                  {comment.creator?.username || "Utilisateur supprimé"}
+                </Text>
+              </Pressable>
               <Text className="text-xs text-gray-500">{timeAgo}</Text>
             </View>
 

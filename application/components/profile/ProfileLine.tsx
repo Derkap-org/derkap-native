@@ -5,7 +5,8 @@ import {
   TUserWithFriendshipStatus,
 } from "@/types/types";
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { router } from "expo-router";
 import ProfilePicture from "../ProfilePicture";
 
 export default function ProfileLine({
@@ -13,13 +14,21 @@ export default function ProfileLine({
   className,
   classNameText,
   avatarReloaded = true,
+  clickable = true,
 }: {
   member: TProfileDB | TProfileInGroup | TUserWithFriendshipStatus[0];
   className?: string;
   classNameText?: string;
   avatarReloaded?: boolean;
+  clickable?: boolean;
 }) {
-  return (
+  const handlePress = () => {
+    if (clickable && member.username) {
+      router.push(`/profile/${member.username}`);
+    }
+  };
+
+  const ProfileContent = () => (
     <View
       key={member.id}
       className={cn(
@@ -31,10 +40,21 @@ export default function ProfileLine({
         avatar_url={member.avatar_url}
         username={member.username}
         userId={member.id}
+        clickable={false} // We handle click at ProfileLine level
       />
       <Text className={cn("text-sm text-gray-300", classNameText)}>
         {member.username}
       </Text>
     </View>
   );
+
+  if (clickable && member.username) {
+    return (
+      <Pressable onPress={handlePress} className="active:opacity-70">
+        <ProfileContent />
+      </Pressable>
+    );
+  }
+
+  return <ProfileContent />;
 }

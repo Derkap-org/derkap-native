@@ -1,4 +1,5 @@
-import { View, Image, Text } from "react-native";
+import { View, Image, Text, Pressable } from "react-native";
+import { router } from "expo-router";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,11 +12,13 @@ export default function ProfilePicture({
   username,
   imgClassName,
   userId,
+  clickable = true,
 }: {
   avatar_url: string | null;
   username: string | null;
   imgClassName?: string;
   userId: string;
+  clickable?: boolean;
 }) {
   const [cachedAvatarUri, setCachedAvatarUri] = useState<string | null>(null);
 
@@ -65,7 +68,13 @@ export default function ProfilePicture({
     loadCachedAvatar();
   }, [avatar_url, userId]);
 
-  return (
+  const handlePress = () => {
+    if (clickable && username) {
+      router.push(`/profile/${username}`);
+    }
+  };
+
+  const ProfileContent = () => (
     <View className={`rounded-full overflow-hidden`}>
       {avatar_url ? (
         <Image
@@ -88,4 +97,14 @@ export default function ProfilePicture({
       )}
     </View>
   );
+
+  if (clickable && username) {
+    return (
+      <Pressable onPress={handlePress} className="active:opacity-70">
+        <ProfileContent />
+      </Pressable>
+    );
+  }
+
+  return <ProfileContent />;
 }
