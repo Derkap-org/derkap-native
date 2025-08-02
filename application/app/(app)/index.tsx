@@ -244,7 +244,7 @@ const Home = () => {
   }
 
   const ChallengeSelector = () => (
-    <View className="mb-4 px-4">
+    <View className="mb-4 px-4 relative z-10">
       <Pressable
         onPress={() => setShowChallengeSelector(!showChallengeSelector)}
         className="flex-row items-center justify-between p-3 bg-gray-700 rounded"
@@ -256,7 +256,7 @@ const Home = () => {
       </Pressable>
 
       {showChallengeSelector && (
-        <View className="mt-2 bg-gray-800 rounded max-h-48">
+        <View className="absolute top-full left-4 right-4 mt-1 bg-gray-800 rounded max-h-48 shadow-lg border border-gray-600">
           <ScrollView
             onScrollEndDrag={({ nativeEvent }) => {
               const { layoutMeasurement, contentOffset, contentSize } =
@@ -359,6 +359,7 @@ const Home = () => {
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <DerkapCard
+              selectChallenge={handleChallengeSelect}
               removeDerkapLocally={removeDerkapLocally}
               alreadyMadeThisChallenge={alreadyMadeThisChallenge(
                 item.challenge,
