@@ -425,7 +425,7 @@ export const fetchDerkapsByUser = async ({
   userId: string;
   page: number;
 }): Promise<TDerkapDB[]> => {
-  const RESULT_PER_PAGE = 9; // 3x3 grid
+  const RESULT_PER_PAGE = 15; // 3x3 grid
 
   const user = await supabase.auth.getUser();
   const current_user_id = user.data.user?.id;
@@ -436,59 +436,13 @@ export const fetchDerkapsByUser = async ({
   // Calculate pagination offset
   const offset = (page - 1) * RESULT_PER_PAGE;
 
-  // First get all derkap IDs that the current user can see
-  const { data: allowedDerkapIds, error: allowedError } = await supabase
-    .from("derkap_allowed_users")
-    .select("derkap_id")
-    .eq("allowed_user_id", current_user_id);
-
-  if (allowedError) {
-    console.error("Error fetching allowed derkap IDs:", allowedError);
-    throw new Error(allowedError.message);
-  }
-
-  if (!allowedDerkapIds || allowedDerkapIds.length === 0) {
-    return [];
-  }
-
-  const allowedIds = allowedDerkapIds.map((item) => item.derkap_id);
-
-  // Now fetch derkaps created by the target user that the current user can see
-  const { data, error } = await supabase
-    .from("derkap")
-    .select(
-      `
-      id,
-      created_at,
-      challenge,
-      caption,
-      file_path,
-      base_key,
-      creator_id,
-      creator:creator_id(
-        id,
-        username,
-        avatar_url,
-        created_at,
-        email,
-        birthdate
-      ),
-      derkap_allowed_users(
-        profile(
-          id,
-          username,
-          avatar_url,
-          created_at,
-          email,
-          birthdate
-        )
-      )
-    `,
-    )
-    .in("id", allowedIds)
-    .eq("creator_id", userId)
-    .order("created_at", { ascending: false })
-    .range(offset, offset + RESULT_PER_PAGE - 1);
+  // Use RPC function to fetch derkaps by user with access control and pagination
+  const { data, error } = await supabase.rpc("get_user_derkaps", {
+    p_target_user_id: userId,
+    p_current_user_id: current_user_id,
+    p_limit: RESULT_PER_PAGE,
+    p_offset: offset,
+  });
 
   if (error) {
     console.error("Error fetching user derkaps:", error);
@@ -499,11 +453,24 @@ export const fetchDerkapsByUser = async ({
     return [];
   }
 
-  // Transform the result to match TDerkapDB structure
-  const derkapsWithoutPhotos = data.map((item) => ({
-    ...item,
-    creator: item.creator,
-    derkap_allowed_users: item.derkap_allowed_users.map((user) => user.profile),
+  // Transform the RPC result to match the expected format for addPhotosToDerkaps
+  const derkapsWithoutPhotos = data.map((item: any) => ({
+    id: item.id,
+    created_at: item.created_at,
+    challenge: item.challenge,
+    caption: item.caption,
+    file_path: item.file_path,
+    base_key: item.base_key,
+    creator_id: item.creator_id,
+    creator: {
+      id: item.creator_id,
+      username: item.creator_username,
+      avatar_url: item.creator_avatar_url,
+      created_at: item.creator_created_at,
+      email: item.creator_email,
+      birthdate: item.creator_birthdate,
+    },
+    derkap_allowed_users: item.allowed_users || [],
   }));
 
   const derkapsWithPhotos = await addPhotosToDerkaps({
@@ -523,7 +490,6 @@ export const fetchDerkapById = async ({
   if (!user || !current_user_id) {
     throw new Error("Not authorized");
   }
-  console.log("c1");
 
   // Use RPC function to fetch the derkap with access control
   const { data, error } = await supabase.rpc("get_derkap_by_id", {
@@ -539,8 +505,6 @@ export const fetchDerkapById = async ({
   if (!data || data.length === 0) {
     throw new Error("Derkap introuvable");
   }
-
-  console.log("c3");
 
   // Transform the RPC result to match the expected format for addPhotosToDerkaps
   const derkapWithoutPhoto = {
@@ -566,8 +530,6 @@ export const fetchDerkapById = async ({
   const derkapsWithPhotos = await addPhotosToDerkaps({
     derkaps: [derkapWithoutPhoto],
   });
-
-  console.log("c4");
 
   // Return the first (and only) derkap with photo
   return derkapsWithPhotos[0];

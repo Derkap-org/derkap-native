@@ -25,7 +25,6 @@ import { Pencil } from "lucide-react-native";
 import { Pressable, ActivityIndicator } from "react-native";
 import Tutorial from "@/components/Tutorial";
 import { ExternalPathString, Link } from "expo-router";
-import useFriendStore from "@/store/useFriendStore";
 import { TUserWithFriendshipStatus, TDerkapDB } from "@/types/types";
 import FriendActionButtons from "@/components/FriendActionButtons";
 import DerkapGrid from "@/components/derkap/DerkapGrid";

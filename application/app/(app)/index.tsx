@@ -73,10 +73,6 @@ const Home = () => {
       }
     } catch (error) {
       console.error("Error fetching challenges:", error);
-      Toast.show({
-        type: "error",
-        text1: "Erreur lors du chargement des défis",
-      });
     } finally {
       setChallengesLoading(false);
     }

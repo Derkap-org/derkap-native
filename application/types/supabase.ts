@@ -783,6 +783,29 @@ export type Database = {
           max_created_at: string
         }[]
       }
+      get_user_derkaps: {
+        Args: {
+          p_target_user_id: string
+          p_current_user_id: string
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          id: number
+          created_at: string
+          challenge: string
+          caption: string
+          file_path: string
+          base_key: string
+          creator_id: string
+          creator_username: string
+          creator_avatar_url: string
+          creator_created_at: string
+          creator_email: string
+          creator_birthdate: string
+          allowed_users: Json
+        }[]
+      }
       get_user_derkaps_by_challenge: {
         Args: {
           p_user_id: string
