@@ -26,7 +26,7 @@ import {
   Swipeable,
 } from "react-native-gesture-handler";
 import ChallengeBox from "@/components/ChallengeBox";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { EyeIcon, Plus, Ellipsis } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
 import {
@@ -284,9 +284,11 @@ export default function DerkapCard({
               username={derkap.creator.username}
               userId={derkap.creator.id}
             />
-            <Text className="text-lg font-bold text-white">
-              {derkap.creator.username}
-            </Text>
+            <Pressable onPress={() => router.push(`/profile/${derkap.creator.username}`)}>
+              <Text className="text-lg font-bold text-white">
+                {derkap.creator.username}
+              </Text>
+            </Pressable>
           </View>
         </View>
 
