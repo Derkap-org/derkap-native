@@ -16,6 +16,7 @@ import {
 import { getUserAndCheckFriendship } from "@/functions/friends-action";
 import { getFeedbackLink } from "@/functions/feedback-action";
 import { compressImage } from "@/functions/image-action";
+import { fetchDerkapsByUser } from "@/functions/derkap-action";
 import Toast from "react-native-toast-message";
 import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
@@ -25,8 +26,9 @@ import { Pressable, ActivityIndicator } from "react-native";
 import Tutorial from "@/components/Tutorial";
 import { ExternalPathString, Link } from "expo-router";
 import useFriendStore from "@/store/useFriendStore";
-import { TUserWithFriendshipStatus } from "@/types/types";
+import { TUserWithFriendshipStatus, TDerkapDB } from "@/types/types";
 import FriendActionButtons from "@/components/FriendActionButtons";
+import DerkapGrid from "@/components/derkap/DerkapGrid";
 
 export default function ProfilePage() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -50,6 +52,13 @@ export default function ProfilePage() {
   >(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
+
+  // State for derkap grid
+  const [userDerkaps, setUserDerkaps] = useState<TDerkapDB[]>([]);
+  const [derkapsPage, setDerkapsPage] = useState(1);
+  const [derkapsLoading, setDerkapsLoading] = useState(false);
+  const [derkapsRefreshing, setDerkapsRefreshing] = useState(false);
+  const [hasMoreDerkaps, setHasMoreDerkaps] = useState(true);
 
   // Check if this is the current user's profile
   const isOwnProfile = profile?.username === username;
@@ -97,11 +106,75 @@ export default function ProfilePage() {
     }
   };
 
+  // Fetch user derkaps
+  const fetchUserDerkaps = async ({
+    page = 1,
+    reset = true,
+  }: {
+    page?: number;
+    reset?: boolean;
+  } = {}) => {
+    const targetUserId = isOwnProfile 
+      ? user?.id 
+      : otherUserProfile?.id;
+
+    if (!targetUserId) return;
+
+    try {
+      setDerkapsLoading(true);
+      const newDerkaps = await fetchDerkapsByUser({
+        userId: targetUserId,
+        page,
+      });
+
+      if (newDerkaps.length === 0) {
+        setHasMoreDerkaps(false);
+      } else {
+        if (reset) {
+          setUserDerkaps(newDerkaps);
+          setDerkapsPage(1);
+        } else {
+          setUserDerkaps(prev => [...prev, ...newDerkaps]);
+        }
+        setHasMoreDerkaps(newDerkaps.length === 9); // 9 items per page
+      }
+    } catch (error) {
+      console.error("Error fetching user derkaps:", error);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du chargement des derkaps",
+      });
+    } finally {
+      setDerkapsLoading(false);
+    }
+  };
+
+  const handleRefreshDerkaps = async () => {
+    setDerkapsRefreshing(true);
+    await fetchUserDerkaps({ page: 1, reset: true });
+    setDerkapsRefreshing(false);
+  };
+
+  const handleLoadMoreDerkaps = async () => {
+    if (hasMoreDerkaps && !derkapsLoading) {
+      const nextPage = derkapsPage + 1;
+      setDerkapsPage(nextPage);
+      await fetchUserDerkaps({ page: nextPage, reset: false });
+    }
+  };
+
   useEffect(() => {
     fetchUserProfile();
     fetchIsDeleting();
     fetchFeedbackLink();
   }, [username, profile?.username]);
+
+  // Fetch derkaps when profile data is available
+  useEffect(() => {
+    if ((isOwnProfile && user?.id) || (!isOwnProfile && otherUserProfile?.id)) {
+      fetchUserDerkaps({ page: 1, reset: true });
+    }
+  }, [isOwnProfile, user?.id, otherUserProfile?.id]);
 
   // Profile editing functions (only for own profile)
   const pickImage = async () => {
@@ -324,6 +397,31 @@ export default function ProfilePage() {
               </Text>
             </Link>
           )}
+        </View>
+
+        {/* Derkap Grid */}
+        <View className="flex-1 w-full mt-6">
+          <View className="px-4 mb-4">
+            <Text className="text-white text-xl font-bold">
+              {isOwnProfile ? "Mes Derkaps" : `Derkaps de ${displayProfile.username}`}
+            </Text>
+            <Text className="text-gray-400 text-sm">
+              {userDerkaps.length} derkap{userDerkaps.length > 1 ? "s" : ""}
+            </Text>
+          </View>
+          <DerkapGrid
+            derkaps={userDerkaps}
+            loading={derkapsLoading}
+            refreshing={derkapsRefreshing}
+            hasMore={hasMoreDerkaps}
+            onRefresh={handleRefreshDerkaps}
+            onLoadMore={handleLoadMoreDerkaps}
+            emptyMessage={
+              isOwnProfile 
+                ? "Vous n'avez pas encore de derkaps" 
+                : `${displayProfile.username} n'a pas encore de derkaps visibles`
+            }
+          />
         </View>
       </View>
 

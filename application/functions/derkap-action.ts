@@ -417,3 +417,76 @@ export const fetchDerkapsByChallenge = async ({
 
   return derkapsWithPhotos;
 };
+
+export const fetchDerkapsByUser = async ({
+  userId,
+  page,
+}: {
+  userId: string;
+  page: number;
+}): Promise<TDerkapDB[]> => {
+  const RESULT_PER_PAGE = 9; // 3x3 grid
+
+  const user = await supabase.auth.getUser();
+  const current_user_id = user.data.user?.id;
+  if (!user || !current_user_id) {
+    throw new Error("Not authorized");
+  }
+
+  // Calculate pagination offset
+  const offset = (page - 1) * RESULT_PER_PAGE;
+
+  // Query derkaps created by the specified user that the current user is allowed to see
+  const { data, error } = await supabase
+    .from("derkap_allowed_users")
+    .select(
+      `
+      *,
+      derkap(
+        id,
+        created_at,
+        challenge,
+        caption,
+        file_path,
+        base_key,
+        creator_id,
+        derkap_allowed_users(
+          profile(*)
+        ),
+        creator:creator_id(
+          id,
+          username,
+          avatar_url,
+          created_at,
+          email
+      )
+    )
+    `,
+    )
+    .eq("allowed_user_id", current_user_id) // Only derkaps the current user can see
+    .eq("derkap.creator_id", userId) // Only derkaps created by the specified user
+    .order("created_at", { ascending: false, foreignTable: "derkap" }) // Order by most recent first
+    .range(offset, offset + RESULT_PER_PAGE - 1); // Apply pagination
+
+  if (error) {
+    console.error("Error fetching user derkaps:", error);
+    throw new Error(error.message);
+  }
+
+  if (data.length === 0) {
+    return [];
+  }
+
+  const derkapsWithoutPhotos = data.map((derkap) => ({
+    ...derkap.derkap,
+    derkap_allowed_users: derkap.derkap.derkap_allowed_users.map(
+      (user) => user.profile,
+    ),
+  }));
+
+  const derkapsWithPhotos = await addPhotosToDerkaps({
+    derkaps: derkapsWithoutPhotos,
+  });
+
+  return derkapsWithPhotos;
+};
