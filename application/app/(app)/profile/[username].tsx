@@ -30,8 +30,9 @@ import FriendActionButtons from "@/components/FriendActionButtons";
 
 export default function ProfilePage() {
   const { username } = useLocalSearchParams<{ username: string }>();
-  const { user, signOut, profile, updateProfileImg, fetchProfile } = useSupabase();
-  
+  const { user, signOut, profile, updateProfileImg, fetchProfile } =
+    useSupabase();
+
   // State for current user's profile functionality
   const [isDeleting, setIsDeleting] = useState(false);
   const [newUsername, setNewUsername] = useState("");
@@ -39,10 +40,14 @@ export default function ProfilePage() {
   const [isUsernameValid, setIsUsernameValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [feedbackLink, setFeedbackLink] = useState<ExternalPathString | null>(null);
-  
+  const [feedbackLink, setFeedbackLink] = useState<ExternalPathString | null>(
+    null,
+  );
+
   // State for other user's profile
-  const [otherUserProfile, setOtherUserProfile] = useState<TUserWithFriendshipStatus[0] | null>(null);
+  const [otherUserProfile, setOtherUserProfile] = useState<
+    TUserWithFriendshipStatus[0] | null
+  >(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
 
@@ -52,17 +57,17 @@ export default function ProfilePage() {
   // Fetch user profile data
   const fetchUserProfile = async () => {
     if (!username) return;
-    
+
     try {
       setProfileLoading(true);
       setProfileError(null);
-      
+
       if (isOwnProfile) {
         // For own profile, we already have the data
         setProfileLoading(false);
         return;
       }
-      
+
       // For other users, fetch their profile with friendship status
       const { data } = await getUserAndCheckFriendship(username);
       if (data && data.length > 0) {
@@ -101,7 +106,7 @@ export default function ProfilePage() {
   // Profile editing functions (only for own profile)
   const pickImage = async () => {
     if (!isOwnProfile) return;
-    
+
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
@@ -305,7 +310,10 @@ export default function ProfilePage() {
 
           {/* Friend action buttons for other users */}
           {!isOwnProfile && otherUserProfile && (
-            <FriendActionButtons userProfile={otherUserProfile} onUpdate={fetchUserProfile} />
+            <FriendActionButtons
+              userProfile={otherUserProfile}
+              onUpdate={fetchUserProfile}
+            />
           )}
 
           {/* Feedback link only for own profile */}
@@ -364,8 +372,8 @@ export default function ProfilePage() {
               {isDeleting ? (
                 <View className="flex flex-col gap-2 justify-center items-center">
                   <Text className="text-white text-center font-bold text-2xl">
-                    Votre demande de suppression de compte a été prise en compte,
-                    votre compte sera supprimé sous 7 jours.
+                    Votre demande de suppression de compte a été prise en
+                    compte, votre compte sera supprimé sous 7 jours.
                   </Text>
                   <Button
                     withLoader={true}

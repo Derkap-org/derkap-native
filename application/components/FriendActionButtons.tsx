@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import Button from "@/components/Button";
 import { Ionicons } from "@expo/vector-icons";
 import useFriendStore from "@/store/useFriendStore";
@@ -10,9 +10,9 @@ interface FriendActionButtonsProps {
   onUpdate?: () => void;
 }
 
-export default function FriendActionButtons({ 
-  userProfile, 
-  onUpdate 
+export default function FriendActionButtons({
+  userProfile,
+  onUpdate,
 }: FriendActionButtonsProps) {
   const { addRequest, acceptRequest, rejectRequest } = useFriendStore();
 
@@ -61,6 +61,21 @@ export default function FriendActionButtons({
     }
   };
 
+  const getStatusText = () => {
+    switch (userProfile.friendship_status) {
+      case "not_friend":
+        return "Vous n'êtes pas amis";
+      case "pending_your_acceptance":
+        return "Demande d'ami en cours";
+      case "pending_their_acceptance":
+        return "Demande d'ami en cours";
+      case "friend":
+        return "Vous êtes amis";
+      default:
+        return "";
+    }
+  };
+
   const renderButtons = () => {
     switch (userProfile.friendship_status) {
       case "not_friend":
@@ -68,7 +83,7 @@ export default function FriendActionButtons({
           <Button
             withLoader={true}
             text="Ajouter"
-            className="px-6 py-3 bg-custom-primary rounded-xl"
+            className="px-2 py-1 bg-custom-primary rounded-xl"
             onClick={handleAddFriend}
           />
         );
@@ -78,19 +93,17 @@ export default function FriendActionButtons({
           <View className="flex flex-row gap-2">
             <Button
               withLoader={true}
-              className="px-4 py-3 bg-custom-primary rounded-xl flex-row items-center gap-2"
+              text="Accepter"
+              className="px-2 py-1 bg-custom-primary rounded-xl"
               onClick={handleAcceptRequest}
-            >
-              <Ionicons name="checkmark" size={20} color="white" />
-            </Button>
+            />
             <Button
               withLoader={true}
+              text="Refuser"
               color="danger"
-              className="px-4 py-3 rounded-xl flex-row items-center gap-2"
+              className="px-2 py-1 rounded-xl"
               onClick={handleRejectRequest}
-            >
-              <Ionicons name="close" size={20} color="white" />
-            </Button>
+            />
           </View>
         );
 
@@ -98,10 +111,10 @@ export default function FriendActionButtons({
         return (
           <Button
             withLoader={true}
+            text="En attente"
             color="gray"
-            className="px-6 py-3 rounded-xl"
+            className="px-2 py-1 rounded-xl"
             onClick={handleRejectRequest}
-            text="Annuler la demande"
           />
         );
 
@@ -109,10 +122,10 @@ export default function FriendActionButtons({
         return (
           <Button
             withLoader={true}
-            color="danger"
-            className="px-6 py-3 rounded-xl"
-            onClick={handleRemoveFriend}
             text="Supprimer ami"
+            color="danger"
+            className="px-2 py-1 rounded-xl"
+            onClick={handleRemoveFriend}
           />
         );
 
@@ -122,8 +135,11 @@ export default function FriendActionButtons({
   };
 
   return (
-    <View className="flex flex-row justify-center">
-      {renderButtons()}
+    <View className="flex flex-col items-center gap-3">
+      <Text className="text-white text-center font-medium">
+        {getStatusText()}
+      </Text>
+      <View className="flex flex-row justify-center">{renderButtons()}</View>
     </View>
   );
 }

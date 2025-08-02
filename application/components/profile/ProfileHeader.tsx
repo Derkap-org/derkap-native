@@ -5,7 +5,7 @@ import { Ellipsis, ChevronLeft } from "lucide-react-native";
 import BackButton from "../BackButton";
 
 interface ProfileHeaderProps extends ViewProps {
-  showModal: () => void;
+  showModal?: () => void;
 }
 
 export default function ProfileHeader({
@@ -22,11 +22,14 @@ export default function ProfileHeader({
     <View {...props} className="flex-row items-center justify-between p-4">
       <BackButton handleBack={handleBack} />
       <Pressable
+        disabled={!showModal}
         onPress={() => {
-          showModal();
+          if (showModal) {
+            showModal();
+          }
         }}
       >
-        <Ellipsis size={32} color={"white"} />
+        {showModal && <Ellipsis size={32} color={"white"} />}
       </Pressable>
     </View>
   );
