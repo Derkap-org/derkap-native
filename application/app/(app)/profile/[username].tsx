@@ -114,9 +114,7 @@ export default function ProfilePage() {
     page?: number;
     reset?: boolean;
   } = {}) => {
-    const targetUserId = isOwnProfile 
-      ? user?.id 
-      : otherUserProfile?.id;
+    const targetUserId = isOwnProfile ? user?.id : otherUserProfile?.id;
 
     if (!targetUserId) return;
 
@@ -134,7 +132,7 @@ export default function ProfilePage() {
           setUserDerkaps(newDerkaps);
           setDerkapsPage(1);
         } else {
-          setUserDerkaps(prev => [...prev, ...newDerkaps]);
+          setUserDerkaps((prev) => [...prev, ...newDerkaps]);
         }
         setHasMoreDerkaps(newDerkaps.length === 9); // 9 items per page
       }
@@ -390,25 +388,17 @@ export default function ProfilePage() {
           )}
 
           {/* Feedback link only for own profile */}
-          {isOwnProfile && feedbackLink && (
+          {/* {isOwnProfile && feedbackLink && (
             <Link href={feedbackLink} target="_blank">
               <Text className="text-zinc-400 text-center font-bold underline">
                 Aide-nous à amélorier Derkap en nous envoyant tes suggestions !
               </Text>
             </Link>
-          )}
+          )} */}
         </View>
 
         {/* Derkap Grid */}
         <View className="flex-1 w-full mt-6">
-          <View className="px-4 mb-4">
-            <Text className="text-white text-xl font-bold">
-              {isOwnProfile ? "Mes Derkaps" : `Derkaps de ${displayProfile.username}`}
-            </Text>
-            <Text className="text-gray-400 text-sm">
-              {userDerkaps.length} derkap{userDerkaps.length > 1 ? "s" : ""}
-            </Text>
-          </View>
           <DerkapGrid
             derkaps={userDerkaps}
             loading={derkapsLoading}
@@ -417,8 +407,8 @@ export default function ProfilePage() {
             onRefresh={handleRefreshDerkaps}
             onLoadMore={handleLoadMoreDerkaps}
             emptyMessage={
-              isOwnProfile 
-                ? "Vous n'avez pas encore de derkaps" 
+              isOwnProfile
+                ? "Vous n'avez pas encore de derkaps"
                 : `${displayProfile.username} n'a pas encore de derkaps visibles`
             }
           />

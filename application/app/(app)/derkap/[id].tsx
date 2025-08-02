@@ -13,10 +13,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { TCommentDB, TDerkapDB } from "@/types/types";
 import { useSupabase } from "@/context/auth-context";
-import {
-  TapGestureHandler,
-  State,
-} from "react-native-gesture-handler";
+import { TapGestureHandler, State } from "react-native-gesture-handler";
 import { ArrowLeft, EyeIcon, Ellipsis } from "lucide-react-native";
 import Toast from "react-native-toast-message";
 import Button from "@/components/Button";
@@ -31,6 +28,7 @@ import {
   fetchAllowedUsers,
   addAllowedUser,
   deleteDerkap,
+  fetchDerkapById,
 } from "@/functions/derkap-action";
 import useFriendStore from "@/store/useFriendStore";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
@@ -70,91 +68,9 @@ export default function DerkapPage() {
 
     try {
       setLoading(true);
-      // We'll use the existing fetchDerkaps function and filter by id
-      // This ensures we only get derkaps the user is allowed to see
-      const { supabase } = await import("@/lib/supabase");
-      
-      const user_session = await supabase.auth.getUser();
-      const user_id = user_session.data.user?.id;
-      
-      if (!user_session || !user_id) {
-        throw new Error("Not authorized");
-      }
-
-      // Query the specific derkap
-      const { data, error } = await supabase
-        .from("derkap_allowed_users")
-        .select(
-          `
-          *,
-          derkap(
-            id,
-            created_at,
-            challenge,
-            caption,
-            file_path,
-            base_key,
-            creator_id,
-            derkap_allowed_users(
-              profile(*)
-            ),
-            creator:creator_id(
-              id,
-              username,
-              avatar_url,
-              created_at,
-              email
-          )
-        )
-        `,
-        )
-        .eq("allowed_user_id", user_id)
-        .eq("derkap.id", parseInt(id))
-        .single();
-
-      if (error) {
-        throw new Error("Derkap introuvable ou accès non autorisé");
-      }
-
-      if (!data?.derkap) {
-        throw new Error("Derkap introuvable");
-      }
-
-      // Get the encrypted photo and decrypt it
-      const filePath = data.derkap.file_path;
-      
-      const { data: file, error: errorDownload } = await supabase.storage
-        .from("derkap_photos")
-        .download(filePath);
-        
-      if (errorDownload) {
-        throw new Error("Erreur lors du chargement de l'image");
-      }
-
-      // Import encryption functions
-      const { decryptPhoto, getEncryptionKey } = await import("@/functions/encryption-action");
-      
-      const encryptionKey = await getEncryptionKey({
-        derkap_id: data.derkap.id,
-      });
-
-      const decryptedPost = await decryptPhoto({
-        encryptedBlob: file,
-        encryptionKey,
-      });
-
-      const photo = `data:image/jpeg;base64,${decryptedPost}`;
-
-      const derkapWithPhoto: TDerkapDB = {
-        ...data.derkap,
-        base64img: photo,
-        derkap_allowed_users: data.derkap.derkap_allowed_users.map(
-          (user) => user.profile,
-        ),
-      };
-
-      setDerkap(derkapWithPhoto);
-      setAllowedUsers(derkapWithPhoto.derkap_allowed_users);
+      const derkapData = await fetchDerkapById({ derkapId: parseInt(id) });
+      setDerkap(derkapData);
+      setAllowedUsers(derkapData.derkap_allowed_users);
     } catch (error) {
       console.error("Error fetching derkap:", error);
       setError(error.message || "Erreur lors du chargement du derkap");
@@ -182,7 +98,7 @@ export default function DerkapPage() {
       setPostingComment(true);
       await createComment({
         derkap_id: derkap.id,
-        comment: newComment.trim(),
+        content: newComment.trim(),
       });
       setNewComment("");
       await handleFetchComments();
@@ -344,7 +260,9 @@ export default function DerkapPage() {
   if (error || !derkap) {
     return (
       <View className="flex-1 justify-center items-center bg-black px-4">
-        <Text className="text-white text-xl mb-4">{error || "Derkap introuvable"}</Text>
+        <Text className="text-white text-xl mb-4">
+          {error || "Derkap introuvable"}
+        </Text>
         <Button
           text="Retour"
           onClick={() => router.back()}
@@ -372,7 +290,7 @@ export default function DerkapPage() {
           ),
         }}
       />
-      
+
       <ScrollView className="flex-1 bg-black">
         <View className="flex flex-col items-center justify-center w-full p-4">
           {/* Challenge Box */}
@@ -391,18 +309,22 @@ export default function DerkapPage() {
                     Révèle son Derkap !
                   </Text>
                   <Pressable
-                    onPress={() => router.push({
-                      pathname: "/new",
-                      params: {
-                        challenge: derkap.challenge,
-                        followingUsers: derkap.derkap_allowed_users.map(
-                          (user) => user.id,
-                        ),
-                      },
-                    })}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/new",
+                        params: {
+                          challenge: derkap.challenge,
+                          followingUsers: derkap.derkap_allowed_users.map(
+                            (user) => user.id,
+                          ),
+                        },
+                      })
+                    }
                     className="px-6 py-3 bg-custom-primary rounded-xl"
                   >
-                    <Text className="text-lg font-bold text-white">Capturer</Text>
+                    <Text className="text-lg font-bold text-white">
+                      Capturer
+                    </Text>
                   </Pressable>
                 </View>
               </View>
@@ -427,7 +349,11 @@ export default function DerkapPage() {
                   username={derkap.creator.username}
                   userId={derkap.creator.id}
                 />
-                <Pressable onPress={() => router.push(`/profile/${derkap.creator.username}`)}>
+                <Pressable
+                  onPress={() =>
+                    router.push(`/profile/${derkap.creator.username}`)
+                  }
+                >
                   <Text className="text-lg font-bold text-white">
                     {derkap.creator.username}
                   </Text>
@@ -550,7 +476,36 @@ export default function DerkapPage() {
 
       {/* Visibility Modal - Similar to DerkapCard but simplified for this context */}
       <Modal actionSheetRef={modalVisibilityRef}>
-        {/* ... visibility modal content similar to DerkapCard ... */}
+        <View className="p-4">
+          <Text className="text-white text-center font-bold mb-4">
+            Utilisateurs autorisés à voir ce Derkap
+          </Text>
+          <ScrollView className="max-h-64">
+            {allowedUsers.map((user) => (
+              <View
+                key={user.id}
+                className="flex flex-row items-center justify-between p-2 border-b border-gray-700"
+              >
+                <View className="flex flex-row items-center gap-2">
+                  <ProfilePicture
+                    avatar_url={user.avatar_url}
+                    username={user.username}
+                    userId={user.id}
+                  />
+                  <Text className="text-white">{user.username}</Text>
+                </View>
+                {isOwner && user.id !== user?.id && (
+                  <Pressable
+                    onPress={() => handleRemoveUser(user.id)}
+                    className="px-3 py-1 bg-red-500 rounded"
+                  >
+                    <Text className="text-white text-sm">Retirer</Text>
+                  </Pressable>
+                )}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
       </Modal>
 
       {/* Actions Modal */}
