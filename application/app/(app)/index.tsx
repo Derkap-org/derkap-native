@@ -250,7 +250,7 @@ const Home = () => {
         className="flex-row items-center justify-between p-3 bg-gray-700 rounded"
       >
         <Text className="text-white flex-1 mr-2" numberOfLines={1}>
-          {selectedChallenge || "Tous les défis"}
+          {selectedChallenge || "Tous les Derkaps"}
         </Text>
         <ChevronDown size={20} color="white" />
       </Pressable>
@@ -274,7 +274,7 @@ const Home = () => {
               onPress={() => handleChallengeSelect(null)}
               className={`p-3 border-b border-gray-600 ${!selectedChallenge ? "bg-custom-primary" : ""}`}
             >
-              <Text className="text-white">Tous les défis</Text>
+              <Text className="text-white">Tous les Derkaps</Text>
             </Pressable>
 
             {availableChallenges.map((challenge, index) => (
@@ -338,7 +338,7 @@ const Home = () => {
             activeFilter === "all" ? "bg-custom-primary" : "bg-gray-700"
           }`}
         >
-          <Text className="text-white">Mes amis</Text>
+          <Text className="text-white">Tous</Text>
         </Pressable>
         <Pressable
           onPress={() => setActiveFilter("unrevealed")}
