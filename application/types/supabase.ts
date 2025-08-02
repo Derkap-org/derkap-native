@@ -751,6 +751,17 @@ export type Database = {
           status: Database["public"]["Enums"]["challenge_status"]
         }[]
       }
+      get_user_allowed_challenges: {
+        Args: {
+          p_user_id: string
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          challenge: string
+          max_created_at: string
+        }[]
+      }
       insert_derkap_with_users:
         | {
             Args: {

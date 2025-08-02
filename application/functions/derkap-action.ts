@@ -328,7 +328,7 @@ export const fetchAllowedChallenges = async ({
   page?: number;
 } = {}): Promise<{ challenges: string[]; hasMore: boolean }> => {
   const RESULT_PER_PAGE = 50;
-  
+
   const user = await supabase.auth.getUser();
   const user_id = user.data.user?.id;
   if (!user || !user_id) {
@@ -340,10 +340,10 @@ export const fetchAllowedChallenges = async ({
 
   // Get unique challenges from derkaps the user is allowed to see
   // We use a raw SQL query to get distinct challenges with proper ordering
-  const { data, error } = await supabase.rpc('get_user_allowed_challenges', {
+  const { data, error } = await supabase.rpc("get_user_allowed_challenges", {
     p_user_id: user_id,
     p_limit: RESULT_PER_PAGE,
-    p_offset: offset
+    p_offset: offset,
   });
 
   if (error) {
@@ -351,7 +351,8 @@ export const fetchAllowedChallenges = async ({
     throw new Error(error.message);
   }
 
-  const challenges = data?.map((item: { challenge: string }) => item.challenge) || [];
+  const challenges =
+    data?.map((item: { challenge: string }) => item.challenge) || [];
   const hasMore = challenges.length === RESULT_PER_PAGE;
 
   return { challenges, hasMore };
