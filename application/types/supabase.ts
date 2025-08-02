@@ -4,790 +4,843 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       "app_ maintenance": {
         Row: {
-          created_at: string;
-          id: number;
-          maintenance_active: boolean;
-          maintenance_active_android: boolean | null;
-        };
+          created_at: string
+          id: number
+          maintenance_active: boolean
+          maintenance_active_android: boolean | null
+        }
         Insert: {
-          created_at?: string;
-          id?: number;
-          maintenance_active?: boolean;
-          maintenance_active_android?: boolean | null;
-        };
+          created_at?: string
+          id?: number
+          maintenance_active?: boolean
+          maintenance_active_android?: boolean | null
+        }
         Update: {
-          created_at?: string;
-          id?: number;
-          maintenance_active?: boolean;
-          maintenance_active_android?: boolean | null;
-        };
-        Relationships: [];
-      };
+          created_at?: string
+          id?: number
+          maintenance_active?: boolean
+          maintenance_active_android?: boolean | null
+        }
+        Relationships: []
+      }
       app_feedback: {
         Row: {
-          created_at: string;
-          id: number;
-          link: string | null;
-        };
+          created_at: string
+          id: number
+          link: string | null
+        }
         Insert: {
-          created_at?: string;
-          id?: number;
-          link?: string | null;
-        };
+          created_at?: string
+          id?: number
+          link?: string | null
+        }
         Update: {
-          created_at?: string;
-          id?: number;
-          link?: string | null;
-        };
-        Relationships: [];
-      };
+          created_at?: string
+          id?: number
+          link?: string | null
+        }
+        Relationships: []
+      }
       app_version: {
         Row: {
-          created_at: string | null;
-          id: number;
-          min_supported_version: string;
-          min_supported_version_android: string | null;
-          notes: string | null;
-          updated_at: string | null;
-          version: string;
-          version_android: string | null;
-        };
+          created_at: string | null
+          id: number
+          min_supported_version: string
+          min_supported_version_android: string | null
+          notes: string | null
+          updated_at: string | null
+          version: string
+          version_android: string | null
+        }
         Insert: {
-          created_at?: string | null;
-          id?: number;
-          min_supported_version: string;
-          min_supported_version_android?: string | null;
-          notes?: string | null;
-          updated_at?: string | null;
-          version: string;
-          version_android?: string | null;
-        };
+          created_at?: string | null
+          id?: number
+          min_supported_version: string
+          min_supported_version_android?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          version: string
+          version_android?: string | null
+        }
         Update: {
-          created_at?: string | null;
-          id?: number;
-          min_supported_version?: string;
-          min_supported_version_android?: string | null;
-          notes?: string | null;
-          updated_at?: string | null;
-          version?: string;
-          version_android?: string | null;
-        };
-        Relationships: [];
-      };
+          created_at?: string | null
+          id?: number
+          min_supported_version?: string
+          min_supported_version_android?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          version?: string
+          version_android?: string | null
+        }
+        Relationships: []
+      }
       challenge: {
         Row: {
-          base_key: string | null;
-          created_at: string;
-          creator_id: string | null;
-          description: string;
-          group_id: number;
-          id: number;
-          status: Database["public"]["Enums"]["challenge_status"];
-        };
+          base_key: string | null
+          created_at: string
+          creator_id: string | null
+          description: string
+          group_id: number
+          id: number
+          status: Database["public"]["Enums"]["challenge_status"]
+        }
         Insert: {
-          base_key?: string | null;
-          created_at?: string;
-          creator_id?: string | null;
-          description: string;
-          group_id: number;
-          id?: number;
-          status: Database["public"]["Enums"]["challenge_status"];
-        };
+          base_key?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description: string
+          group_id: number
+          id?: number
+          status: Database["public"]["Enums"]["challenge_status"]
+        }
         Update: {
-          base_key?: string | null;
-          created_at?: string;
-          creator_id?: string | null;
-          description?: string;
-          group_id?: number;
-          id?: number;
-          status?: Database["public"]["Enums"]["challenge_status"];
-        };
+          base_key?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string
+          group_id?: number
+          id?: number
+          status?: Database["public"]["Enums"]["challenge_status"]
+        }
         Relationships: [
           {
-            foreignKeyName: "challenge_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "challenge_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "challenge_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "challenge_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "challenge_group_id_fkey";
-            columns: ["group_id"];
-            referencedRelation: "group";
-            referencedColumns: ["id"];
+            foreignKeyName: "challenge_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "group"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       comment: {
         Row: {
-          content: string | null;
-          created_at: string;
-          creator_id: string | null;
-          derkap_id: number | null;
-          id: number;
-        };
+          content: string | null
+          created_at: string
+          creator_id: string | null
+          derkap_id: number | null
+          id: number
+        }
         Insert: {
-          content?: string | null;
-          created_at?: string;
-          creator_id?: string | null;
-          derkap_id?: number | null;
-          id?: number;
-        };
+          content?: string | null
+          created_at?: string
+          creator_id?: string | null
+          derkap_id?: number | null
+          id?: number
+        }
         Update: {
-          content?: string | null;
-          created_at?: string;
-          creator_id?: string | null;
-          derkap_id?: number | null;
-          id?: number;
-        };
+          content?: string | null
+          created_at?: string
+          creator_id?: string | null
+          derkap_id?: number | null
+          id?: number
+        }
         Relationships: [
           {
-            foreignKeyName: "comment_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "comment_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "comment_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "comment_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "comment_derkap_id_fkey";
-            columns: ["derkap_id"];
-            referencedRelation: "derkap";
-            referencedColumns: ["id"];
+            foreignKeyName: "comment_derkap_id_fkey"
+            columns: ["derkap_id"]
+            isOneToOne: false
+            referencedRelation: "derkap"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       delete_account: {
         Row: {
-          created_at: string;
-          id: number;
-          profile_id: string | null;
-        };
+          created_at: string
+          id: number
+          profile_id: string | null
+        }
         Insert: {
-          created_at?: string;
-          id?: number;
-          profile_id?: string | null;
-        };
+          created_at?: string
+          id?: number
+          profile_id?: string | null
+        }
         Update: {
-          created_at?: string;
-          id?: number;
-          profile_id?: string | null;
-        };
+          created_at?: string
+          id?: number
+          profile_id?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "delete_account_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "delete_account_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "delete_account_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "delete_account_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       derkap: {
         Row: {
-          base_key: string | null;
-          caption: string | null;
-          challenge: string | null;
-          created_at: string;
-          creator_id: string | null;
-          file_path: string | null;
-          id: number;
-        };
+          base_key: string | null
+          caption: string | null
+          challenge: string | null
+          created_at: string
+          creator_id: string | null
+          file_path: string | null
+          id: number
+        }
         Insert: {
-          base_key?: string | null;
-          caption?: string | null;
-          challenge?: string | null;
-          created_at?: string;
-          creator_id?: string | null;
-          file_path?: string | null;
-          id?: number;
-        };
+          base_key?: string | null
+          caption?: string | null
+          challenge?: string | null
+          created_at?: string
+          creator_id?: string | null
+          file_path?: string | null
+          id?: number
+        }
         Update: {
-          base_key?: string | null;
-          caption?: string | null;
-          challenge?: string | null;
-          created_at?: string;
-          creator_id?: string | null;
-          file_path?: string | null;
-          id?: number;
-        };
+          base_key?: string | null
+          caption?: string | null
+          challenge?: string | null
+          created_at?: string
+          creator_id?: string | null
+          file_path?: string | null
+          id?: number
+        }
         Relationships: [
           {
-            foreignKeyName: "derkap_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "derkap_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "derkap_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "derkap_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       derkap_allowed_users: {
         Row: {
-          allowed_user_id: string;
-          created_at: string;
-          derkap_id: number;
-        };
+          allowed_user_id: string
+          created_at: string
+          derkap_id: number
+        }
         Insert: {
-          allowed_user_id: string;
-          created_at?: string;
-          derkap_id: number;
-        };
+          allowed_user_id: string
+          created_at?: string
+          derkap_id: number
+        }
         Update: {
-          allowed_user_id?: string;
-          created_at?: string;
-          derkap_id?: number;
-        };
+          allowed_user_id?: string
+          created_at?: string
+          derkap_id?: number
+        }
         Relationships: [
           {
-            foreignKeyName: "derkap_allowed_users_derkap_id_fkey";
-            columns: ["derkap_id"];
-            referencedRelation: "derkap";
-            referencedColumns: ["id"];
+            foreignKeyName: "derkap_allowed_users_derkap_id_fkey"
+            columns: ["derkap_id"]
+            isOneToOne: false
+            referencedRelation: "derkap"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_user";
-            columns: ["allowed_user_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "fk_user"
+            columns: ["allowed_user_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "fk_user";
-            columns: ["allowed_user_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "fk_user"
+            columns: ["allowed_user_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       friends_request: {
         Row: {
-          created_at: string | null;
-          id: string;
-          receiver_id: string;
-          sender_id: string;
-          status: Database["public"]["Enums"]["friend_request_status"] | null;
-          updated_at: string | null;
-        };
+          created_at: string | null
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: Database["public"]["Enums"]["friend_request_status"] | null
+          updated_at: string | null
+        }
         Insert: {
-          created_at?: string | null;
-          id?: string;
-          receiver_id: string;
-          sender_id: string;
-          status?: Database["public"]["Enums"]["friend_request_status"] | null;
-          updated_at?: string | null;
-        };
+          created_at?: string | null
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: Database["public"]["Enums"]["friend_request_status"] | null
+          updated_at?: string | null
+        }
         Update: {
-          created_at?: string | null;
-          id?: string;
-          receiver_id?: string;
-          sender_id?: string;
-          status?: Database["public"]["Enums"]["friend_request_status"] | null;
-          updated_at?: string | null;
-        };
+          created_at?: string | null
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: Database["public"]["Enums"]["friend_request_status"] | null
+          updated_at?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "friends_request_receiver_id_fkey";
-            columns: ["receiver_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "friends_request_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "friends_request_receiver_id_fkey";
-            columns: ["receiver_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "friends_request_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "friends_request_sender_id_fkey";
-            columns: ["sender_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "friends_request_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "friends_request_sender_id_fkey";
-            columns: ["sender_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "friends_request_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       group: {
         Row: {
-          created_at: string;
-          creator_id: string | null;
-          id: number;
-          img_url: string | null;
-          invite_code: string | null;
-          last_activity: string | null;
-          name: string;
-        };
+          created_at: string
+          creator_id: string | null
+          id: number
+          img_url: string | null
+          invite_code: string | null
+          last_activity: string | null
+          name: string
+        }
         Insert: {
-          created_at?: string;
-          creator_id?: string | null;
-          id?: number;
-          img_url?: string | null;
-          invite_code?: string | null;
-          last_activity?: string | null;
-          name: string;
-        };
+          created_at?: string
+          creator_id?: string | null
+          id?: number
+          img_url?: string | null
+          invite_code?: string | null
+          last_activity?: string | null
+          name: string
+        }
         Update: {
-          created_at?: string;
-          creator_id?: string | null;
-          id?: number;
-          img_url?: string | null;
-          invite_code?: string | null;
-          last_activity?: string | null;
-          name?: string;
-        };
+          created_at?: string
+          creator_id?: string | null
+          id?: number
+          img_url?: string | null
+          invite_code?: string | null
+          last_activity?: string | null
+          name?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "group_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "group_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "group_creator_id_fkey";
-            columns: ["creator_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "group_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       group_profile: {
         Row: {
-          created_at: string;
-          group_id: number;
-          id: number;
-          profile_id: string | null;
-        };
+          created_at: string
+          group_id: number
+          id: number
+          profile_id: string | null
+        }
         Insert: {
-          created_at?: string;
-          group_id: number;
-          id?: number;
-          profile_id?: string | null;
-        };
+          created_at?: string
+          group_id: number
+          id?: number
+          profile_id?: string | null
+        }
         Update: {
-          created_at?: string;
-          group_id?: number;
-          id?: number;
-          profile_id?: string | null;
-        };
+          created_at?: string
+          group_id?: number
+          id?: number
+          profile_id?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "group_profile_group_id_fkey";
-            columns: ["group_id"];
-            referencedRelation: "group";
-            referencedColumns: ["id"];
+            foreignKeyName: "group_profile_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "group"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "group_profile_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "group_profile_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "group_profile_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "group_profile_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       notification_subscription: {
         Row: {
-          created_at: string;
-          expo_push_token: string | null;
-          id: number;
-          updated_at: string | null;
-          user_id: string;
-        };
+          created_at: string
+          expo_push_token: string | null
+          id: number
+          updated_at: string | null
+          user_id: string
+        }
         Insert: {
-          created_at?: string;
-          expo_push_token?: string | null;
-          id?: number;
-          updated_at?: string | null;
-          user_id?: string;
-        };
+          created_at?: string
+          expo_push_token?: string | null
+          id?: number
+          updated_at?: string | null
+          user_id?: string
+        }
         Update: {
-          created_at?: string;
-          expo_push_token?: string | null;
-          id?: number;
-          updated_at?: string | null;
-          user_id?: string;
-        };
+          created_at?: string
+          expo_push_token?: string | null
+          id?: number
+          updated_at?: string | null
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "notification_subscription_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "notification_subscription_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "notification_subscription_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "notification_subscription_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       post: {
         Row: {
-          caption: string | null;
-          challenge_id: number | null;
-          created_at: string;
-          file_path: string | null;
-          id: number;
-          profile_id: string | null;
-        };
+          caption: string | null
+          challenge_id: number | null
+          created_at: string
+          file_path: string | null
+          id: number
+          profile_id: string | null
+        }
         Insert: {
-          caption?: string | null;
-          challenge_id?: number | null;
-          created_at?: string;
-          file_path?: string | null;
-          id?: number;
-          profile_id?: string | null;
-        };
+          caption?: string | null
+          challenge_id?: number | null
+          created_at?: string
+          file_path?: string | null
+          id?: number
+          profile_id?: string | null
+        }
         Update: {
-          caption?: string | null;
-          challenge_id?: number | null;
-          created_at?: string;
-          file_path?: string | null;
-          id?: number;
-          profile_id?: string | null;
-        };
+          caption?: string | null
+          challenge_id?: number | null
+          created_at?: string
+          file_path?: string | null
+          id?: number
+          profile_id?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "post_challenge_id_fkey";
-            columns: ["challenge_id"];
-            referencedRelation: "challenge";
-            referencedColumns: ["id"];
+            foreignKeyName: "post_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenge"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "post_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "post_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "post_profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "post_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       profile: {
         Row: {
-          avatar_url: string | null;
-          birthdate: string | null;
-          created_at: string;
-          email: string;
-          id: string;
-          username: string;
-        };
+          avatar_url: string | null
+          birthdate: string | null
+          created_at: string
+          email: string
+          id: string
+          username: string
+        }
         Insert: {
-          avatar_url?: string | null;
-          birthdate?: string | null;
-          created_at?: string;
-          email: string;
-          id: string;
-          username: string;
-        };
+          avatar_url?: string | null
+          birthdate?: string | null
+          created_at?: string
+          email: string
+          id: string
+          username: string
+        }
         Update: {
-          avatar_url?: string | null;
-          birthdate?: string | null;
-          created_at?: string;
-          email?: string;
-          id?: string;
-          username?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "profile_id_fkey";
-            columns: ["id"];
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
+          avatar_url?: string | null
+          birthdate?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          username?: string
+        }
+        Relationships: []
+      }
       reporting: {
         Row: {
-          comment_id: number | null;
-          created_at: string | null;
-          derkap_id: number | null;
-          id: number;
-          reason: string | null;
-          reported_by: string | null;
-        };
+          comment_id: number | null
+          created_at: string | null
+          derkap_id: number | null
+          id: number
+          reason: string | null
+          reported_by: string | null
+        }
         Insert: {
-          comment_id?: number | null;
-          created_at?: string | null;
-          derkap_id?: number | null;
-          id?: number;
-          reason?: string | null;
-          reported_by?: string | null;
-        };
+          comment_id?: number | null
+          created_at?: string | null
+          derkap_id?: number | null
+          id?: number
+          reason?: string | null
+          reported_by?: string | null
+        }
         Update: {
-          comment_id?: number | null;
-          created_at?: string | null;
-          derkap_id?: number | null;
-          id?: number;
-          reason?: string | null;
-          reported_by?: string | null;
-        };
+          comment_id?: number | null
+          created_at?: string | null
+          derkap_id?: number | null
+          id?: number
+          reason?: string | null
+          reported_by?: string | null
+        }
         Relationships: [
           {
-            foreignKeyName: "reporting_comment_id_fkey";
-            columns: ["comment_id"];
-            referencedRelation: "comment";
-            referencedColumns: ["id"];
+            foreignKeyName: "reporting_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comment"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reporting_derkap_id_fkey";
-            columns: ["derkap_id"];
-            referencedRelation: "derkap";
-            referencedColumns: ["id"];
+            foreignKeyName: "reporting_derkap_id_fkey"
+            columns: ["derkap_id"]
+            isOneToOne: false
+            referencedRelation: "derkap"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reporting_reported_by_fkey";
-            columns: ["reported_by"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "reporting_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "reporting_reported_by_fkey";
-            columns: ["reported_by"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "reporting_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       suggested_challenge: {
         Row: {
-          category: Database["public"]["Enums"]["suggested_challenge_category"];
-          challenge: string;
-          created_at: string;
-          id: number;
-        };
+          category: Database["public"]["Enums"]["suggested_challenge_category"]
+          challenge: string
+          created_at: string
+          id: number
+        }
         Insert: {
-          category: Database["public"]["Enums"]["suggested_challenge_category"];
-          challenge: string;
-          created_at?: string;
-          id?: number;
-        };
+          category: Database["public"]["Enums"]["suggested_challenge_category"]
+          challenge: string
+          created_at?: string
+          id?: number
+        }
         Update: {
-          category?: Database["public"]["Enums"]["suggested_challenge_category"];
-          challenge?: string;
-          created_at?: string;
-          id?: number;
-        };
-        Relationships: [];
-      };
+          category?: Database["public"]["Enums"]["suggested_challenge_category"]
+          challenge?: string
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
       vote: {
         Row: {
-          challenge_id: number;
-          created_at: string;
-          id: number;
-          post_id: number;
-          user_id: string;
-        };
+          challenge_id: number
+          created_at: string
+          id: number
+          post_id: number
+          user_id: string
+        }
         Insert: {
-          challenge_id: number;
-          created_at?: string;
-          id?: number;
-          post_id: number;
-          user_id?: string;
-        };
+          challenge_id: number
+          created_at?: string
+          id?: number
+          post_id: number
+          user_id?: string
+        }
         Update: {
-          challenge_id?: number;
-          created_at?: string;
-          id?: number;
-          post_id?: number;
-          user_id?: string;
-        };
+          challenge_id?: number
+          created_at?: string
+          id?: number
+          post_id?: number
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "vote_challenge_id_fkey";
-            columns: ["challenge_id"];
-            referencedRelation: "challenge";
-            referencedColumns: ["id"];
+            foreignKeyName: "vote_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenge"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "vote_post_id_fkey";
-            columns: ["post_id"];
-            referencedRelation: "post";
-            referencedColumns: ["id"];
+            foreignKeyName: "vote_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "vote_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
+            foreignKeyName: "vote_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "friends"
+            referencedColumns: ["profile_id"]
           },
           {
-            foreignKeyName: "vote_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "friends";
-            referencedColumns: ["profile_id"];
+            foreignKeyName: "vote_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
           },
-        ];
-      };
-    };
+        ]
+      }
+    }
     Views: {
       friends: {
         Row: {
-          avatar_url: string | null;
-          created_at: string | null;
-          email: string | null;
-          friend_id: string | null;
-          profile_id: string | null;
-          updated_at: string | null;
-          username: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "profile_id_fkey";
-            columns: ["profile_id"];
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-    };
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          friend_id: string | null
+          profile_id: string | null
+          updated_at: string | null
+          username: string | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
       cron_schedule: {
-        Args: Record<PropertyKey, never>;
-        Returns: undefined;
-      };
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_unique_invite_code: {
-        Args: Record<PropertyKey, never>;
-        Returns: string;
-      };
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_group_by_invite_code: {
         Args: {
-          p_invite_code: string;
-        };
+          p_invite_code: string
+        }
         Returns: {
-          created_at: string;
-          creator_id: string | null;
-          id: number;
-          img_url: string | null;
-          invite_code: string | null;
-          last_activity: string | null;
-          name: string;
-        }[];
-      };
+          created_at: string
+          creator_id: string | null
+          id: number
+          img_url: string | null
+          invite_code: string | null
+          last_activity: string | null
+          name: string
+        }[]
+      }
       get_group_ranking: {
         Args: {
-          group_id_param: number;
-        };
+          group_id_param: number
+        }
         Returns: {
-          rank: number;
-          profile_id: string;
-          username: string;
-          avatar_url: string;
-          winned_challenges: number;
-        }[];
-      };
+          rank: number
+          profile_id: string
+          username: string
+          avatar_url: string
+          winned_challenges: number
+        }[]
+      }
       get_group_user_count: {
         Args: {
-          group_id_param: number;
-        };
-        Returns: number;
-      };
+          group_id_param: number
+        }
+        Returns: number
+      }
       get_latest_challenge_status: {
         Args: {
-          group_ids: number[];
-        };
+          group_ids: number[]
+        }
         Returns: {
-          group_id: number;
-          status: Database["public"]["Enums"]["challenge_status"];
-        }[];
-      };
+          group_id: number
+          status: Database["public"]["Enums"]["challenge_status"]
+        }[]
+      }
+      get_user_allowed_challenges: {
+        Args: {
+          p_user_id: string
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          challenge: string
+          max_created_at: string
+        }[]
+      }
+      get_user_derkaps_by_challenge: {
+        Args: {
+          p_user_id: string
+          p_challenge: string
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          id: number
+          created_at: string
+          challenge: string
+          caption: string
+          file_path: string
+          base_key: string
+          creator_id: string
+          creator_username: string
+          creator_avatar_url: string
+          creator_email: string
+          allowed_users: Json
+        }[]
+      }
       insert_derkap_with_users:
         | {
             Args: {
-              p_challenge: string;
-              p_caption: string;
-              p_allowed_users: string[];
-              p_base_key: string;
-              p_file_path: string;
-              p_user_id: string;
-            };
+              p_challenge: string
+              p_caption: string
+              p_allowed_users: string[]
+              p_base_key: string
+              p_file_path: string
+              p_user_id: string
+            }
             Returns: {
-              derkap_id: number;
-            }[];
+              derkap_id: number
+            }[]
           }
         | {
             Args: {
-              p_challenge: string;
-              p_encrypted_post: string;
-              p_caption: string;
-              p_allowed_users: string[];
-              p_base_key: string;
-              p_file_path: string;
-              p_user_id: string;
-            };
+              p_challenge: string
+              p_encrypted_post: string
+              p_caption: string
+              p_allowed_users: string[]
+              p_base_key: string
+              p_file_path: string
+              p_user_id: string
+            }
             Returns: {
-              derkap_id: number;
-            }[];
-          };
+              derkap_id: number
+            }[]
+          }
       is_derkap_accessible: {
         Args: {
-          target_derkap_id: number;
-          requesting_user_id: string;
-        };
-        Returns: boolean;
-      };
+          target_derkap_id: number
+          requesting_user_id: string
+        }
+        Returns: boolean
+      }
       search_users_friendship_status: {
         Args: {
-          p_search_username: string;
-          p_current_user_id: string;
-        };
+          p_search_username: string
+          p_current_user_id: string
+        }
         Returns: {
-          id: string;
-          username: string;
-          avatar_url: string;
-          email: string;
-          friendship_status: Database["public"]["Enums"]["friendship_status_type"];
-          friend_request_id: string;
-        }[];
-      };
-    };
+          id: string
+          username: string
+          avatar_url: string
+          email: string
+          friendship_status: Database["public"]["Enums"]["friendship_status_type"]
+          friend_request_id: string
+        }[]
+      }
+    }
     Enums: {
-      challenge_status: "posting" | "voting" | "ended";
-      friend_request_status: "pending" | "accepted" | "rejected";
+      challenge_status: "posting" | "voting" | "ended"
+      friend_request_status: "pending" | "accepted" | "rejected"
       friendship_status_type:
         | "friend"
         | "pending_their_acceptance"
         | "pending_your_acceptance"
-        | "not_friend";
+        | "not_friend"
       suggested_challenge_category:
         | "perspective"
         | "selfie avec"
@@ -795,10 +848,108 @@ export interface Database {
         | "absurde"
         | "sport"
         | "cuisine"
-        | "transformation";
-    };
+        | "transformation"
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
+      [_ in never]: never
+    }
+  }
 }
+
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+

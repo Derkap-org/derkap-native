@@ -21,7 +21,9 @@
       "bundleIdentifier": "com.nicoalz.derkap",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "CFBundleLocalizations": ["fr"],
+        "CFBundleLocalizations": [
+          "fr"
+        ],
         "CFBundleDevelopmentRegion": "fr"
       }
     },
@@ -33,7 +35,9 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "package": "com.nicoalz.derkap",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

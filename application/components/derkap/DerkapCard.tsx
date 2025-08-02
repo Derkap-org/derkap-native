@@ -42,6 +42,7 @@ interface DerkapCardProps extends ViewProps {
   derkap: TDerkapDB;
   alreadyMadeThisChallenge: boolean;
   removeDerkapLocally: (derkap_id: number) => void;
+  selectChallenge: (challenge: string) => void;
 }
 
 export default function DerkapCard({
@@ -49,6 +50,7 @@ export default function DerkapCard({
   className,
   alreadyMadeThisChallenge,
   removeDerkapLocally,
+  selectChallenge,
   ...props
 }: DerkapCardProps) {
   const [comments, setComments] = useState<TCommentDB[]>([]);
@@ -230,14 +232,9 @@ export default function DerkapCard({
       )}
       {...props}
     >
-      <Link
-        disabled={derkap.creator_id === user.id}
-        href={{
-          pathname: "/new",
-          params: {
-            challenge: derkap.challenge,
-            followingUsers: derkap.derkap_allowed_users.map((user) => user.id),
-          },
+      <Pressable
+        onPress={() => {
+          selectChallenge(derkap.challenge);
         }}
       >
         <ChallengeBox
@@ -245,7 +242,7 @@ export default function DerkapCard({
           setChallenge={() => {}}
           isChallengeChangeable={false}
         />
-      </Link>
+      </Pressable>
 
       <View className="w-full aspect-[4/5] relative">
         {!alreadyMadeThisChallenge && (

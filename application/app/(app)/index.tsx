@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import React, { useState, useCallback, useEffect } from "react";
 import { Link, router } from "expo-router";
-import { UserPlus, Plus } from "lucide-react-native";
+import { UserPlus, Plus, ChevronDown } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
 import DerkapCard from "@/components/derkap/DerkapCard";
 import { useFocusEffect } from "@react-navigation/native";
@@ -18,7 +18,11 @@ import Toast from "react-native-toast-message";
 import Avatar from "@/components/Avatar";
 import useFriendStore from "@/store/useFriendStore";
 import { TDerkapDB } from "@/types/types";
-import { fetchDerkaps } from "@/functions/derkap-action";
+import {
+  fetchDerkaps,
+  fetchAllowedChallenges,
+  fetchDerkapsByChallenge,
+} from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
 import Button from "@/components/Button";
 import Tutorial from "@/components/Tutorial";
@@ -31,6 +35,16 @@ const Home = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "unrevealed">("all");
   const [showTutorial, setShowTutorial] = useState(false);
 
+  // Challenge selector state
+  const [selectedChallenge, setSelectedChallenge] = useState<string | null>(
+    null,
+  );
+  const [availableChallenges, setAvailableChallenges] = useState<string[]>([]);
+  const [challengesLoading, setChallengesLoading] = useState(false);
+  const [showChallengeSelector, setShowChallengeSelector] = useState(false);
+  const [challengesPage, setChallengesPage] = useState(1);
+  const [hasMoreChallenges, setHasMoreChallenges] = useState(true);
+
   const { requests, fetchRequests } = useFriendStore();
   const { user, profile, fetchFriendsCount, friendsCount } = useSupabase();
 
@@ -40,9 +54,45 @@ const Home = () => {
   const [derkapsLoading, setDerkapsLoading] = useState(false);
   const [friendsRequestsCount, setFriendsRequestsCount] = useState(0);
 
+  // Fetch challenges function
+  const fetchChallenges = async (page: number = 1, reset: boolean = true) => {
+    try {
+      setChallengesLoading(true);
+      const { challenges, hasMore } = await fetchAllowedChallenges({ page });
+
+      if (reset) {
+        setAvailableChallenges(challenges);
+        setChallengesPage(1);
+      } else {
+        setAvailableChallenges((prev) => [...prev, ...challenges]);
+      }
+
+      setHasMoreChallenges(hasMore);
+      if (!reset) {
+        setChallengesPage(page);
+      }
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du chargement des défis",
+      });
+    } finally {
+      setChallengesLoading(false);
+    }
+  };
+
   const fetchMoreDerkaps = async () => {
     if (hasMoreDerkaps) {
-      await fetchDerkapsTimeline({ page: derkapsPage + 1, reset: false });
+      if (selectedChallenge) {
+        await fetchDerkapsForChallenge({
+          challenge: selectedChallenge,
+          page: derkapsPage + 1,
+          reset: false,
+        });
+      } else {
+        await fetchDerkapsTimeline({ page: derkapsPage + 1, reset: false });
+      }
       setDerkapsPage(derkapsPage + 1);
     }
   };
@@ -78,8 +128,56 @@ const Home = () => {
     }
   };
 
+  const fetchDerkapsForChallenge = async ({
+    challenge,
+    page,
+    reset,
+  }: {
+    challenge: string;
+    page: number;
+    reset: boolean;
+  }) => {
+    try {
+      if (!user) {
+        return;
+      }
+      setDerkapsLoading(true);
+      const newDerkaps = await fetchDerkapsByChallenge({ challenge, page });
+      if (newDerkaps.length === 0) {
+        setHasMoreDerkaps(false);
+      } else {
+        setDerkaps(reset ? newDerkaps : [...derkaps, ...newDerkaps]);
+      }
+    } catch (error) {
+      console.error("Error fetching derkaps for challenge:", error);
+      Toast.show({
+        type: "error",
+        text1: "Erreur lors du chargement des derkaps",
+      });
+    } finally {
+      setDerkapsLoading(false);
+    }
+  };
+
   const removeDerkapLocally = (derkap_id: number) => {
     setDerkaps(derkaps.filter((derkap) => derkap.id !== derkap_id));
+  };
+
+  const handleChallengeSelect = async (challenge: string | null) => {
+    setSelectedChallenge(challenge);
+    setShowChallengeSelector(false);
+    setDerkapsPage(1);
+    setHasMoreDerkaps(true);
+
+    if (challenge) {
+      await fetchDerkapsForChallenge({
+        challenge,
+        page: 1,
+        reset: true,
+      });
+    } else {
+      await fetchDerkapsTimeline({ page: 1, reset: true });
+    }
   };
 
   // Check if tutorial has been seen
@@ -106,7 +204,18 @@ const Home = () => {
       setRefreshing(true);
       await fetchFriendsCount();
       await refreshMyChallenges();
-      await fetchDerkapsTimeline({ page: 1, reset: true });
+      await fetchChallenges(1, true);
+
+      if (selectedChallenge) {
+        await fetchDerkapsForChallenge({
+          challenge: selectedChallenge,
+          page: 1,
+          reset: true,
+        });
+      } else {
+        await fetchDerkapsTimeline({ page: 1, reset: true });
+      }
+
       await fetchRequests();
       setDerkapsPage(1);
       setHasMoreDerkaps(true);
@@ -133,6 +242,63 @@ const Home = () => {
   if (showTutorial) {
     return <Tutorial onFinish={handleTutorialFinish} />;
   }
+
+  const ChallengeSelector = () => (
+    <View className="mb-4 px-4 relative z-10">
+      <Pressable
+        onPress={() => setShowChallengeSelector(!showChallengeSelector)}
+        className="flex-row items-center justify-between p-3 bg-gray-700 rounded"
+      >
+        <Text className="text-white flex-1 mr-2" numberOfLines={1}>
+          {selectedChallenge || "Tous les Derkaps"}
+        </Text>
+        <ChevronDown size={20} color="white" />
+      </Pressable>
+
+      {showChallengeSelector && (
+        <View className="absolute top-full left-4 right-4 mt-1 bg-gray-800 rounded max-h-48 shadow-lg border border-gray-600">
+          <ScrollView
+            onScrollEndDrag={({ nativeEvent }) => {
+              const { layoutMeasurement, contentOffset, contentSize } =
+                nativeEvent;
+              const isCloseToBottom =
+                layoutMeasurement.height + contentOffset.y >=
+                contentSize.height - 20;
+
+              if (isCloseToBottom && hasMoreChallenges && !challengesLoading) {
+                fetchChallenges(challengesPage + 1, false);
+              }
+            }}
+          >
+            <Pressable
+              onPress={() => handleChallengeSelect(null)}
+              className={`p-3 border-b border-gray-600 ${!selectedChallenge ? "bg-custom-primary" : ""}`}
+            >
+              <Text className="text-white">Tous les Derkaps</Text>
+            </Pressable>
+
+            {availableChallenges.map((challenge, index) => (
+              <Pressable
+                key={index}
+                onPress={() => handleChallengeSelect(challenge)}
+                className={`p-3 border-b border-gray-600 ${selectedChallenge === challenge ? "bg-custom-primary" : ""}`}
+              >
+                <Text className="text-white" numberOfLines={2}>
+                  {challenge}
+                </Text>
+              </Pressable>
+            ))}
+
+            {challengesLoading && (
+              <View className="p-3">
+                <ActivityIndicator size="small" color="white" />
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      )}
+    </View>
+  );
 
   return (
     <View className="flex-1">
@@ -163,6 +329,8 @@ const Home = () => {
         </Link>
       </View>
 
+      <ChallengeSelector />
+
       <View className="flex-row justify-center px-4 mb-4 gap-x-4">
         <Pressable
           onPress={() => setActiveFilter("all")}
@@ -170,7 +338,7 @@ const Home = () => {
             activeFilter === "all" ? "bg-custom-primary" : "bg-gray-700"
           }`}
         >
-          <Text className="text-white">Mes amis</Text>
+          <Text className="text-white">Tous</Text>
         </Pressable>
         <Pressable
           onPress={() => setActiveFilter("unrevealed")}
@@ -191,6 +359,7 @@ const Home = () => {
           keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <DerkapCard
+              selectChallenge={handleChallengeSelect}
               removeDerkapLocally={removeDerkapLocally}
               alreadyMadeThisChallenge={alreadyMadeThisChallenge(
                 item.challenge,
@@ -237,7 +406,9 @@ const Home = () => {
           ) : (
             <View className="items-center justify-center flex-1">
               <Text className="text-center text-white">
-                Aucun derkap pour le moment
+                {selectedChallenge
+                  ? `Aucun derkap pour le défi "${selectedChallenge}"`
+                  : "Aucun derkap pour le moment"}
               </Text>
             </View>
           )}

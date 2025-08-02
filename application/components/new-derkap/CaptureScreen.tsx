@@ -3,9 +3,9 @@ import React, {
   ViewProps,
   Text,
   Pressable,
-  FlatList,
+  // FlatList,
 } from "react-native";
-
+import { FlatList } from "react-native-gesture-handler";
 import ChallengeBox from "../ChallengeBox";
 import CapturePhoto from "./CapturePhoto";
 import { Modal } from "@/components/modals/Modal";
@@ -133,6 +133,7 @@ export default function CaptureScreen({
           <View className="mb-4">
             <FlatList
               horizontal
+              nestedScrollEnabled
               showsHorizontalScrollIndicator={false}
               data={["Toutes", ...challengeCategories]}
               keyExtractor={(item) => item}
@@ -165,6 +166,7 @@ export default function CaptureScreen({
 
           {/* Challenges vertical scroll */}
           <FlatList
+            keyboardShouldPersistTaps="handled"
             data={filteredChallenges}
             keyExtractor={(item) => item.challenge}
             renderItem={({ item }) => (
