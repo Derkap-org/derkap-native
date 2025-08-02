@@ -18,7 +18,11 @@ import Toast from "react-native-toast-message";
 import Avatar from "@/components/Avatar";
 import useFriendStore from "@/store/useFriendStore";
 import { TDerkapDB } from "@/types/types";
-import { fetchDerkaps, fetchAllowedChallenges, fetchDerkapsByChallenge } from "@/functions/derkap-action";
+import {
+  fetchDerkaps,
+  fetchAllowedChallenges,
+  fetchDerkapsByChallenge,
+} from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
 import Button from "@/components/Button";
 import Tutorial from "@/components/Tutorial";
@@ -30,9 +34,11 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | "unrevealed">("all");
   const [showTutorial, setShowTutorial] = useState(false);
-  
+
   // Challenge selector state
-  const [selectedChallenge, setSelectedChallenge] = useState<string | null>(null);
+  const [selectedChallenge, setSelectedChallenge] = useState<string | null>(
+    null,
+  );
   const [availableChallenges, setAvailableChallenges] = useState<string[]>([]);
   const [challengesLoading, setChallengesLoading] = useState(false);
   const [showChallengeSelector, setShowChallengeSelector] = useState(false);
@@ -53,14 +59,14 @@ const Home = () => {
     try {
       setChallengesLoading(true);
       const { challenges, hasMore } = await fetchAllowedChallenges({ page });
-      
+
       if (reset) {
         setAvailableChallenges(challenges);
         setChallengesPage(1);
       } else {
-        setAvailableChallenges(prev => [...prev, ...challenges]);
+        setAvailableChallenges((prev) => [...prev, ...challenges]);
       }
-      
+
       setHasMoreChallenges(hasMore);
       if (!reset) {
         setChallengesPage(page);
@@ -79,7 +85,11 @@ const Home = () => {
   const fetchMoreDerkaps = async () => {
     if (hasMoreDerkaps) {
       if (selectedChallenge) {
-        await fetchDerkapsForChallenge(selectedChallenge, derkapsPage + 1, false);
+        await fetchDerkapsForChallenge({
+          challenge: selectedChallenge,
+          page: derkapsPage + 1,
+          reset: false,
+        });
       } else {
         await fetchDerkapsTimeline({ page: derkapsPage + 1, reset: false });
       }
@@ -118,7 +128,15 @@ const Home = () => {
     }
   };
 
-  const fetchDerkapsForChallenge = async (challenge: string, page: number, reset: boolean) => {
+  const fetchDerkapsForChallenge = async ({
+    challenge,
+    page,
+    reset,
+  }: {
+    challenge: string;
+    page: number;
+    reset: boolean;
+  }) => {
     try {
       if (!user) {
         return;
@@ -150,9 +168,13 @@ const Home = () => {
     setShowChallengeSelector(false);
     setDerkapsPage(1);
     setHasMoreDerkaps(true);
-    
+
     if (challenge) {
-      await fetchDerkapsForChallenge(challenge, 1, true);
+      await fetchDerkapsForChallenge({
+        challenge,
+        page: 1,
+        reset: true,
+      });
     } else {
       await fetchDerkapsTimeline({ page: 1, reset: true });
     }
@@ -183,13 +205,17 @@ const Home = () => {
       await fetchFriendsCount();
       await refreshMyChallenges();
       await fetchChallenges(1, true);
-      
+
       if (selectedChallenge) {
-        await fetchDerkapsForChallenge(selectedChallenge, 1, true);
+        await fetchDerkapsForChallenge({
+          challenge: selectedChallenge,
+          page: 1,
+          reset: true,
+        });
       } else {
         await fetchDerkapsTimeline({ page: 1, reset: true });
       }
-      
+
       await fetchRequests();
       setDerkapsPage(1);
       setHasMoreDerkaps(true);
@@ -228,14 +254,17 @@ const Home = () => {
         </Text>
         <ChevronDown size={20} color="white" />
       </Pressable>
-      
+
       {showChallengeSelector && (
         <View className="mt-2 bg-gray-800 rounded max-h-48">
           <ScrollView
             onScrollEndDrag={({ nativeEvent }) => {
-              const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-              const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
-              
+              const { layoutMeasurement, contentOffset, contentSize } =
+                nativeEvent;
+              const isCloseToBottom =
+                layoutMeasurement.height + contentOffset.y >=
+                contentSize.height - 20;
+
               if (isCloseToBottom && hasMoreChallenges && !challengesLoading) {
                 fetchChallenges(challengesPage + 1, false);
               }
@@ -243,23 +272,23 @@ const Home = () => {
           >
             <Pressable
               onPress={() => handleChallengeSelect(null)}
-              className={`p-3 border-b border-gray-600 ${!selectedChallenge ? 'bg-custom-primary' : ''}`}
+              className={`p-3 border-b border-gray-600 ${!selectedChallenge ? "bg-custom-primary" : ""}`}
             >
               <Text className="text-white">Tous les défis</Text>
             </Pressable>
-            
+
             {availableChallenges.map((challenge, index) => (
               <Pressable
                 key={index}
                 onPress={() => handleChallengeSelect(challenge)}
-                className={`p-3 border-b border-gray-600 ${selectedChallenge === challenge ? 'bg-custom-primary' : ''}`}
+                className={`p-3 border-b border-gray-600 ${selectedChallenge === challenge ? "bg-custom-primary" : ""}`}
               >
                 <Text className="text-white" numberOfLines={2}>
                   {challenge}
                 </Text>
               </Pressable>
             ))}
-            
+
             {challengesLoading && (
               <View className="p-3">
                 <ActivityIndicator size="small" color="white" />
@@ -376,10 +405,9 @@ const Home = () => {
           ) : (
             <View className="items-center justify-center flex-1">
               <Text className="text-center text-white">
-                {selectedChallenge 
+                {selectedChallenge
                   ? `Aucun derkap pour le défi "${selectedChallenge}"`
-                  : "Aucun derkap pour le moment"
-                }
+                  : "Aucun derkap pour le moment"}
               </Text>
             </View>
           )}

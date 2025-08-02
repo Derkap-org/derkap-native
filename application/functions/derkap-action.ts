@@ -375,52 +375,40 @@ export const fetchDerkapsByChallenge = async ({
 
   // Calculate pagination offset
   const offset = (page - 1) * RESULT_PER_PAGE;
-
-  const { data, error } = await supabase
-    .from("derkap_allowed_users")
-    .select(
-      `
-      *,
-      derkap(
-        id,
-        created_at,
-        challenge,
-        caption,
-        file_path,
-        base_key,
-        creator_id,
-        derkap_allowed_users(
-          profile(*)
-        ),
-        creator:creator_id(
-          id,
-          username,
-          avatar_url,
-          created_at,
-          email
-      )
-    )
-    `,
-    )
-    .eq("allowed_user_id", user_id) // Only return derkaps the user is allowed to see
-    .eq("derkap.challenge", challenge) // Filter by specific challenge
-    .order("created_at", { ascending: false }) // Order by most recent first
-    .range(offset, offset + RESULT_PER_PAGE - 1); // Apply pagination
+  // Use RPC function for efficient querying with proper filtering and pagination
+  const { data, error } = await supabase.rpc("get_user_derkaps_by_challenge", {
+    p_user_id: user_id,
+    p_challenge: challenge,
+    p_limit: RESULT_PER_PAGE,
+    p_offset: offset,
+  });
 
   if (error) {
     console.error("Error fetching derkaps by challenge:", error);
     throw new Error(error.message);
   }
 
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return [];
   }
 
-  const derkapsWithoutPhotos = data.map((derkap) => ({
-    ...derkap.derkap,
-    derkap_allowed_users: derkap.derkap.derkap_allowed_users.map(
-      (user) => user.profile,
-    ),
+  // Transform the RPC response to match the expected format
+  const derkapsWithoutPhotos = data.map((item: any) => ({
+    id: item.id,
+    created_at: item.created_at,
+    challenge: item.challenge,
+    caption: item.caption,
+    file_path: item.file_path,
+    base_key: item.base_key,
+    creator_id: item.creator_id,
+    creator: {
+      id: item.creator_id,
+      username: item.creator_username,
+      avatar_url: item.creator_avatar_url,
+      email: item.creator_email,
+      created_at: item.created_at,
+    },
+    derkap_allowed_users: item.allowed_users || [],
   }));
 
   const derkapsWithPhotos = await addPhotosToDerkaps({
