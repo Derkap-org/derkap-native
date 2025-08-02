@@ -41,8 +41,10 @@ import { reportContent } from "@/functions/reporting-action";
 interface DerkapCardProps extends ViewProps {
   derkap: TDerkapDB;
   alreadyMadeThisChallenge: boolean;
-  removeDerkapLocally: (derkap_id: number) => void;
-  selectChallenge: (challenge: string) => void;
+  removeDerkapLocally?: (derkap_id: number) => void;
+  selectChallenge?: (challenge: string) => void;
+  isStandalone?: boolean; // For individual derkap page
+  onBack?: () => void; // For individual derkap page
 }
 
 export default function DerkapCard({
@@ -51,6 +53,8 @@ export default function DerkapCard({
   alreadyMadeThisChallenge,
   removeDerkapLocally,
   selectChallenge,
+  isStandalone = false,
+  onBack,
   ...props
 }: DerkapCardProps) {
   const [comments, setComments] = useState<TCommentDB[]>([]);
@@ -181,8 +185,13 @@ export default function DerkapCard({
 
   const handleDeleteDerkap = async () => {
     await deleteDerkap({ derkap_id: derkap.id });
-    removeDerkapLocally(derkap.id);
+    if (removeDerkapLocally) {
+      removeDerkapLocally(derkap.id);
+    }
     modalDeleteRef.current?.hide();
+    if (isStandalone && onBack) {
+      onBack();
+    }
   };
 
   const openModalComment = async () => {
@@ -234,7 +243,9 @@ export default function DerkapCard({
     >
       <Pressable
         onPress={() => {
-          selectChallenge(derkap.challenge);
+          if (selectChallenge) {
+            selectChallenge(derkap.challenge);
+          }
         }}
       >
         <ChallengeBox
@@ -284,7 +295,9 @@ export default function DerkapCard({
               username={derkap.creator.username}
               userId={derkap.creator.id}
             />
-            <Pressable onPress={() => router.push(`/profile/${derkap.creator.username}`)}>
+            <Pressable
+              onPress={() => router.push(`/profile/${derkap.creator.username}`)}
+            >
               <Text className="text-lg font-bold text-white">
                 {derkap.creator.username}
               </Text>

@@ -417,3 +417,158 @@ export const fetchDerkapsByChallenge = async ({
 
   return derkapsWithPhotos;
 };
+
+export const fetchDerkapsByUser = async ({
+  userId,
+  page,
+}: {
+  userId: string;
+  page: number;
+}): Promise<TDerkapDB[]> => {
+  const RESULT_PER_PAGE = 9; // 3x3 grid
+
+  const user = await supabase.auth.getUser();
+  const current_user_id = user.data.user?.id;
+  if (!user || !current_user_id) {
+    throw new Error("Not authorized");
+  }
+
+  // Calculate pagination offset
+  const offset = (page - 1) * RESULT_PER_PAGE;
+
+  // First get all derkap IDs that the current user can see
+  const { data: allowedDerkapIds, error: allowedError } = await supabase
+    .from("derkap_allowed_users")
+    .select("derkap_id")
+    .eq("allowed_user_id", current_user_id);
+
+  if (allowedError) {
+    console.error("Error fetching allowed derkap IDs:", allowedError);
+    throw new Error(allowedError.message);
+  }
+
+  if (!allowedDerkapIds || allowedDerkapIds.length === 0) {
+    return [];
+  }
+
+  const allowedIds = allowedDerkapIds.map((item) => item.derkap_id);
+
+  // Now fetch derkaps created by the target user that the current user can see
+  const { data, error } = await supabase
+    .from("derkap")
+    .select(
+      `
+      id,
+      created_at,
+      challenge,
+      caption,
+      file_path,
+      base_key,
+      creator_id,
+      creator:creator_id(
+        id,
+        username,
+        avatar_url,
+        created_at,
+        email,
+        birthdate
+      ),
+      derkap_allowed_users(
+        profile(
+          id,
+          username,
+          avatar_url,
+          created_at,
+          email,
+          birthdate
+        )
+      )
+    `,
+    )
+    .in("id", allowedIds)
+    .eq("creator_id", userId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + RESULT_PER_PAGE - 1);
+
+  if (error) {
+    console.error("Error fetching user derkaps:", error);
+    throw new Error(error.message);
+  }
+
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // Transform the result to match TDerkapDB structure
+  const derkapsWithoutPhotos = data.map((item) => ({
+    ...item,
+    creator: item.creator,
+    derkap_allowed_users: item.derkap_allowed_users.map((user) => user.profile),
+  }));
+
+  const derkapsWithPhotos = await addPhotosToDerkaps({
+    derkaps: derkapsWithoutPhotos,
+  });
+
+  return derkapsWithPhotos;
+};
+
+export const fetchDerkapById = async ({
+  derkapId,
+}: {
+  derkapId: number;
+}): Promise<TDerkapDB> => {
+  const user = await supabase.auth.getUser();
+  const current_user_id = user.data.user?.id;
+  if (!user || !current_user_id) {
+    throw new Error("Not authorized");
+  }
+  console.log("c1");
+
+  // Use RPC function to fetch the derkap with access control
+  const { data, error } = await supabase.rpc("get_derkap_by_id", {
+    p_derkap_id: derkapId,
+    p_current_user_id: current_user_id,
+  });
+
+  if (error) {
+    console.error("Error fetching derkap:", error);
+    throw new Error("Derkap introuvable ou accès non autorisé");
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error("Derkap introuvable");
+  }
+
+  console.log("c3");
+
+  // Transform the RPC result to match the expected format for addPhotosToDerkaps
+  const derkapWithoutPhoto = {
+    id: data[0].id,
+    created_at: data[0].created_at,
+    challenge: data[0].challenge,
+    caption: data[0].caption,
+    file_path: data[0].file_path,
+    base_key: data[0].base_key,
+    creator_id: data[0].creator_id,
+    creator: {
+      id: data[0].creator_id,
+      username: data[0].creator_username,
+      avatar_url: data[0].creator_avatar_url,
+      created_at: data[0].creator_created_at,
+      email: data[0].creator_email,
+      birthdate: data[0].creator_birthdate,
+    },
+    derkap_allowed_users: data[0].allowed_users || [],
+  };
+
+  // Use the existing addPhotosToDerkaps function to handle photo decryption
+  const derkapsWithPhotos = await addPhotosToDerkaps({
+    derkaps: [derkapWithoutPhoto],
+  });
+
+  console.log("c4");
+
+  // Return the first (and only) derkap with photo
+  return derkapsWithPhotos[0];
+};

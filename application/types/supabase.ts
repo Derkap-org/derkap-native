@@ -710,6 +710,27 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_derkap_by_id: {
+        Args: {
+          p_derkap_id: number
+          p_current_user_id: string
+        }
+        Returns: {
+          id: number
+          created_at: string
+          challenge: string
+          caption: string
+          file_path: string
+          base_key: string
+          creator_id: string
+          creator_username: string
+          creator_avatar_url: string
+          creator_created_at: string
+          creator_email: string
+          creator_birthdate: string
+          allowed_users: Json
+        }[]
+      }
       get_group_by_invite_code: {
         Args: {
           p_invite_code: string
@@ -779,6 +800,28 @@ export type Database = {
           creator_id: string
           creator_username: string
           creator_avatar_url: string
+          creator_email: string
+          allowed_users: Json
+        }[]
+      }
+      get_user_derkaps_by_user: {
+        Args: {
+          p_user_id: string
+          p_current_user_id: string
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          id: number
+          created_at: string
+          challenge: string
+          caption: string
+          file_path: string
+          base_key: string
+          creator_id: string
+          creator_username: string
+          creator_avatar_url: string
+          creator_created_at: string
           creator_email: string
           allowed_users: Json
         }[]
