@@ -534,3 +534,29 @@ export const fetchDerkapById = async ({
   // Return the first (and only) derkap with photo
   return derkapsWithPhotos[0];
 };
+
+export const fetchUserStreak = async ({
+  userId,
+}: {
+  userId?: string;
+} = {}): Promise<number> => {
+  const user = await supabase.auth.getUser();
+  const current_user_id = user.data.user?.id;
+  if (!user || !current_user_id) {
+    throw new Error("Not authorized");
+  }
+
+  // Use the provided userId or fall back to current user
+  const target_user_id = userId || current_user_id;
+
+  const { data, error } = await supabase.rpc("get_user_streak", {
+    p_user_id: target_user_id,
+  });
+
+  if (error) {
+    console.error("Error fetching user streak:", error);
+    return 0; // Return 0 if there's an error
+  }
+
+  return data || 0;
+};

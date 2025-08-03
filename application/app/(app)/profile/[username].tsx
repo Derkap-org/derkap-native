@@ -16,7 +16,7 @@ import {
 import { getUserAndCheckFriendship } from "@/functions/friends-action";
 import { getFeedbackLink } from "@/functions/feedback-action";
 import { compressImage } from "@/functions/image-action";
-import { fetchDerkapsByUser } from "@/functions/derkap-action";
+import { fetchDerkapsByUser, fetchUserStreak } from "@/functions/derkap-action";
 import Toast from "react-native-toast-message";
 import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
@@ -28,6 +28,7 @@ import { ExternalPathString, Link } from "expo-router";
 import { TUserWithFriendshipStatus, TDerkapDB } from "@/types/types";
 import FriendActionButtons from "@/components/FriendActionButtons";
 import DerkapGrid from "@/components/derkap/DerkapGrid";
+import { StreakDisplay, StreakExplanationModal } from "@/components/StreakModal";
 
 export default function ProfilePage() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -58,6 +59,10 @@ export default function ProfilePage() {
   const [derkapsLoading, setDerkapsLoading] = useState(false);
   const [derkapsRefreshing, setDerkapsRefreshing] = useState(false);
   const [hasMoreDerkaps, setHasMoreDerkaps] = useState(true);
+
+  // Streak state
+  const [userStreak, setUserStreak] = useState(0);
+  const streakModalRef = useRef<ActionSheetRef>(null);
 
   // Check if this is the current user's profile
   const isOwnProfile = profile?.username === username;
@@ -102,6 +107,20 @@ export default function ProfilePage() {
     if (isOwnProfile) {
       const link = await getFeedbackLink();
       setFeedbackLink(link as ExternalPathString);
+    }
+  };
+
+  const fetchUserStreakData = async () => {
+    const targetUserId = isOwnProfile ? user?.id : otherUserProfile?.id;
+    
+    if (!targetUserId) return;
+
+    try {
+      const streak = await fetchUserStreak({ userId: targetUserId });
+      setUserStreak(streak);
+    } catch (error) {
+      console.error("Error fetching user streak:", error);
+      setUserStreak(0);
     }
   };
 
@@ -166,10 +185,11 @@ export default function ProfilePage() {
     fetchFeedbackLink();
   }, [username, profile?.username]);
 
-  // Fetch derkaps when profile data is available
+  // Fetch derkaps and streak when profile data is available
   useEffect(() => {
     if ((isOwnProfile && user?.id) || (!isOwnProfile && otherUserProfile?.id)) {
       fetchUserDerkaps({ page: 1, reset: true });
+      fetchUserStreakData();
     }
   }, [isOwnProfile, user?.id, otherUserProfile?.id]);
 
@@ -376,6 +396,11 @@ export default function ProfilePage() {
                 </Pressable>
               )}
             </View>
+            
+            <StreakDisplay
+              streakCount={userStreak}
+              onPress={() => streakModalRef.current?.show()}
+            />
           </View>
 
           {/* Friend action buttons for other users */}
@@ -552,6 +577,8 @@ export default function ProfilePage() {
           </Modal>
         </>
       )}
+      
+      <StreakExplanationModal actionSheetRef={streakModalRef} />
     </>
   );
 }

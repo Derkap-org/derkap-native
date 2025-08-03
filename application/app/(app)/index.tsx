@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Link, router } from "expo-router";
 import { UserPlus, Plus, ChevronDown } from "lucide-react-native";
 import { useSupabase } from "@/context/auth-context";
@@ -22,11 +22,14 @@ import {
   fetchDerkaps,
   fetchAllowedChallenges,
   fetchDerkapsByChallenge,
+  fetchUserStreak,
 } from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
 import Button from "@/components/Button";
 import Tutorial from "@/components/Tutorial";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StreakDisplay, StreakExplanationModal } from "@/components/StreakModal";
+import { ActionSheetRef } from "react-native-actions-sheet";
 
 const Home = () => {
   const { refreshMyChallenges, alreadyMadeThisChallenge } =
@@ -34,6 +37,10 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | "unrevealed">("all");
   const [showTutorial, setShowTutorial] = useState(false);
+
+  // Streak state
+  const [userStreak, setUserStreak] = useState(0);
+  const streakModalRef = useRef<ActionSheetRef>(null);
 
   // Challenge selector state
   const [selectedChallenge, setSelectedChallenge] = useState<string | null>(
@@ -75,6 +82,17 @@ const Home = () => {
       console.error("Error fetching challenges:", error);
     } finally {
       setChallengesLoading(false);
+    }
+  };
+
+  // Fetch user streak function
+  const fetchUserStreakData = async () => {
+    try {
+      const streak = await fetchUserStreak();
+      setUserStreak(streak);
+    } catch (error) {
+      console.error("Error fetching user streak:", error);
+      setUserStreak(0);
     }
   };
 
@@ -201,6 +219,7 @@ const Home = () => {
       await fetchFriendsCount();
       await refreshMyChallenges();
       await fetchChallenges(1, true);
+      await fetchUserStreakData();
 
       if (selectedChallenge) {
         await fetchDerkapsForChallenge({
@@ -298,7 +317,7 @@ const Home = () => {
 
   return (
     <View className="flex-1">
-      <View className="flex-row justify-between w-full px-8 mb-4">
+      <View className="flex-row justify-between items-center w-full px-8 mb-4">
         <Link href="/friends">
           <View className="relative flex-row items-center gap-x-2">
             <UserPlus size={30} color="white" />
@@ -311,6 +330,12 @@ const Home = () => {
             )}
           </View>
         </Link>
+        
+        <StreakDisplay
+          streakCount={userStreak}
+          onPress={() => streakModalRef.current?.show()}
+        />
+        
         <Link
           href={{
             pathname: "/profile",
@@ -417,6 +442,8 @@ const Home = () => {
           </Pressable>
         </Link>
       )}
+      
+      <StreakExplanationModal actionSheetRef={streakModalRef} />
     </View>
   );
 };
