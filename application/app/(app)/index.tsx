@@ -28,7 +28,10 @@ import useMyChallengesStore from "@/store/useMyChallengesStore";
 import Button from "@/components/Button";
 import Tutorial from "@/components/Tutorial";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StreakDisplay, StreakExplanationModal } from "@/components/StreakModal";
+import {
+  StreakDisplay,
+  StreakExplanationModal,
+} from "@/components/StreakModal";
 import { ActionSheetRef } from "react-native-actions-sheet";
 
 const Home = () => {
@@ -330,12 +333,12 @@ const Home = () => {
             )}
           </View>
         </Link>
-        
+
         <StreakDisplay
           streakCount={userStreak}
           onPress={() => streakModalRef.current?.show()}
         />
-        
+
         <Link
           href={{
             pathname: "/profile",
@@ -442,7 +445,7 @@ const Home = () => {
           </Pressable>
         </Link>
       )}
-      
+
       <StreakExplanationModal actionSheetRef={streakModalRef} />
     </View>
   );

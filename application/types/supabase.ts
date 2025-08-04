@@ -849,6 +849,12 @@ export type Database = {
           allowed_users: Json
         }[]
       }
+      get_user_streak: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: number
+      }
       insert_derkap_with_users:
         | {
             Args: {
