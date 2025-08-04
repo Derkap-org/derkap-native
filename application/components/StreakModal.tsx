@@ -23,10 +23,7 @@ export const StreakDisplay: React.FC<StreakModalProps> = ({
   };
 
   return (
-    <Pressable
-      onPress={onPress}
-      className="flex-row items-center gap-1 px-3 py-2 bg-gray-700 rounded-full"
-    >
+    <Pressable onPress={onPress} className="flex-row items-center gap-1">
       <Text className="text-white text-lg font-bold">{streakCount}</Text>
       <Text className="text-lg">{getStreakEmoji(streakCount)}</Text>
     </Pressable>

@@ -53,3 +53,20 @@ BEGIN
     RETURN streak_count;
 END;
 $$;
+
+-- Function to get total derkaps count for a user
+CREATE OR REPLACE FUNCTION get_user_total_derkaps(p_user_id uuid)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    total_count INTEGER;
+BEGIN
+    SELECT COUNT(*)
+    INTO total_count
+    FROM derkap
+    WHERE creator_id = p_user_id;
+    
+    RETURN total_count;
+END;
+$$;

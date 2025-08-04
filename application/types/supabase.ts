@@ -855,6 +855,12 @@ export type Database = {
         }
         Returns: number
       }
+      get_user_total_derkaps: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: number
+      }
       insert_derkap_with_users:
         | {
             Args: {

@@ -16,7 +16,7 @@ import {
 import { getUserAndCheckFriendship } from "@/functions/friends-action";
 import { getFeedbackLink } from "@/functions/feedback-action";
 import { compressImage } from "@/functions/image-action";
-import { fetchDerkapsByUser, fetchUserStreak } from "@/functions/derkap-action";
+import { fetchDerkapsByUser, fetchUserStreak, fetchUserTotalDerkaps } from "@/functions/derkap-action";
 import Toast from "react-native-toast-message";
 import { Modal } from "@/components/modals/Modal";
 import { ActionSheetRef } from "react-native-actions-sheet";
@@ -29,6 +29,7 @@ import { TUserWithFriendshipStatus, TDerkapDB } from "@/types/types";
 import FriendActionButtons from "@/components/FriendActionButtons";
 import DerkapGrid from "@/components/derkap/DerkapGrid";
 import { StreakDisplay, StreakExplanationModal } from "@/components/StreakModal";
+import { DerkapRankDisplay, DerkapRankExplanationModal } from "@/components/DerkapRank";
 
 export default function ProfilePage() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -63,6 +64,10 @@ export default function ProfilePage() {
   // Streak state
   const [userStreak, setUserStreak] = useState(0);
   const streakModalRef = useRef<ActionSheetRef>(null);
+
+  // Rank state
+  const [userTotalDerkaps, setUserTotalDerkaps] = useState(0);
+  const rankModalRef = useRef<ActionSheetRef>(null);
 
   // Check if this is the current user's profile
   const isOwnProfile = profile?.username === username;
@@ -121,6 +126,20 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Error fetching user streak:", error);
       setUserStreak(0);
+    }
+  };
+
+  const fetchUserTotalDerkapsData = async () => {
+    const targetUserId = isOwnProfile ? user?.id : otherUserProfile?.id;
+    
+    if (!targetUserId) return;
+
+    try {
+      const total = await fetchUserTotalDerkaps({ userId: targetUserId });
+      setUserTotalDerkaps(total);
+    } catch (error) {
+      console.error("Error fetching user total derkaps:", error);
+      setUserTotalDerkaps(0);
     }
   };
 
@@ -185,11 +204,12 @@ export default function ProfilePage() {
     fetchFeedbackLink();
   }, [username, profile?.username]);
 
-  // Fetch derkaps and streak when profile data is available
+  // Fetch derkaps, streak and rank when profile data is available
   useEffect(() => {
     if ((isOwnProfile && user?.id) || (!isOwnProfile && otherUserProfile?.id)) {
       fetchUserDerkaps({ page: 1, reset: true });
       fetchUserStreakData();
+      fetchUserTotalDerkapsData();
     }
   }, [isOwnProfile, user?.id, otherUserProfile?.id]);
 
@@ -397,10 +417,16 @@ export default function ProfilePage() {
               )}
             </View>
             
-            <StreakDisplay
-              streakCount={userStreak}
-              onPress={() => streakModalRef.current?.show()}
-            />
+            <View className="flex-row items-center gap-2">
+              <StreakDisplay
+                streakCount={userStreak}
+                onPress={() => streakModalRef.current?.show()}
+              />
+              <DerkapRankDisplay
+                totalDerkaps={userTotalDerkaps}
+                onPress={() => rankModalRef.current?.show()}
+              />
+            </View>
           </View>
 
           {/* Friend action buttons for other users */}
@@ -579,6 +605,10 @@ export default function ProfilePage() {
       )}
       
       <StreakExplanationModal actionSheetRef={streakModalRef} />
+      <DerkapRankExplanationModal 
+        actionSheetRef={rankModalRef} 
+        totalDerkaps={userTotalDerkaps}
+      />
     </>
   );
 }

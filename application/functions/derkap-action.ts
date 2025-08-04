@@ -560,3 +560,29 @@ export const fetchUserStreak = async ({
 
   return data || 0;
 };
+
+export const fetchUserTotalDerkaps = async ({
+  userId,
+}: {
+  userId?: string;
+} = {}): Promise<number> => {
+  const user = await supabase.auth.getUser();
+  const current_user_id = user.data.user?.id;
+  if (!user || !current_user_id) {
+    throw new Error("Not authorized");
+  }
+
+  // Use the provided userId or fall back to current user
+  const target_user_id = userId || current_user_id;
+
+  const { data, error } = await supabase.rpc("get_user_total_derkaps", {
+    p_user_id: target_user_id,
+  });
+
+  if (error) {
+    console.error("Error fetching user total derkaps:", error);
+    return 0; // Return 0 if there's an error
+  }
+
+  return data || 0;
+};

@@ -23,6 +23,7 @@ import {
   fetchAllowedChallenges,
   fetchDerkapsByChallenge,
   fetchUserStreak,
+  fetchUserTotalDerkaps,
 } from "@/functions/derkap-action";
 import useMyChallengesStore from "@/store/useMyChallengesStore";
 import Button from "@/components/Button";
@@ -32,6 +33,10 @@ import {
   StreakDisplay,
   StreakExplanationModal,
 } from "@/components/StreakModal";
+import {
+  DerkapRankDisplay,
+  DerkapRankExplanationModal,
+} from "@/components/DerkapRank";
 import { ActionSheetRef } from "react-native-actions-sheet";
 
 const Home = () => {
@@ -44,6 +49,10 @@ const Home = () => {
   // Streak state
   const [userStreak, setUserStreak] = useState(0);
   const streakModalRef = useRef<ActionSheetRef>(null);
+
+  // Rank state
+  const [userTotalDerkaps, setUserTotalDerkaps] = useState(0);
+  const rankModalRef = useRef<ActionSheetRef>(null);
 
   // Challenge selector state
   const [selectedChallenge, setSelectedChallenge] = useState<string | null>(
@@ -96,6 +105,17 @@ const Home = () => {
     } catch (error) {
       console.error("Error fetching user streak:", error);
       setUserStreak(0);
+    }
+  };
+
+  // Fetch user total derkaps function
+  const fetchUserTotalDerkapsData = async () => {
+    try {
+      const total = await fetchUserTotalDerkaps();
+      setUserTotalDerkaps(total);
+    } catch (error) {
+      console.error("Error fetching user total derkaps:", error);
+      setUserTotalDerkaps(0);
     }
   };
 
@@ -223,6 +243,7 @@ const Home = () => {
       await refreshMyChallenges();
       await fetchChallenges(1, true);
       await fetchUserStreakData();
+      await fetchUserTotalDerkapsData();
 
       if (selectedChallenge) {
         await fetchDerkapsForChallenge({
@@ -334,10 +355,16 @@ const Home = () => {
           </View>
         </Link>
 
-        <StreakDisplay
-          streakCount={userStreak}
-          onPress={() => streakModalRef.current?.show()}
-        />
+        <View className="flex-row items-center gap-6">
+          <StreakDisplay
+            streakCount={userStreak}
+            onPress={() => streakModalRef.current?.show()}
+          />
+          <DerkapRankDisplay
+            totalDerkaps={userTotalDerkaps}
+            onPress={() => rankModalRef.current?.show()}
+          />
+        </View>
 
         <Link
           href={{
@@ -447,6 +474,10 @@ const Home = () => {
       )}
 
       <StreakExplanationModal actionSheetRef={streakModalRef} />
+      <DerkapRankExplanationModal
+        actionSheetRef={rankModalRef}
+        totalDerkaps={userTotalDerkaps}
+      />
     </View>
   );
 };
