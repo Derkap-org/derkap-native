@@ -49,12 +49,14 @@ export const StreakExplanationModal: React.FC<StreakExplanationModalProps> = ({
 
         <View className="flex flex-col gap-3">
           <Text className="text-white text-base">
-            Un <Text className="font-bold text-custom-primary">streak</Text> c'est
-            le nombre de jours consécutifs où tu as posté au moins un derkap.
+            Un <Text className="font-bold text-custom-primary">streak</Text>{" "}
+            c'est le nombre de jours consécutifs où tu as posté au moins un
+            derkap.
           </Text>
 
           <Text className="text-white text-base">
-            • Si tu postes aujourd'hui, hier et avant-hier, tu as un streak de 3 🔥
+            • Si tu postes aujourd'hui, hier et avant-hier, tu as un streak de 3
+            🔥
           </Text>
 
           <Text className="text-white text-base">
